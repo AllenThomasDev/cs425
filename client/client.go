@@ -36,6 +36,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	grep_args_line = strings.Trim(grep_args_line, "\n") // remove the \n to avoid creating an empty string on Split
 	grep_args := Grep_Args{strings.Split(grep_args_line, " ")}
 	err = client.Call("Query.Grep", grep_args, &grep_reply)
 	if err != nil {
