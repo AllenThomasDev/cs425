@@ -12,24 +12,6 @@ import (
 	"path/filepath"
 )
 
-type Result struct {
-	Test_Int int
-}
-
-type Args struct {
-	Arg1, Arg2, Arg3 int
-}
-
-type Arith int
-
-func (t *Arith) Add3(args *Args, result *Result) error {
-	if args.Arg1 < 0 || args.Arg2 < 0 || args.Arg3 < 0 {
-		return errors.New("negative arguments")
-	}
-	result.Test_Int = args.Arg1 + args.Arg2 + args.Arg3
-	return nil
-}
-
 type Grep_Result struct {
 	Matches []string
 }
@@ -88,8 +70,6 @@ func (t *Query) Grep(args *Grep_Args, result *Grep_Result) error {
 }
 
 func main() {
-	arith := new(Arith)
-	rpc.Register(arith)
 	grep := new(Query)
 	rpc.Register(grep)
 	rpc.HandleHTTP()
