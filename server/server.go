@@ -9,9 +9,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strconv"
 )
 
 type Result struct {
@@ -73,12 +71,12 @@ func (t *Query) Grep(args *Grep_Args, result *Grep_Result) error {
 
 			file_scanner := bufio.NewScanner(f)
 			file_scanner.Split(bufio.ScanLines) // there might be a limit on the line length to check for
-
+			var line string
 			for file_scanner.Scan() {
-				fmt.Println(strconv.Itoa(line_number) + ": " + file_scanner.Text())
+				line = fmt.Sprintf("%d: %s", line_number, file_scanner.Text())
+				result.Matches = append(result.Matches, line)
 				line_number++
 			}
-			fmt.Printf("File name: %s\n", info.Name())
 			err = f.Close()
 			if err != nil {
 				log.Fatal(err)
@@ -86,8 +84,6 @@ func (t *Query) Grep(args *Grep_Args, result *Grep_Result) error {
 		}
 		return nil
 	})
-	// TODO: modify to grep the file in the Walk function
-	exec.Command("grep")
 	return nil
 }
 
