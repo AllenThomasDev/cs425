@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/rpc"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -22,27 +23,30 @@ type Grep_Args struct {
 }
 
 func main() {
-	client, err := rpc.DialHTTP("tcp", "localhost:8880")
-	if err != nil {
-		log.Fatal("dialing:", err)
-	}
 
 	// grep start
 	grep_reply := Grep_Result{}
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Printf("Enter your grep arguments to query log files:\ngrep ")
-	var grep_args_line string
-	grep_args_line, err = reader.ReadString('\n')
+	grep_args_line, err := reader.ReadString('\n')
 	if err != nil {
 		log.Fatal(err)
 	}
 	grep_args_line = strings.Trim(grep_args_line, "\n") // remove the \n to avoid creating an empty string on Split
 	grep_args := Grep_Args{strings.Split(grep_args_line, " ")}
-	err = client.Call("Query.Grep", grep_args, &grep_reply)
-	if err != nil {
-		log.Fatal("client call failed:", err)
-	}
-	for _, line := range grep_reply.Matches {
-		fmt.Println(line)
+
+	for i := 0; i < 10; i++ {
+		client, err := rpc.DialHTTP("tcp", "localhost:888"+strconv.Itoa(i))
+		if err != nil {
+			log.Println("dialing:", err)
+			continue
+		}
+		err = client.Call("Query.Grep", grep_args, &grep_reply) // consider using Go instead of call
+		if err != nil {
+			log.Fatal("client call failed:", err)
+		}
+		for _, line := range grep_reply.Matches {
+			fmt.Println(line)
+		}
 	}
 }
