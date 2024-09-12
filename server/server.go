@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
@@ -11,7 +10,6 @@ import (
 	"net/rpc"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strconv"
 )
 
@@ -30,49 +28,31 @@ func (t *Query) Grep(args *Grep_Args, result *Grep_Result) error {
 		return errors.New("no arguments passed to grep")
 	}
 
-	curr_dir, err := os.Getwd()
+	f, err := os.Open("simple_log.txt") // may or may not work
 	if err != nil {
 		log.Fatal(err)
 	}
-	// iterate
 
-	filepath.Walk(curr_dir, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			log.Fatal(err)
+	args.Line_Args = append(args.Line_Args, "simple_log.txt")  // grep only works with files
+	args.Line_Args = append([]string{"-n"}, args.Line_Args...) // prepend to add line numbers to output
+	var cmd []byte
+	cmd, err = exec.Command("grep", args.Line_Args...).Output()
+	if err != nil {
+		log.Fatal("grep command failed", err)
+	}
+	lines := bytes.Split(cmd, []byte("\n")) // split output on newlines to get each line of the file
+
+	// if the result of grep results in matches
+	for _, line := range lines {
+		if len(line) != 0 {
+			result.Matches = append(result.Matches, string(line))
 		}
-		if !info.IsDir() { // walk includes the root so make sure to exclude that
-			var f *os.File
+	}
 
-			f, err = os.Open(path)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			file_scanner := bufio.NewScanner(f)
-			file_scanner.Split(bufio.ScanLines)                        // there might be a limit on the line length to check for
-			args.Line_Args = append(args.Line_Args, info.Name())       // grep only works with files
-			args.Line_Args = append([]string{"-n"}, args.Line_Args...) // prepend to add line numbers to output
-			var cmd []byte
-			cmd, err = exec.Command("grep", args.Line_Args...).Output()
-			if err != nil {
-				log.Fatal("grep command failed", err)
-			}
-			lines := bytes.Split(cmd, []byte("\n")) // split output on newlines to get each line of the file
-
-			// if the result of grep results in matches
-			for _, line := range lines {
-				if len(line) != 0 {
-					result.Matches = append(result.Matches, string(line))
-				}
-			}
-
-			err = f.Close()
-			if err != nil {
-				log.Fatal(err)
-			}
-		}
-		return nil
-	})
+	err = f.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
 	return nil
 }
 
