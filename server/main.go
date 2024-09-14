@@ -24,6 +24,19 @@ var vmIPs = map[string]string{
 	"vm10": "172.22.94.181",
 }
 
+var vmDomains = map[string]string{
+	"vm1":  "dcondr2@fa24-cs425-5401.cs.illinois.edu",
+	"vm2":  "dcondr2@fa24-cs425-5402.cs.illinois.edu",
+	"vm3":  "dcondr2@fa24-cs425-5403.cs.illinois.edu",
+	"vm4":  "dcondr2@fa24-cs425-5404.cs.illinois.edu",
+	"vm5":  "dcondr2@fa24-cs425-5405.cs.illinois.edu",
+	"vm6":  "dcondr2@fa24-cs425-5406.cs.illinois.edu",
+	"vm7":  "dcondr2@fa24-cs425-5407.cs.illinois.edu",
+	"vm8":  "dcondr2@fa24-cs425-5408.cs.illinois.edu",
+	"vm9":  "dcondr2@fa24-cs425-5409.cs.illinois.edu",
+	"vm10": "dcondr2@fa24-cs425-5410.cs.illinois.edu",
+}
+
 // GrepRequest struct for sending grep queries to clients
 type GrepRequest struct {
 	Pattern string `json:"pattern"`
