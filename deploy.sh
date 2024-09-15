@@ -16,7 +16,7 @@ vmIPs=(
 # Directory of your Go project on your local machine
 REPO_DIR="."                    # Replace with your local repo path
 REMOTE_DIR="~/go_project"       # Destination folder on the VM
-CLIENT_DIR="$REMOTE_DIR/client" # Path to client directory on the VM
+SERVER_DIR="$REMOTE_DIR/server" # Path to server directory on the VM
 
 for ip in "${vmIPs[@]}"; do
   echo "deleting existing repo from $ip"
@@ -26,13 +26,13 @@ for ip in "${vmIPs[@]}"; do
   if [ $? -eq 0 ]; then
     echo "successfully propagated repo to $ip"
 
-    echo "starting client on $ip..."
-    ssh -n "allent3@$ip" "cd $CLIENT_DIR && nohup go run main.go > /dev/null 2>&1 &"
+    echo "starting server on $ip..."
+    ssh -n "allent3@$ip" "cd $SERVER_DIR && nohup go run main.go > /dev/null 2>&1 &"
 
     if [ $? -eq 0 ]; then
-      echo "client started successfully on $ip"
+      echo "server started successfully on $ip"
     else
-      echo "failed to start client on $ip"
+      echo "failed to start server on $ip"
     fi
   else
     echo "failed to propagate repo to $ip"
