@@ -38,11 +38,11 @@ type GrepResponse struct {
 func main() {
 	listener, err := net.Listen("tcp", ":8080")
 	if err != nil {
-		log.Fatal("Error starting server:", err)
+		log.Fatal("Error starting client:", err)
 	}
 	defer listener.Close()
 
-	fmt.Println("Server listening on :8080")
+	fmt.Println("Client listening on :8080")
 
 	// Continuously ask the user for grep patterns
 	for {

@@ -22,11 +22,11 @@ func main() {
 	// Start listening on a specific port for client commands
 	listener, err := net.Listen("tcp", ":8081")
 	if err != nil {
-		log.Fatal("Error starting client:", err)
+		log.Fatal("Error starting Server:", err)
 	}
 	defer listener.Close()
 
-	fmt.Println("Client listening on :8080")
+	fmt.Println("Server listening on :8080")
 
 	for {
 		conn, err := listener.Accept()
