@@ -123,6 +123,7 @@ func broadcastGrepRequest(pattern string) map[string]string {
 			if resp.Error != "" {
 				log.Printf("Error from VM %s: %s\n%s\n", vm, ip, resp.Error)
 			} else {
+				log.Printf("Output from VM %s: %s\n\n%s\n", vm, ip, resp.Output)
 				results[vm] = resp.Output
 			}
 		}(vm, ip)
