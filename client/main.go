@@ -8,21 +8,23 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
 
 var vmIPs = map[string]string{
-	"vm1":  "172.22.94.178",
-	"vm2":  "172.22.156.179",
-	"vm3":  "172.22.158.179",
-	"vm4":  "172.22.94.179",
-	"vm5":  "172.22.156.180",
-	"vm6":  "172.22.158.180",
-	"vm7":  "172.22.94.180",
-	"vm8":  "172.22.156.181",
-	"vm9":  "172.22.158.181",
-	"vm10": "172.22.94.181",
+	"vm1": "172.22.94.178",
+	"vm2": "172.22.156.179",
+	"vm3": "172.22.158.179",
+	"vm4": "172.22.94.179",
+	// "vm5":  "172.22.156.180",
+	// "vm6":  "172.22.158.180",
+	// "vm7":  "172.22.94.180",
+	// "vm8":  "172.22.156.181",
+	// "vm9":  "172.22.158.181",
+	// "vm10": "172.22.94.181",
 }
 
 type GrepRequest struct {
@@ -49,7 +51,7 @@ func main() {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print("Enter grep pattern (or 'exit' to quit): ")
 		pattern, _ := reader.ReadString('\n')
-		pattern = pattern[:len(pattern)-1]
+		pattern = strings.TrimSpace(pattern)
 
 		if pattern == "exit" {
 			fmt.Println("Exiting.")
@@ -57,12 +59,37 @@ func main() {
 		}
 
 		startTime := time.Now()
-		broadcastGrepRequest(pattern)
-		fmt.Printf("Total time for request: %v\n", time.Since(startTime))
+
+		if !strings.Contains(pattern, " -c") {
+			fmt.Println("Sending normal grep requests...")
+			broadcastGrepRequest(pattern)
+			fmt.Printf("Total time for normal request: %v\n", time.Since(startTime))
+		}
+
+		startTime = time.Now()
+		fmt.Println("Sending count grep requests...")
+		if !strings.Contains(pattern, " -c") {
+			pattern += " -c"
+		}
+		results := broadcastGrepRequest(pattern)
+		fmt.Printf("Total time for count request: %v\n", time.Since(startTime))
+
+		fmt.Println("Results from VMs:")
+		totalSum := 0
+		for vm, output := range results {
+			fmt.Printf("VM %s: %s\n", vm, output)
+			count, err := strconv.Atoi(strings.TrimSpace(output))
+			if err == nil {
+				totalSum += count
+			}
+		}
+
+		fmt.Printf("\nTotal sum across all VMs: %d\n", totalSum)
 	}
 }
 
-func broadcastGrepRequest(pattern string) {
+func broadcastGrepRequest(pattern string) map[string]string {
+	results := make(map[string]string)
 	var wg sync.WaitGroup
 
 	for vm, ip := range vmIPs {
@@ -96,13 +123,14 @@ func broadcastGrepRequest(pattern string) {
 			if resp.Error != "" {
 				log.Printf("Error from VM %s: %s\n%s\n", vm, ip, resp.Error)
 			} else {
-				log.Printf("Output from VM %s: %s\n\n%s\n", vm, ip, resp.Output)
+				results[vm] = resp.Output
 			}
 		}(vm, ip)
 	}
 
 	wg.Wait()
 	fmt.Println("All grep requests completed.")
+	return results
 }
 
 func handleConnection(conn net.Conn) {
