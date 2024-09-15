@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"sync"
+	"time"
 )
 
 var vmIPs = map[string]string{
@@ -24,29 +25,14 @@ var vmIPs = map[string]string{
 	"vm10": "172.22.94.181",
 }
 
-var vmDomains = map[string]string{
-	"vm1":  "dcondr2@fa24-cs425-5401.cs.illinois.edu",
-	"vm2":  "dcondr2@fa24-cs425-5402.cs.illinois.edu",
-	"vm3":  "dcondr2@fa24-cs425-5403.cs.illinois.edu",
-	"vm4":  "dcondr2@fa24-cs425-5404.cs.illinois.edu",
-	"vm5":  "dcondr2@fa24-cs425-5405.cs.illinois.edu",
-	"vm6":  "dcondr2@fa24-cs425-5406.cs.illinois.edu",
-	"vm7":  "dcondr2@fa24-cs425-5407.cs.illinois.edu",
-	"vm8":  "dcondr2@fa24-cs425-5408.cs.illinois.edu",
-	"vm9":  "dcondr2@fa24-cs425-5409.cs.illinois.edu",
-	"vm10": "dcondr2@fa24-cs425-5410.cs.illinois.edu",
-}
-
-// GrepRequest struct for sending grep queries to server
 type GrepRequest struct {
 	Pattern string `json:"pattern"`
 }
 
-// GrepResponse struct for receiving responses from server
 type GrepResponse struct {
-	VM     string `json:"vm"`     // Identifier for the VM
-	Output string `json:"output"` // Grep output
-	Error  string `json:"error"`  // Any error encountered
+	VM     string `json:"vm"`
+	Output string `json:"output"`
+	Error  string `json:"error"`
 }
 
 func main() {
@@ -58,29 +44,24 @@ func main() {
 
 	fmt.Println("Server listening on :8080")
 
-	// Ask the user for the grep pattern
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Enter grep pattern: ")
-	pattern, _ := reader.ReadString('\n')
-
-	// Remove newline from pattern
-	pattern = pattern[:len(pattern)-1]
-
-	// Broadcast the grep request to all VMs
-	broadcastGrepRequest(pattern)
-
-	// Keep listening for server responses
+	// Continuously ask the user for grep patterns
 	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Println("Error accepting connection:", err)
-			continue
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Enter grep pattern (or 'exit' to quit): ")
+		pattern, _ := reader.ReadString('\n')
+		pattern = pattern[:len(pattern)-1]
+
+		if pattern == "exit" {
+			fmt.Println("Exiting.")
+			break
 		}
-		go handleConnection(conn)
+
+		startTime := time.Now()
+		broadcastGrepRequest(pattern)
+		fmt.Printf("Total time for request: %v\n", time.Since(startTime))
 	}
 }
 
-// broadcastGrepRequest sends grep queries to all VMs
 func broadcastGrepRequest(pattern string) {
 	var wg sync.WaitGroup
 
@@ -90,7 +71,6 @@ func broadcastGrepRequest(pattern string) {
 		go func(vm, ip string) {
 			defer wg.Done()
 
-			// Connect to the server VM
 			conn, err := net.Dial("tcp", ip+":8081")
 			if err != nil {
 				log.Printf("Error connecting to VM %s (%s): %v\n", vm, ip, err)
@@ -98,12 +78,8 @@ func broadcastGrepRequest(pattern string) {
 			}
 			defer conn.Close()
 
-			// Prepare the grep request
-			req := GrepRequest{
-				Pattern: pattern,
-			}
+			req := GrepRequest{Pattern: pattern}
 
-			// Send the request as JSON
 			err = json.NewEncoder(conn).Encode(req)
 			if err != nil {
 				log.Printf("Error sending request to VM %s (%s): %v\n", vm, ip, err)
@@ -132,7 +108,6 @@ func broadcastGrepRequest(pattern string) {
 func handleConnection(conn net.Conn) {
 	defer conn.Close()
 
-	// Read the incoming grep query request
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		var req GrepRequest
@@ -142,7 +117,7 @@ func handleConnection(conn net.Conn) {
 			continue
 		}
 
-		// Execute the grep command locally
+		startTime := time.Now()
 		output, err := executeGrep(req.Pattern)
 
 		resp := GrepResponse{Output: output}
@@ -150,14 +125,14 @@ func handleConnection(conn net.Conn) {
 			resp.Error = err.Error()
 		}
 
-		// Send the grep response back to the server
 		json.NewEncoder(conn).Encode(resp)
+
+		// Measure the time taken for this grep execution
+		fmt.Printf("Time taken for grep on VM: %v\n", time.Since(startTime))
 	}
 }
 
-// executeGrep runs the grep command locally on the machine
 func executeGrep(pattern string) (string, error) {
-	// Always search in ~/*.log
 	cmd := exec.Command("bash", "-c", fmt.Sprintf("grep '%s' ~/*.log", pattern))
 	output, err := cmd.CombinedOutput()
 	return string(output), err

@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 type GrepRequest struct {
@@ -68,9 +70,20 @@ func handleConnection(conn net.Conn) {
 }
 
 // executeGrep runs the grep command locally on ~/*.log files
+
 func executeGrep(pattern string) (string, error) {
-	// Always search in ~/*.log
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("grep %s ~/*.log", pattern))
+	// Get the user's home directory
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("failed to get user home directory: %w", err)
+	}
+
+	// Construct the full path pattern for log files
+	logPattern := filepath.Join(homeDir, "*.log")
+
+	// Run grep on *.log files in the home directory
+	cmd := exec.Command("grep", pattern, logPattern)
+
 	output, err := cmd.CombinedOutput()
 	return string(output), err
 }
