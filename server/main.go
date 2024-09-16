@@ -10,6 +10,7 @@ import (
 
 type GrepRequest struct {
 	Pattern string `json:"pattern"`
+	Path    string `json:"path"`
 }
 
 type GrepResponse struct {
@@ -50,7 +51,7 @@ func handleConnection(conn net.Conn) {
 	}
 
 	// Execute grep locally
-	output, err := executeGrep(req.Pattern)
+	output, err := executeGrep(req.Pattern, req.Path)
 	resp := GrepResponse{
 		VM:     getVMIdentifier(), // This function will return the VM's identifier, such as "vm1"
 		Output: output,
@@ -69,8 +70,8 @@ func handleConnection(conn net.Conn) {
 
 // executeGrep runs the grep command locally on ~/*.log files
 
-func executeGrep(pattern string) (string, error) {
-	cmd := exec.Command("bash", "-c", fmt.Sprintf("grep %s ~/vm*.log", pattern))
+func executeGrep(pattern string, file_path string) (string, error) {
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("grep %s   %s", pattern, file_path))
 	output, err := cmd.CombinedOutput()
 	return string(output), err
 }

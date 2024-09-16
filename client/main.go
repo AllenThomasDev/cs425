@@ -16,10 +16,10 @@ import (
 
 var vmIPs = map[string]string{
 	"vm1": "172.22.94.178",
-	"vm2": "172.22.156.179",
-	"vm3": "172.22.158.179",
-	"vm4": "172.22.94.179",
-	// "vm5":  "172.22.156.180",
+	// "vm2": "172.22.156.179",
+	// "vm3": "172.22.158.179",
+	// "vm4": "172.22.94.179",
+	// // "vm5":  "172.22.156.180",
 	// "vm6":  "172.22.158.180",
 	// "vm7":  "172.22.94.180",
 	// "vm8":  "172.22.156.181",
@@ -29,6 +29,7 @@ var vmIPs = map[string]string{
 
 type GrepRequest struct {
 	Pattern string `json:"pattern"`
+	Path    string `json:"path"`
 }
 
 type GrepResponse struct {
@@ -52,6 +53,7 @@ func main() {
 		fmt.Print("Enter grep pattern (or 'exit' to quit): ")
 		pattern, _ := reader.ReadString('\n')
 		pattern = strings.TrimSpace(pattern)
+		path := "~/vm*.log"
 
 		if pattern == "exit" {
 			fmt.Println("Exiting.")
@@ -62,7 +64,7 @@ func main() {
 
 		if !strings.Contains(pattern, " -c") {
 			fmt.Println("Sending normal grep requests...")
-			broadcastGrepRequest(pattern)
+			broadcastGrepRequest(pattern, path)
 			fmt.Printf("Total time for normal request: %v\n", time.Since(startTime))
 		}
 
@@ -71,7 +73,7 @@ func main() {
 		if !strings.Contains(pattern, " -c") {
 			pattern += " -c"
 		}
-		results := broadcastGrepRequest(pattern)
+		results := broadcastGrepRequest(pattern, path)
 		fmt.Printf("Total time for count request: %v\n", time.Since(startTime))
 
 		fmt.Println("Results from VMs:")
@@ -96,7 +98,7 @@ func main() {
 	}
 }
 
-func broadcastGrepRequest(pattern string) map[string]map[string]interface{} {
+func broadcastGrepRequest(pattern string, path string) map[string]map[string]interface{} {
 	results := make(map[string]map[string]interface{})
 	var wg sync.WaitGroup
 
@@ -115,7 +117,7 @@ func broadcastGrepRequest(pattern string) map[string]map[string]interface{} {
 			}
 			defer conn.Close()
 
-			req := GrepRequest{Pattern: pattern}
+			req := GrepRequest{Pattern: pattern, Path: path}
 
 			err = json.NewEncoder(conn).Encode(req)
 			if err != nil {
