@@ -1,0 +1,10 @@
+The quick brown fox jumps over the lazy dog. The dog doesn't seem to mind.
+This is a sample log file for testing purposes. The content is designed to match our test cases.
+We expect to find the word "the" multiple times in this file.
+xylophone is a rare word that should appear only once across all log files.
+The sun rises in the east and sets in the west. The moon follows a similar path.
+Log entries often contain timestamps. The format can vary depending on the system.
+The network connection was lost at 14:23. The system tried to reconnect automatically.
+Error codes help identify issues. The most common ones are 404, 500, and 200.
+The quick brown fox jumps over the lazy dog again. The dog still doesn't seem to mind.
+The end of the log file is approaching. The test cases should now have enough data.

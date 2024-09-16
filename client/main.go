@@ -64,7 +64,7 @@ func main() {
 
 		if !strings.Contains(pattern, " -c") {
 			fmt.Println("Sending normal grep requests...")
-			broadcastGrepRequest(pattern, path)
+			BroadcastGrepRequest(pattern, path)
 			fmt.Printf("Total time for normal request: %v\n", time.Since(startTime))
 		}
 
@@ -73,7 +73,7 @@ func main() {
 		if !strings.Contains(pattern, " -c") {
 			pattern += " -c"
 		}
-		results := broadcastGrepRequest(pattern, path)
+		results := BroadcastGrepRequest(pattern, path)
 		fmt.Printf("Total time for count request: %v\n", time.Since(startTime))
 
 		fmt.Println("Results from VMs:")
@@ -98,7 +98,7 @@ func main() {
 	}
 }
 
-func broadcastGrepRequest(pattern string, path string) map[string]map[string]interface{} {
+func BroadcastGrepRequest(pattern string, path string) map[string]map[string]interface{} {
 	results := make(map[string]map[string]interface{})
 	var wg sync.WaitGroup
 
