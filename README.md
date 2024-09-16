@@ -2,10 +2,12 @@
 
 ### Running the Server
 
-1. cd into the server directory from the root of the project
-2. `go run main.go` 
+1. `chmod +x deploy.sh`
+2. `./deploy.sh`
+3. This will send the current code to all the VMs and also start a server there
 
 ### Running the Client
 
-1. cd into the client directory from the root of the project
-2. `go run main.go`
+1. `go run ./client/main.go`
+2. enter a grep command like  
+    `GET-c`
