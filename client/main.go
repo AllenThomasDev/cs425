@@ -64,8 +64,13 @@ func main() {
 
 		if !strings.Contains(pattern, " -c") {
 			fmt.Println("Sending normal grep requests...")
-			BroadcastGrepRequest(pattern, path)
+			results := BroadcastGrepRequest(pattern, path)
 			fmt.Printf("Total time for normal request: %v\n", time.Since(startTime))
+			for vm, result := range results {
+				outputStr := result["output"].(string)               // Access the output as a string
+				responseTime := result["time_taken"].(time.Duration) // Access the response time
+				fmt.Printf("VM %s: %s\nResponse Time: %s\n", vm, outputStr, responseTime)
+			}
 		}
 
 		startTime = time.Now()
