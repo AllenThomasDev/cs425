@@ -75,21 +75,29 @@ func main() {
 		fmt.Printf("Total time for count request: %v\n", time.Since(startTime))
 
 		fmt.Println("Results from VMs:")
+
 		totalSum := 0
-		for vm, output := range results {
-			fmt.Printf("VM %s: %s\n", vm, output)
-			count, err := strconv.Atoi(strings.TrimSpace(output))
+		for vm, result := range results {
+			outputStr := result["output"].(string)               // Access the output as a string
+			responseTime := result["time_taken"].(time.Duration) // Access the response time
+
+			fmt.Printf("VM %s: %s\nResponse Time: %s\n", vm, outputStr, responseTime)
+
+			count, err := strconv.Atoi(strings.TrimSpace(outputStr))
 			if err == nil {
 				totalSum += count
+			} else {
+				log.Printf("Error converting output from VM %s to integer: %v\n", vm, err)
 			}
 		}
 
-		fmt.Printf("\nTotal sum across all VMs: %d\n", totalSum)
+		fmt.Printf("Total sum: %d\n", totalSum)
+
 	}
 }
 
-func broadcastGrepRequest(pattern string) map[string]string {
-	results := make(map[string]string)
+func broadcastGrepRequest(pattern string) map[string]map[string]interface{} {
+	results := make(map[string]map[string]interface{})
 	var wg sync.WaitGroup
 
 	for vm, ip := range vmIPs {
@@ -97,6 +105,8 @@ func broadcastGrepRequest(pattern string) map[string]string {
 
 		go func(vm, ip string) {
 			defer wg.Done()
+
+			start := time.Now() // Start the timer
 
 			conn, err := net.Dial("tcp", ip+":8081")
 			if err != nil {
@@ -120,11 +130,15 @@ func broadcastGrepRequest(pattern string) map[string]string {
 				return
 			}
 
+			duration := time.Since(start) // Calculate the elapsed time
+
 			if resp.Error != "" {
 				log.Printf("Error from VM %s: %s\n%s\n", vm, ip, resp.Error)
 			} else {
-				log.Printf("Output from VM %s: %s\n\n%s\n", vm, ip, resp.Output)
-				results[vm] = resp.Output
+				results[vm] = map[string]interface{}{
+					"output":     resp.Output,
+					"time_taken": duration,
+				}
 			}
 		}(vm, ip)
 	}
@@ -132,33 +146,6 @@ func broadcastGrepRequest(pattern string) map[string]string {
 	wg.Wait()
 	fmt.Println("All grep requests completed.")
 	return results
-}
-
-func handleConnection(conn net.Conn) {
-	defer conn.Close()
-
-	scanner := bufio.NewScanner(conn)
-	for scanner.Scan() {
-		var req GrepRequest
-		err := json.Unmarshal(scanner.Bytes(), &req)
-		if err != nil {
-			log.Println("Error decoding request:", err)
-			continue
-		}
-
-		startTime := time.Now()
-		output, err := executeGrep(req.Pattern)
-
-		resp := GrepResponse{Output: output}
-		if err != nil {
-			resp.Error = err.Error()
-		}
-
-		json.NewEncoder(conn).Encode(resp)
-
-		// Measure the time taken for this grep execution
-		fmt.Printf("Time taken for grep on VM: %v\n", time.Since(startTime))
-	}
 }
 
 func executeGrep(pattern string) (string, error) {
