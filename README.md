@@ -3,7 +3,7 @@
 ### Running the Server
 
 1. `chmod +x deploy.sh`
-2. `./deploy.sh`
+2. `./deploy.sh <net-id>`
 3. This will send the current code to all the VMs and also start a server there
 
 ### Running the Client
