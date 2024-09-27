@@ -163,6 +163,7 @@ func enableSuspicion() {
 	fmt.Println("suspicion enabled.")
 }
 
+// use sendMessage to tell everyone what the status of suspicion is
 func disableSuspicion() {
 	suspicionEnabled = false
 	fmt.Println("Suspicion mechanism disabled.")
