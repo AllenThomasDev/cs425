@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"net"
 	"os"
@@ -40,6 +41,7 @@ const (
 func main() {
 	go startUDPServer()
 
+	go commandListener()
 	// Start the pinging process
 	go startPinging()
 
@@ -78,6 +80,66 @@ func startUDPServer() {
 
 		handleMessage(strings.TrimSpace(string(buf[:n])))
 	}
+}
+
+func commandListener() {
+	reader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("Enter command: ")
+		input, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Println("Error reading input:", err)
+			continue
+		}
+		input = strings.TrimSpace(input)
+
+		switch input {
+		case "list_mem":
+			listMembership()
+		case "list_self":
+			listSelf()
+		case "join":
+			joinGroup()
+		case "leave":
+			leaveGroup()
+		case "enable_sus":
+			enableSuspicion()
+		case "disable_sus":
+			disableSuspicion()
+		case "status_sus":
+			statusSuspicion()
+		default:
+			fmt.Println("Unknown command")
+		}
+	}
+}
+
+func statusSuspicion() {
+	fmt.Println("statusSuspicion")
+}
+
+func disableSuspicion() {
+	fmt.Println("disableSuspicion")
+}
+
+func leaveGroup() {
+	fmt.Println("leaveGroup")
+}
+
+func enableSuspicion() {
+	fmt.Println("enableSuspicion")
+}
+
+func joinGroup() {
+	fmt.Println("joinGroup")
+}
+
+func listSelf() {
+	fmt.Println("listSelf")
+}
+
+func listMembership() {
+	fmt.Println("listMembership")
 }
 
 // Handle incoming UDP messages
@@ -123,8 +185,8 @@ func sendPing(serverAddress string) {
 
 	_, err = conn.Write([]byte(msg))
 	if err != nil {
-		fmt.Printf("Error sending ping to %s: %v\n", serverAddress, err)
+		// fmt.Printf("Error sending ping to %s: %v\n", serverAddress, err)
 	} else {
-		fmt.Printf("Sent ping to %s\n", serverAddress)
+		// fmt.Printf("Sent ping to %s\n", serverAddress)
 	}
 }
