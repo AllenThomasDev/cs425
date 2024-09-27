@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+var suspicionEnabled = false
+
 type Member struct {
 	IP        string
 	Port      string
@@ -124,19 +126,46 @@ func commandListener() {
 }
 
 func statusSuspicion() {
-	fmt.Println("statusSuspicion")
-}
-
-func disableSuspicion() {
-	fmt.Println("disableSuspicion")
+	fmt.Printf("Suspicion enabled == %t", suspicionEnabled)
 }
 
 func leaveGroup() {
-	fmt.Println("leaveGroup")
+	selfIP := GetOutboundIP().String()
+
+	// Inform all members that this node is leaving
+	for ip := range membershipList {
+		if ip != selfIP {
+			sendMessage(ip, fmt.Sprintf("LEAVE,%s,%s", selfIP, port))
+		}
+	}
+
+	// Clear the membership list
+	membershipList = make(map[string]Member)
+	fmt.Println("Left the group.")
+}
+
+func sendMessage(targetIP, message string) {
+	conn, err := net.Dial("udp", targetIP+":"+port)
+	if err != nil {
+		fmt.Printf("Error sending message to %s: %v\n", targetIP, err)
+		return
+	}
+	defer conn.Close()
+
+	_, err = conn.Write([]byte(message))
+	if err != nil {
+		fmt.Printf("Error writing message to %s: %v\n", targetIP, err)
+	}
 }
 
 func enableSuspicion() {
-	fmt.Println("enableSuspicion")
+	suspicionEnabled = true
+	fmt.Println("suspicion enabled.")
+}
+
+func disableSuspicion() {
+	suspicionEnabled = false
+	fmt.Println("Suspicion mechanism disabled.")
 }
 
 func joinGroup() {
@@ -144,12 +173,16 @@ func joinGroup() {
 }
 
 func listSelf() {
-	fmt.Println("listSelf")
+	fmt.Printf("I am %s", GetOutboundIP().String())
 }
 
 func listMembership() {
-	fmt.Println("listMembership")
+	fmt.Println("Current Membership List:")
+	for _, member := range membershipList {
+		fmt.Printf("IP: %s, Port: %s, Timestamp: %d\n", member.IP, member.Port, member.Timestamp)
+	}
 }
+
 func GetOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
