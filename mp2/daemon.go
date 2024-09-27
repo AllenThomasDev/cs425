@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -30,6 +31,9 @@ var vmIPs = map[string]string{
 	// "vm9":  "172.22.158.181",
 	// "vm10": "172.22.94.181",
 }
+
+var vmList []string
+
 var membershipList = make(map[string]Member)
 
 const (
@@ -39,6 +43,11 @@ const (
 )
 
 func main() {
+	vmList = make([]string, 0, len(vmIPs))
+
+	for _, value := range vmIPs {
+		vmList = append(vmList, value)
+	}
 	go startUDPServer()
 	go startPinging()
 	time.Sleep(2)
@@ -66,7 +75,10 @@ func startUDPServer() {
 	defer conn.Close()
 
 	fmt.Printf("Daemon is listening on %s\n", port)
-
+	fmt.Printf(
+		"my own ip is %s",
+		GetOutboundIP(),
+	)
 	buf := make([]byte, 1024)
 	for {
 		n, _, err := conn.ReadFromUDP(buf)
@@ -138,6 +150,17 @@ func listSelf() {
 func listMembership() {
 	fmt.Println("listMembership")
 }
+func GetOutboundIP() net.IP {
+	conn, err := net.Dial("udp", "8.8.8.8:80")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddr := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddr.IP
+}
 
 // Handle incoming UDP messages
 func handleMessage(msg string) {
@@ -162,7 +185,9 @@ func handleMessage(msg string) {
 func startPinging() {
 	for {
 		for _, server := range vmIPs {
-			go sendPing(server)
+			if server != GetOutboundIP().String() {
+				go sendPing(server)
+			}
 		}
 		time.Sleep(pingInterval)
 	}
@@ -177,13 +202,13 @@ func sendPing(serverAddress string) {
 	}
 	defer conn.Close()
 
-	localIP := "172.22.156.179"
+	localIP := GetOutboundIP()
 	msg := fmt.Sprintf("%s,%s,%d", localIP, port, time.Now().Unix())
 
 	_, err = conn.Write([]byte(msg))
 	if err != nil {
 		fmt.Printf("Error sending ping to %s: %v\n", serverAddress, err)
 	} else {
-		fmt.Printf("Sent ping to %s\n", serverAddress)
+		// fmt.Printf("Sent ping to %s\n", serverAddress)
 	}
 }
