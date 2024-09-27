@@ -33,23 +33,23 @@ copy_files() {
   echo "Files copied to $domain_name"
 }
 
-# Function to start server
-start_server() {
-  local domain_name=$1
-  echo "Starting server on $domain_name..."
-  ssh -n "$USER@$domain_name" "cd $SERVER_DIR && nohup go run main.go > ~/go_server.log 2>&1 &" &
-  echo "Server start command sent to $domain_name"
-}
-
+# # Function to start server
+# start_server() {
+#   local domain_name=$1
+#   echo "Starting server on $domain_name..."
+#   ssh -n "$USER@$domain_name" "cd $SERVER_DIR && nohup go run main.go > ~/go_server.log 2>&1 &" &
+#   echo "Server start command sent to $domain_name"
+# }
+#
 # Main loop
 for domain_name in "${VMDomainNames[@]}"; do
   echo "Processing $domain_name..."
 
   copy_files "$domain_name"
   echo "File copy completed for $domain_name"
-
-  start_server "$domain_name"
-  echo "Server start command completed for $domain_name"
+  #
+  # start_server "$domain_name"
+  # echo "Server start command completed for $domain_name"
 
   echo "Finished processing $domain_name"
   echo "------------------------"

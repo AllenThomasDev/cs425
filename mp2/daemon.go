@@ -40,12 +40,9 @@ const (
 
 func main() {
 	go startUDPServer()
-
-	go commandListener()
-	// Start the pinging process
 	go startPinging()
-
-	// Graceful shutdown handling
+	time.Sleep(2)
+	go commandListener()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
@@ -55,7 +52,7 @@ func main() {
 
 // Start the UDP server to listen for incoming messages from other daemons
 func startUDPServer() {
-	addr, err := net.ResolveUDPAddr("udp", port)
+	addr, err := net.ResolveUDPAddr("udp", ":"+port)
 	if err != nil {
 		fmt.Printf("Error resolving address: %v\n", err)
 		return
@@ -180,13 +177,13 @@ func sendPing(serverAddress string) {
 	}
 	defer conn.Close()
 
-	localIP := "127.0.0.1" // Change this to your actual IP address
+	localIP := "172.22.156.179"
 	msg := fmt.Sprintf("%s,%s,%d", localIP, port, time.Now().Unix())
 
 	_, err = conn.Write([]byte(msg))
 	if err != nil {
-		// fmt.Printf("Error sending ping to %s: %v\n", serverAddress, err)
+		fmt.Printf("Error sending ping to %s: %v\n", serverAddress, err)
 	} else {
-		// fmt.Printf("Sent ping to %s\n", serverAddress)
+		fmt.Printf("Sent ping to %s\n", serverAddress)
 	}
 }
