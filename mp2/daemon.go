@@ -51,7 +51,7 @@ func main() {
 		vmList = append(vmList, value)
 	}
 	go startUDPServer()
-	go startPinging()
+	//	go startPinging()
 	time.Sleep(2)
 	go commandListener()
 	sigs := make(chan os.Signal, 1)
@@ -213,36 +213,9 @@ func handleMessage(msg string) {
 
 	membershipList[ip] = Member{IP: ip, Port: port, Timestamp: timestamp}
 	fmt.Printf("Received heartbeat from %s:%s\n", ip, port)
+
+	// This is where bulk of the SWIM logic will go
 }
 
 // Start sending ping messages to other daemons
-func startPinging() {
-	for {
-		for _, server := range vmIPs {
-			if server != GetOutboundIP().String() {
-				go sendPing(server)
-			}
-		}
-		time.Sleep(pingInterval)
-	}
-}
-
 // Send a ping message to another daemon
-func sendPing(serverAddress string) {
-	conn, err := net.Dial("udp", serverAddress+":"+port)
-	if err != nil {
-		fmt.Printf("Error dialing UDP: %v\n", err)
-		return
-	}
-	defer conn.Close()
-
-	localIP := GetOutboundIP()
-	msg := fmt.Sprintf("%s,%s,%d", localIP, port, time.Now().Unix())
-
-	_, err = conn.Write([]byte(msg))
-	if err != nil {
-		fmt.Printf("Error sending ping to %s: %v\n", serverAddress, err)
-	} else {
-		// fmt.Printf("Sent ping to %s\n", serverAddress)
-	}
-}
