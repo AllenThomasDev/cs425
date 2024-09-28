@@ -244,13 +244,10 @@ func startPinging() {
 
 			// Check if an ACK has been received since the last PING
 			if lastAckReceivedAt[targetIP] < lastPingSentAt[targetIP] {
-
-				fmt.Printf("%d, %d", lastAckReceivedAt[targetIP], lastPingSentAt[targetIP])
 				fmt.Printf("No ACK received from %s. Initiating PING_REQ.\n", targetIP)
 				go startIndirectProbing(targetIP) // Start indirect probing if no ACK received
 			} else {
 				//fmt.Printf("Received ACK from %s.\n", targetIP)
-				fmt.Printf("%d, %d", lastAckReceivedAt[targetIP], lastPingSentAt[targetIP])
 			}
 
 			lastAckReceivedMutex.Unlock()
@@ -308,10 +305,32 @@ func GetOutboundIP() net.IP {
 }
 
 func startIndirectProbing(targetIP string) {
-	indirectNodes := selectKRandomMembers(targetIP, k)
+	indirectNodes := selectKRandomMembers(targetIP, 1)
+	ackReceived := false
+	if _, exists := membershipList[targetIP]; !exists {
+		fmt.Printf("Node %s is already marked as failed. Skipping PING-REQ.\n", targetIP)
+		return
+	}
 	for _, node := range indirectNodes {
-		fmt.Printf("Sending PING_REQ to %s to check %s\n", node, targetIP)
+		fmt.Printf("Sending PING-REQ to %s to check %s\n", node, targetIP)
 		sendMessage(node, fmt.Sprintf("PING-REQ,%s,%s", targetIP, selfIP))
+	}
+
+	// Wait for an ACK from any of the indirect nodes
+	time.Sleep(pingTimeout)
+
+	// Check if any ACK was received indirectly
+	lastAckReceivedMutex.Lock()
+	if lastAckReceivedAt[targetIP] > 0 && time.Now().Unix()-lastAckReceivedAt[targetIP] <= int64(pingTimeout.Seconds()) {
+		ackReceived = true
+	}
+	lastAckReceivedMutex.Unlock()
+
+	// If no ACK was received, mark the target as failed
+	if !ackReceived {
+		fmt.Printf("No ACK received for %s, marking as failed.\n", targetIP)
+		removeMember(targetIP)                       // Remove the failed node from membership list
+		sendToAll(fmt.Sprintf("LEAVE,%s", targetIP)) // Inform others about the failure
 	}
 }
 
@@ -347,21 +366,38 @@ func handleMessage(msg string) {
 	case "PING":
 		senderIP := parts[1]
 		// Send ACK back to the sender
-		fmt.Printf("I got a ping")
 		sendMessage(senderIP, fmt.Sprintf("ACK,%s", selfIP))
 	case "ACK":
 		senderIP := parts[1]
 		timestamp := time.Now().Unix()
-		fmt.Printf("\nI got an ack from %s", senderIP)
 		updateLastAckReceived(senderIP, timestamp)
 
 	case "PING-REQ":
-		targetIP := parts[1]
-		// Send PING to targetIP
+		targetIP := parts[1]    // The node that the requester wants to ping
+		requesterIP := parts[2] // The node that originally initiated the request
+		if _, exists := membershipList[targetIP]; !exists {
+			fmt.Printf("Target %s is already marked as failed. Ignoring PING-REQ from %s.\n", targetIP, requesterIP)
+			return
+		}
+		fmt.Printf("\nReceived PING-REQ from %s to check %s\n", requesterIP, targetIP)
+
+		// Send a direct PING to the target node
+		if _, exists := membershipList[targetIP]; !exists {
+			fmt.Printf("Target %s is already marked as failed. Ignoring PING-REQ from %s.\n", targetIP, requesterIP)
+			return
+		}
 		sendMessage(targetIP, fmt.Sprintf("PING,%s", selfIP))
-		// Wait for ACK
-		// If ACK received, send ACK back to requesterIP
-		// You may need to implement a mechanism to wait for ACK and then forward it
+
+		// Wait for an ACK with a timeout
+		time.Sleep(pingTimeout)
+
+		// Check if an ACK was received from the target node
+		lastAckReceivedMutex.Lock()
+		if lastAckReceivedAt[targetIP] > 0 && time.Now().Unix()-lastAckReceivedAt[targetIP] <= int64(pingTimeout.Seconds()) {
+			fmt.Printf("Received ACK from %s, forwarding to %s\n", targetIP, requesterIP)
+			sendMessage(requesterIP, fmt.Sprintf("ACK,%s", targetIP)) // Forward ACK to the requester
+		}
+		lastAckReceivedMutex.Unlock()
 
 	}
 	// This is where bulk of the SWIM logic will go
