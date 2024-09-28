@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"os"
 	"os/signal"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -20,42 +22,54 @@ type Member struct {
 	Timestamp int64
 }
 
+const k = 3 // Number of entries
+
 const introducerIP = "172.22.94.178"
 
-var vmIPs = map[string]string{
-	"vm1": "172.22.94.178",
-	"vm2": "172.22.156.179",
-	// "vm3":  "172.22.158.179",
-	// "vm4":  "172.22.94.179",
-	// "vm5":  "172.22.156.180",
-	// "vm6":  "172.22.158.180",
-	// "vm7":  "172.22.94.180",
-	// "vm8":  "172.22.156.181",
-	// "vm9":  "172.22.158.181",
-	// "vm10": "172.22.94.181",
+var membershipList = make(map[string]Member)
+
+var (
+	lastPingSentAt       = make(map[string]int64)
+	lastAckReceivedAt    = make(map[string]int64)
+	lastPingMutex        = &sync.Mutex{}
+	lastAckReceivedMutex = &sync.Mutex{}
+)
+
+func updateLastPingSent(ip string, timestamp int64) {
+	lastPingMutex.Lock()
+	defer lastPingMutex.Unlock()
+	lastPingSentAt[ip] = timestamp
 }
 
-var vmList []string
+func getLastPingSent(ip string) int64 {
+	lastPingMutex.Lock()
+	defer lastPingMutex.Unlock()
+	return lastPingSentAt[ip]
+}
 
-var membershipList = make(map[string]Member)
+func updateLastAckReceived(ip string, timestamp int64) {
+	lastAckReceivedMutex.Lock()
+	defer lastAckReceivedMutex.Unlock()
+	lastAckReceivedAt[ip] = timestamp
+}
+
+func getLastAckReceived(ip string) int64 {
+	lastAckReceivedMutex.Lock()
+	defer lastAckReceivedMutex.Unlock()
+	return lastAckReceivedAt[ip]
+}
 
 const (
 	port         = "5000"          // The UDP port to use for this daemon
 	pingInterval = 2 * time.Second // Interval for sending pings
-	timeout      = 5 * time.Second // Time to consider a member as failed
+	pingTimeout  = 5 * time.Second // Time to consider a member as failed
 )
 
-func main() {
-	vmList = make([]string, 0, len(vmIPs))
+var selfIP = GetOutboundIP().String()
 
-	for _, value := range vmIPs {
-		vmList = append(vmList, value)
-	}
+func main() {
 	go startUDPServer()
-	if GetOutboundIP().String() == introducerIP {
-		fmt.Println("I am the introducer")
-	}
-	time.Sleep(2)
+	go startPinging()
 	go commandListener()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
@@ -152,7 +166,6 @@ func sendMessage(targetIP, message string) {
 }
 
 func sendToAll(message string) {
-	selfIP := GetOutboundIP().String()
 	for ip := range membershipList {
 		if ip != selfIP {
 			sendMessage(ip, fmt.Sprintf("%s,%s", message, selfIP))
@@ -174,19 +187,18 @@ func disableSuspicion() {
 }
 
 func joinGroup() {
-	var self_ip = GetOutboundIP().String()
 	var join_ts = fmt.Sprintf("%d", time.Now().Unix())
-	if self_ip == introducerIP {
+	if selfIP == introducerIP {
 		fmt.Printf("I have joined as the introducer\n")
 		addMember(introducerIP, join_ts)
 		return
 	}
 	fmt.Printf("Trying to join the group\n")
-	sendMessage(introducerIP, fmt.Sprintf("JOIN,%s,%s", self_ip, join_ts))
+	sendMessage(introducerIP, fmt.Sprintf("JOIN,%s,%s", selfIP, join_ts))
 }
 
 func listSelf() {
-	fmt.Printf("I am %s \n", GetOutboundIP().String())
+	fmt.Printf("I am %s \n", selfIP)
 }
 
 func listMembership() {
@@ -216,6 +228,73 @@ func sendFullMembershipList(targetIP string) {
 	}
 }
 
+func startPinging() {
+	for {
+		// Select a random member to ping
+		targetIP := selectRandomMember()
+		if targetIP != "" {
+			ping(targetIP) // Send the ping message
+
+			// Wait for the ACK response within the pingTimeout duration
+			time.Sleep(pingTimeout)
+
+			// Check if ACK was received within the timeout
+			lastPingMutex.Lock()
+			lastAckReceivedMutex.Lock()
+
+			// Check if an ACK has been received since the last PING
+			if lastAckReceivedAt[targetIP] < lastPingSentAt[targetIP] {
+
+				fmt.Printf("%d, %d", lastAckReceivedAt[targetIP], lastPingSentAt[targetIP])
+				fmt.Printf("No ACK received from %s. Initiating PING_REQ.\n", targetIP)
+				go startIndirectProbing(targetIP) // Start indirect probing if no ACK received
+			} else {
+				//fmt.Printf("Received ACK from %s.\n", targetIP)
+				fmt.Printf("%d, %d", lastAckReceivedAt[targetIP], lastPingSentAt[targetIP])
+			}
+
+			lastAckReceivedMutex.Unlock()
+			lastPingMutex.Unlock()
+		}
+		time.Sleep(pingInterval) // Respect the main ping interval
+	}
+}
+
+func ping(targetIP string) {
+	var ping_ts = time.Now().Unix()
+	sendMessage(targetIP, fmt.Sprintf("PING,%s,%d", selfIP, ping_ts))
+	updateLastPingSent(targetIP, ping_ts)
+}
+
+func selectRandomMember() string {
+	var eligibleMembers []string
+	for ip := range membershipList {
+		if ip != selfIP { // Exclude selfIP
+			eligibleMembers = append(eligibleMembers, ip)
+		}
+	}
+	if len(eligibleMembers) == 0 {
+		return ""
+	}
+	randomIndex := rand.Intn(len(eligibleMembers))
+	return eligibleMembers[randomIndex]
+}
+
+func selectKRandomMembers(excludeIP string, k int) []string {
+	selectedMembers := make(map[string]struct{})
+	for len(selectedMembers) < k {
+		randomMember := selectRandomMember()
+		if randomMember != "" && randomMember != excludeIP && randomMember != selfIP {
+			selectedMembers[randomMember] = struct{}{}
+		}
+	}
+	result := make([]string, 0, k)
+	for member := range selectedMembers {
+		result = append(result, member)
+	}
+	return result
+}
+
 func GetOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
@@ -226,6 +305,14 @@ func GetOutboundIP() net.IP {
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 
 	return localAddr.IP
+}
+
+func startIndirectProbing(targetIP string) {
+	indirectNodes := selectKRandomMembers(targetIP, k)
+	for _, node := range indirectNodes {
+		fmt.Printf("Sending PING_REQ to %s to check %s\n", node, targetIP)
+		sendMessage(node, fmt.Sprintf("PING-REQ,%s,%s", targetIP, selfIP))
+	}
 }
 
 // Handle incoming UDP messages
@@ -240,9 +327,16 @@ func handleMessage(msg string) {
 	case "JOIN":
 		sender_ip := parts[1]
 		ts := parts[2]
-		addMember(sender_ip, ts) // add sender to membershipList on introc and then send this new memberslist to everyone
-		sendToAll(fmt.Sprintf("NEW_MEMBER,%s,%s", sender_ip, ts))
-		sendFullMembershipList(sender_ip)
+
+		// Check if the introducer itself is in the membership list
+		if _, exists := membershipList[introducerIP]; !exists {
+			fmt.Printf("Introducer (%s) not in membership list\n", introducerIP)
+			break
+		}
+		// Now add the joining member
+		addMember(sender_ip, ts)                                  // Add sender to the membership list
+		sendToAll(fmt.Sprintf("NEW_MEMBER,%s,%s", sender_ip, ts)) // Inform others about the new member
+		sendFullMembershipList(sender_ip)                         // Send the full membership list to the new member
 	case "NEW_MEMBER":
 		sender_ip := parts[1]
 		ts := parts[2]
@@ -250,7 +344,25 @@ func handleMessage(msg string) {
 	case "LEAVE":
 		sender_ip := parts[1]
 		removeMember(sender_ip)
-		// add sender to membershipList on introc and then send this new memberslist to everyone
+	case "PING":
+		senderIP := parts[1]
+		// Send ACK back to the sender
+		fmt.Printf("I got a ping")
+		sendMessage(senderIP, fmt.Sprintf("ACK,%s", selfIP))
+	case "ACK":
+		senderIP := parts[1]
+		timestamp := time.Now().Unix()
+		fmt.Printf("\nI got an ack from %s", senderIP)
+		updateLastAckReceived(senderIP, timestamp)
+
+	case "PING-REQ":
+		targetIP := parts[1]
+		// Send PING to targetIP
+		sendMessage(targetIP, fmt.Sprintf("PING,%s", selfIP))
+		// Wait for ACK
+		// If ACK received, send ACK back to requesterIP
+		// You may need to implement a mechanism to wait for ACK and then forward it
+
 	}
 	// This is where bulk of the SWIM logic will go
 }
