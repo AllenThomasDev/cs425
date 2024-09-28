@@ -17,9 +17,10 @@ var suspicionEnabled = false
 
 type Member struct {
 	IP        string
-	Port      string
 	Timestamp int64
 }
+
+const introducerIP = "172.22.94.178"
 
 var vmIPs = map[string]string{
 	"vm1": "172.22.94.178",
@@ -51,7 +52,9 @@ func main() {
 		vmList = append(vmList, value)
 	}
 	go startUDPServer()
-	//	go startPinging()
+	if GetOutboundIP().String() == introducerIP {
+		fmt.Println("I am the introducer")
+	}
 	time.Sleep(2)
 	go commandListener()
 	sigs := make(chan os.Signal, 1)
@@ -77,10 +80,7 @@ func startUDPServer() {
 	defer conn.Close()
 
 	fmt.Printf("Daemon is listening on %s\n", port)
-	fmt.Printf(
-		"my own ip is %s",
-		GetOutboundIP(),
-	)
+
 	buf := make([]byte, 1024)
 	for {
 		n, _, err := conn.ReadFromUDP(buf)
@@ -130,15 +130,8 @@ func statusSuspicion() {
 }
 
 func leaveGroup() {
-	selfIP := GetOutboundIP().String()
-
 	// Inform all members that this node is leaving
-	for ip := range membershipList {
-		if ip != selfIP {
-			sendMessage(ip, fmt.Sprintf("LEAVE,%s,%s", selfIP, port))
-		}
-	}
-
+	sendToAll("LEAVE")
 	// Clear the membership list
 	membershipList = make(map[string]Member)
 	fmt.Println("Left the group.")
@@ -158,29 +151,68 @@ func sendMessage(targetIP, message string) {
 	}
 }
 
+func sendToAll(message string) {
+	selfIP := GetOutboundIP().String()
+	for ip := range membershipList {
+		if ip != selfIP {
+			sendMessage(ip, fmt.Sprintf("%s,%s", message, selfIP))
+		}
+	}
+}
+
 func enableSuspicion() {
 	suspicionEnabled = true
 	fmt.Println("suspicion enabled.")
+	sendToAll("SUS_ON")
 }
 
 // use sendMessage to tell everyone what the status of suspicion is
 func disableSuspicion() {
 	suspicionEnabled = false
 	fmt.Println("Suspicion mechanism disabled.")
+	sendToAll("SUS_OFF")
 }
 
 func joinGroup() {
-	fmt.Println("joinGroup")
+	var self_ip = GetOutboundIP().String()
+	var join_ts = fmt.Sprintf("%d", time.Now().Unix())
+	if self_ip == introducerIP {
+		fmt.Printf("I have joined as the introducer\n")
+		addMember(introducerIP, join_ts)
+		return
+	}
+	fmt.Printf("Trying to join the group\n")
+	sendMessage(introducerIP, fmt.Sprintf("JOIN,%s,%s", self_ip, join_ts))
 }
 
 func listSelf() {
-	fmt.Printf("I am %s", GetOutboundIP().String())
+	fmt.Printf("I am %s \n", GetOutboundIP().String())
 }
 
 func listMembership() {
 	fmt.Println("Current Membership List:")
 	for _, member := range membershipList {
-		fmt.Printf("IP: %s, Port: %s, Timestamp: %d\n", member.IP, member.Port, member.Timestamp)
+		fmt.Printf("IP: %s, Timestamp: %d\n", member.IP, member.Timestamp)
+	}
+}
+func removeMember(ip string) {
+	delete(membershipList, ip)
+}
+
+func addMember(ip string, timestamp string) {
+	converted_ts, err := strconv.ParseInt(timestamp, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	membershipList[ip] = Member{ip, converted_ts}
+}
+
+// Sends the entire current membership list to the specified node
+func sendFullMembershipList(targetIP string) {
+	for ip, member := range membershipList {
+		if ip != targetIP { // Don't send the new member's entry back to itself
+			sendMessage(targetIP, fmt.Sprintf("NEW_MEMBER,%s,%d", member.IP, member.Timestamp))
+		}
 	}
 }
 
@@ -199,21 +231,27 @@ func GetOutboundIP() net.IP {
 // Handle incoming UDP messages
 func handleMessage(msg string) {
 	parts := strings.Split(msg, ",")
-	if len(parts) != 3 {
-		fmt.Printf("Invalid message received: %s\n", msg)
-		return
+	switch command := parts[0]; command {
+	case "SUS_OFF":
+		suspicionEnabled = false
+	case "SUS_ON":
+		suspicionEnabled = true
+		// Only the introducer can ingest JOIN messages
+	case "JOIN":
+		sender_ip := parts[1]
+		ts := parts[2]
+		addMember(sender_ip, ts) // add sender to membershipList on introc and then send this new memberslist to everyone
+		sendToAll(fmt.Sprintf("NEW_MEMBER,%s,%s", sender_ip, ts))
+		sendFullMembershipList(sender_ip)
+	case "NEW_MEMBER":
+		sender_ip := parts[1]
+		ts := parts[2]
+		addMember(sender_ip, ts)
+	case "LEAVE":
+		sender_ip := parts[1]
+		removeMember(sender_ip)
+		// add sender to membershipList on introc and then send this new memberslist to everyone
 	}
-
-	ip, port := parts[0], parts[1]
-	timestamp, err := strconv.ParseInt(parts[2], 10, 64)
-	if err != nil {
-		fmt.Printf("Invalid timestamp: %v\n", err)
-		return
-	}
-
-	membershipList[ip] = Member{IP: ip, Port: port, Timestamp: timestamp}
-	fmt.Printf("Received heartbeat from %s:%s\n", ip, port)
-
 	// This is where bulk of the SWIM logic will go
 }
 
