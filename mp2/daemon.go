@@ -65,10 +65,11 @@ func getLastAckReceived(ip string) int64 {
 }
 
 const (
-	UDPport      = "5000"          // The UDP port to use for this daemon
-	TCPport      = "5001"          // The UDP port to use for this daemon
-	pingInterval = 1 * time.Second // Interval for sending pings
-	pingTimeout  = 4 * time.Second // Time to consider a member as failed
+	UDPport        = "5000"          // The UDP port to use for this daemon
+	TCPport        = "5001"          // The UDP port to use for this daemon
+	pingInterval   = 1 * time.Second // Interval for sending pings
+	pingTimeout    = 4 * time.Second // Time to consider a member as failed
+	suspicionTimer = 7 * time.Second
 )
 
 var selfIP = GetOutboundIP().String()
@@ -264,10 +265,9 @@ func disseminateSuspicion(ip string) {
 	memberIncarnation := getMemberIncarnation(ip)
 	sendToAll(fmt.Sprintf("SUSPECT,%s,%d", ip, memberIncarnation))
 }
-
 func startSuspicionTimer(ip string) {
 	go func() {
-		time.Sleep(pingTimeout)
+		time.Sleep(suspicionTimer)
 		if isNodeSuspected(ip) {
 			fmt.Printf("Suspicion timeout for %s, marking as failed.\n", ip)
 			removeMember(ip)
@@ -326,16 +326,24 @@ func getIncarnationNumber() int64 {
 	defer incarnationNumberMutex.Unlock()
 	return incarnationNumber
 }
+
 func addMember(ip, timestamp, incarnation string) {
 	convertedTS, _ := strconv.ParseInt(timestamp, 10, 64)
 	convertedInc, _ := strconv.ParseInt(incarnation, 10, 64)
 
 	membershipListMutex.Lock()
-	member, exists := membershipList[ip]
-	if !exists || member.Incarnation < convertedInc {
-		membershipList[ip] = Member{ip, convertedTS, convertedInc}
+	defer membershipListMutex.Unlock()
+
+	if ip == selfIP {
+		// For self, always use the local incarnation number
+		membershipList[ip] = Member{ip, convertedTS, getIncarnationNumber()}
+	} else {
+		// For other nodes, use the received incarnation number
+		member, exists := membershipList[ip]
+		if !exists || member.Incarnation < convertedInc {
+			membershipList[ip] = Member{ip, convertedTS, convertedInc}
+		}
 	}
-	membershipListMutex.Unlock()
 }
 
 func listSuspectedNodes() {
@@ -349,12 +357,24 @@ func listSuspectedNodes() {
 
 func updateMemberIncarnation(ip string, incarnation int64) {
 	membershipListMutex.Lock()
-	if member, exists := membershipList[ip]; exists && member.Incarnation < incarnation {
-		member.Incarnation = incarnation
-		membershipList[ip] = member
+	defer membershipListMutex.Unlock()
+
+	if ip == selfIP {
+		// For self, only update if the received incarnation is higher
+		if incarnation > getIncarnationNumber() {
+			incarnationNumberMutex.Lock()
+			incarnationNumber = incarnation
+			incarnationNumberMutex.Unlock()
+		}
+	} else {
+		// For other nodes, update if the received incarnation is higher
+		if member, exists := membershipList[ip]; exists && member.Incarnation < incarnation {
+			member.Incarnation = incarnation
+			membershipList[ip] = member
+		}
 	}
-	membershipListMutex.Unlock()
 }
+
 func sendRefutation() {
 	sendToAll(fmt.Sprintf("REFUTE,%s,%d", selfIP, getIncarnationNumber()))
 }
@@ -459,8 +479,12 @@ func handleMessage(msg string) {
 		inc := parts[3]
 		addMember(sender_ip, ts, inc)
 	case "LEAVE":
-		sender_ip := parts[1]
-		removeMember(sender_ip)
+		leaver_ip := parts[1]
+		if leaver_ip == selfIP {
+			fmt.Printf("I was killed unfortunately, if only you had enabled suspicion earlier\n\n\n :(")
+			os.Exit(0)
+		}
+		removeMember(leaver_ip)
 	case "PING":
 		senderIP := parts[1]
 		// Send ACK back to the sender
@@ -475,16 +499,15 @@ func handleMessage(msg string) {
 		}
 		suspectedIP := parts[1]
 		suspectedIncarnation, _ := strconv.ParseInt(parts[2], 10, 64)
-		if suspectedIP != selfIP {
+		if suspectedIP == selfIP {
+			if suspectedIncarnation >= getIncarnationNumber() {
+				incrementIncarnation()
+				sendRefutation()
+			}
+		} else {
 			updateMemberIncarnation(suspectedIP, suspectedIncarnation)
 			markNodeAsSuspected(suspectedIP)
-		} else {
-			currentIncarnation := getIncarnationNumber()
-			if suspectedIncarnation < currentIncarnation {
-				return // Ignore outdated suspicion
-			}
-			incrementIncarnation()
-			sendRefutation()
+			startSuspicionTimer(suspectedIP)
 		}
 
 	case "REFUTE":
@@ -498,6 +521,3 @@ func handleMessage(msg string) {
 	}
 	// This is where bulk of the SWIM logic will go
 }
-
-// Start sending ping messages to other daemons
-// Send a ping message to another daemon
