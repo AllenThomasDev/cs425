@@ -64,10 +64,10 @@ func getLastAckReceived(ip string) int64 {
 
 const (
 	UDPport        = "5000"          // The UDP port to use for this daemon
-	TCPport        = "5001"          // The UDP port to use for this daemon
+	TCPport        = "5001"          // The TCP port to use for this daemon
 	pingInterval   = 1 * time.Second // Interval for sending pings
 	pingTimeout    = 4 * time.Second // Time to consider a member as failed
-	suspicionTimer = 7 * time.Second
+	suspicionTimer = 5 * time.Second
 )
 
 var selfIP = GetOutboundIP().String()
