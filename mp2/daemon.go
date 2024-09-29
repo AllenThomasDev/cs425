@@ -23,8 +23,6 @@ type Member struct {
 	Incarnation int64
 }
 
-const k = 3 // Number of entries
-
 const introducerIP = "172.22.94.178"
 
 var (
@@ -128,7 +126,7 @@ func startTCPServer() {
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
-			fmt.Printf("Error accepting TCP connection: %v\n", err)
+			// fmt.Printf("Error accepting TCP connection: %v\n", err)
 			continue
 		}
 
@@ -138,7 +136,7 @@ func startTCPServer() {
 			buf := make([]byte, 1024)
 			n, err := c.Read(buf)
 			if err != nil {
-				fmt.Printf("Error reading from TCP connection: %v\n", err)
+				// fmt.Printf("Error reading from TCP connection: %v\n", err)
 				return
 			}
 			message := strings.TrimSpace(string(buf[:n]))
@@ -171,7 +169,7 @@ func commandListener() {
 			enableSuspicion()
 		case "disable_sus":
 			disableSuspicion()
-		case "list_suspected":
+		case "list_sus":
 			listSuspectedNodes()
 		case "status_sus":
 			statusSuspicion()
@@ -211,14 +209,14 @@ func sendMessageViaTCP(targetIP, message string) {
 	address := net.JoinHostPort(targetIP, "5001")
 	conn, err := net.DialTimeout("tcp", address, 5*time.Second)
 	if err != nil {
-		fmt.Printf("TCP connection error to %s: %v\n", targetIP, err)
+		// fmt.Printf("TCP connection error to %s: %v\n", targetIP, err)
 		return
 	}
 	defer conn.Close()
 
 	_, err = conn.Write([]byte(message))
 	if err != nil {
-		fmt.Printf("Error sending TCP message to %s: %v\n", targetIP, err)
+		// fmt.Printf("Error sending TCP message to %s: %v\n", targetIP, err)
 	}
 }
 
@@ -263,6 +261,8 @@ func removeNodeFromSuspected(ip string) {
 
 func disseminateSuspicion(ip string) {
 	memberIncarnation := getMemberIncarnation(ip)
+	listSuspectedNodes()
+	fmt.Printf("I suspect %s, telling everyone else\n", ip)
 	sendToAll(fmt.Sprintf("SUSPECT,%s,%d", ip, memberIncarnation))
 }
 func startSuspicionTimer(ip string) {
@@ -272,6 +272,7 @@ func startSuspicionTimer(ip string) {
 			fmt.Printf("Suspicion timeout for %s, marking as failed.\n", ip)
 			removeMember(ip)
 			removeNodeFromSuspected(ip)
+			removeMember(ip)
 			sendToAll(fmt.Sprintf("LEAVE,%s", ip))
 		}
 	}()
@@ -291,9 +292,10 @@ func joinGroup() {
 		fmt.Printf("I have joined as the introducer\n")
 		addMember(introducerIP, join_ts, fmt.Sprintf("%d", incarnationNumber))
 		return
+	} else {
+		fmt.Printf("Trying to join the group\n")
+		sendMessageViaTCP(introducerIP, fmt.Sprintf("JOIN,%s,%s,%d", selfIP, join_ts, getIncarnationNumber()))
 	}
-	fmt.Printf("Trying to join the group\n")
-	sendMessageViaTCP(introducerIP, fmt.Sprintf("JOIN,%s,%s,%d", selfIP, join_ts, getIncarnationNumber()))
 }
 
 func listSelf() {
@@ -306,7 +308,7 @@ func listMembership() {
 	defer membershipListMutex.RUnlock()
 
 	for _, member := range membershipList {
-		fmt.Printf("IP: %s, Timestamp: %d, Incarnation: %d\n", member.IP, member.Timestamp, member.Incarnation)
+		fmt.Printf("IP: %s, I have been alive for : %d seconds, Incarnation: %d\n", member.IP, time.Now().Unix()-member.Timestamp, member.Incarnation)
 	}
 }
 
@@ -347,7 +349,7 @@ func addMember(ip, timestamp, incarnation string) {
 }
 
 func listSuspectedNodes() {
-	fmt.Println("Currently Suspected Nodes:")
+	fmt.Println("\nCurrently Suspected Nodes:")
 	suspectedNodesMutex.Lock()
 	defer suspectedNodesMutex.Unlock()
 	for ip := range suspectedNodes {
@@ -407,17 +409,24 @@ func startPinging() {
 				lastAckTime := lastAckReceivedAt[ip]
 				lastAckReceivedMutex.Unlock()
 
-				if lastAckTime < lastPingTime {
-					if suspicionEnabled {
-						fmt.Printf("No ACK from %s, marking as suspected.\n", ip)
-						markNodeAsSuspected(ip)
-						disseminateSuspicion(ip)
-						startSuspicionTimer(ip)
-					} else {
-						fmt.Printf("No ACK from %s, marking as failed.\n", ip)
-						removeMember(ip)
-						sendToAll(fmt.Sprintf("LEAVE,%s", ip))
+				_, exists := membershipList[ip]
+				_, suspicionExists := suspectedNodes[ip]
+				if exists {
+					if lastAckTime < lastPingTime {
+						if suspicionEnabled {
+							if !suspicionExists {
+								markNodeAsSuspected(ip)
+								disseminateSuspicion(ip)
+								startSuspicionTimer(ip)
+							}
+						} else {
+							fmt.Printf("No ACK from %s, marking as failed.\n", ip)
+							removeMember(ip)
+							sendToAll(fmt.Sprintf("LEAVE,%s", ip))
+						}
 					}
+				} else {
+					// fmt.Print("gobbling up redundant removals")
 				}
 			}(targetIP)
 		}
@@ -473,6 +482,13 @@ func handleMessage(msg string) {
 		addMember(sender_ip, ts, inc)
 		sendToAll(fmt.Sprintf("NEW_MEMBER,%s,%s,%s", sender_ip, ts, inc))
 		sendFullMembershipList(sender_ip)
+		if suspicionEnabled {
+			sus_status := "SUS_ON"
+			sendMessageViaTCP(sender_ip, sus_status)
+		} else {
+			sus_status := "SUS_OFF"
+			sendMessageViaTCP(sender_ip, sus_status)
+		}
 	case "NEW_MEMBER":
 		sender_ip := parts[1]
 		ts := parts[2]
@@ -493,6 +509,7 @@ func handleMessage(msg string) {
 		senderIP := parts[1]
 		timestamp := time.Now().Unix()
 		updateLastAckReceived(senderIP, timestamp)
+		removeNodeFromSuspected(senderIP)
 	case "SUSPECT":
 		if !suspicionEnabled {
 			return
@@ -509,6 +526,7 @@ func handleMessage(msg string) {
 			markNodeAsSuspected(suspectedIP)
 			startSuspicionTimer(suspectedIP)
 		}
+		listSuspectedNodes()
 
 	case "REFUTE":
 		if !suspicionEnabled {
