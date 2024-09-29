@@ -26,9 +26,9 @@ const k = 3 // Number of entries
 
 const introducerIP = "172.22.94.178"
 
-var membershipList = make(map[string]Member)
-
 var (
+	membershipList       = make(map[string]Member)
+	membershipListMutex  = &sync.RWMutex{}
 	lastPingSentAt       = make(map[string]int64)
 	lastAckReceivedAt    = make(map[string]int64)
 	lastPingMutex        = &sync.Mutex{}
@@ -60,15 +60,17 @@ func getLastAckReceived(ip string) int64 {
 }
 
 const (
-	port         = "5000"          // The UDP port to use for this daemon
-	pingInterval = 2 * time.Second // Interval for sending pings
-	pingTimeout  = 5 * time.Second // Time to consider a member as failed
+	UDPport      = "5000"          // The UDP port to use for this daemon
+	TCPport      = "5001"          // The UDP port to use for this daemon
+	pingInterval = 1 * time.Second // Interval for sending pings
+	pingTimeout  = 4 * time.Second // Time to consider a member as failed
 )
 
 var selfIP = GetOutboundIP().String()
 
 func main() {
 	go startUDPServer()
+	go startTCPServer()
 	go startPinging()
 	go commandListener()
 	sigs := make(chan os.Signal, 1)
@@ -80,7 +82,7 @@ func main() {
 
 // Start the UDP server to listen for incoming messages from other daemons
 func startUDPServer() {
-	addr, err := net.ResolveUDPAddr("udp", ":"+port)
+	addr, err := net.ResolveUDPAddr("udp", ":"+UDPport)
 	if err != nil {
 		fmt.Printf("Error resolving address: %v\n", err)
 		return
@@ -93,7 +95,7 @@ func startUDPServer() {
 	}
 	defer conn.Close()
 
-	fmt.Printf("Daemon is listening on %s\n", port)
+	fmt.Printf("Daemon is listening on %s\n", UDPport)
 
 	buf := make([]byte, 1024)
 	for {
@@ -104,6 +106,38 @@ func startUDPServer() {
 		}
 
 		handleMessage(strings.TrimSpace(string(buf[:n])))
+	}
+}
+
+func startTCPServer() {
+	listener, err := net.Listen("tcp", ":"+TCPport)
+	if err != nil {
+		fmt.Printf("Error starting TCP server: %v\n", err)
+		return
+	}
+	defer listener.Close()
+
+	fmt.Printf("TCP server is listening on %s\n", TCPport)
+
+	for {
+		conn, err := listener.Accept()
+		if err != nil {
+			fmt.Printf("Error accepting TCP connection: %v\n", err)
+			continue
+		}
+
+		go func(c net.Conn) {
+			defer c.Close()
+
+			buf := make([]byte, 1024)
+			n, err := c.Read(buf)
+			if err != nil {
+				fmt.Printf("Error reading from TCP connection: %v\n", err)
+				return
+			}
+			message := strings.TrimSpace(string(buf[:n]))
+			handleMessage(message)
+		}(conn)
 	}
 }
 
@@ -152,7 +186,7 @@ func leaveGroup() {
 }
 
 func sendMessage(targetIP, message string) {
-	conn, err := net.Dial("udp", targetIP+":"+port)
+	conn, err := net.Dial("udp", targetIP+":"+UDPport)
 	if err != nil {
 		fmt.Printf("Error sending message to %s: %v\n", targetIP, err)
 		return
@@ -165,10 +199,25 @@ func sendMessage(targetIP, message string) {
 	}
 }
 
+func sendMessageViaTCP(targetIP, message string) {
+	address := net.JoinHostPort(targetIP, "5001")
+	conn, err := net.DialTimeout("tcp", address, 5*time.Second)
+	if err != nil {
+		fmt.Printf("TCP connection error to %s: %v\n", targetIP, err)
+		return
+	}
+	defer conn.Close()
+
+	_, err = conn.Write([]byte(message))
+	if err != nil {
+		fmt.Printf("Error sending TCP message to %s: %v\n", targetIP, err)
+	}
+}
+
 func sendToAll(message string) {
 	for ip := range membershipList {
 		if ip != selfIP {
-			sendMessage(ip, fmt.Sprintf("%s,%s", message, selfIP))
+			sendMessageViaTCP(ip, fmt.Sprintf("%s,%s", message, selfIP))
 		}
 	}
 }
@@ -194,7 +243,7 @@ func joinGroup() {
 		return
 	}
 	fmt.Printf("Trying to join the group\n")
-	sendMessage(introducerIP, fmt.Sprintf("JOIN,%s,%s", selfIP, join_ts))
+	sendMessageViaTCP(introducerIP, fmt.Sprintf("JOIN,%s,%s", selfIP, join_ts))
 }
 
 func listSelf() {
@@ -207,8 +256,11 @@ func listMembership() {
 		fmt.Printf("IP: %s, Timestamp: %d\n", member.IP, member.Timestamp)
 	}
 }
+
 func removeMember(ip string) {
+	membershipListMutex.Lock()
 	delete(membershipList, ip)
+	membershipListMutex.Unlock()
 }
 
 func addMember(ip string, timestamp string) {
@@ -216,7 +268,9 @@ func addMember(ip string, timestamp string) {
 	if err != nil {
 		panic(err)
 	}
+	membershipListMutex.Lock()
 	membershipList[ip] = Member{ip, converted_ts}
+	membershipListMutex.Unlock()
 }
 
 // Sends the entire current membership list to the specified node
@@ -230,30 +284,30 @@ func sendFullMembershipList(targetIP string) {
 
 func startPinging() {
 	for {
-		// Select a random member to ping
 		targetIP := selectRandomMember()
 		if targetIP != "" {
-			ping(targetIP) // Send the ping message
+			ping(targetIP)
+			// Start a goroutine to handle the timeout asynchronously
+			go func(ip string) {
+				time.Sleep(pingTimeout)
 
-			// Wait for the ACK response within the pingTimeout duration
-			time.Sleep(pingTimeout)
+				// Capture the necessary timestamps without holding the locks
+				lastPingMutex.Lock()
+				lastPingTime := lastPingSentAt[ip]
+				lastPingMutex.Unlock()
 
-			// Check if ACK was received within the timeout
-			lastPingMutex.Lock()
-			lastAckReceivedMutex.Lock()
+				lastAckReceivedMutex.Lock()
+				lastAckTime := lastAckReceivedAt[ip]
+				lastAckReceivedMutex.Unlock()
 
-			// Check if an ACK has been received since the last PING
-			if lastAckReceivedAt[targetIP] < lastPingSentAt[targetIP] {
-				fmt.Printf("No ACK received from %s. Initiating PING_REQ.\n", targetIP)
-				go startIndirectProbing(targetIP) // Start indirect probing if no ACK received
-			} else {
-				//fmt.Printf("Received ACK from %s.\n", targetIP)
-			}
-
-			lastAckReceivedMutex.Unlock()
-			lastPingMutex.Unlock()
+				if lastAckTime < lastPingTime {
+					fmt.Printf("No ACK received from %s, marking as failed.\n", ip)
+					removeMember(ip)
+					sendToAll(fmt.Sprintf("LEAVE,%s", ip))
+				}
+			}(targetIP)
 		}
-		time.Sleep(pingInterval) // Respect the main ping interval
+		time.Sleep(pingInterval)
 	}
 }
 
@@ -277,21 +331,6 @@ func selectRandomMember() string {
 	return eligibleMembers[randomIndex]
 }
 
-func selectKRandomMembers(excludeIP string, k int) []string {
-	selectedMembers := make(map[string]struct{})
-	for len(selectedMembers) < k {
-		randomMember := selectRandomMember()
-		if randomMember != "" && randomMember != excludeIP && randomMember != selfIP {
-			selectedMembers[randomMember] = struct{}{}
-		}
-	}
-	result := make([]string, 0, k)
-	for member := range selectedMembers {
-		result = append(result, member)
-	}
-	return result
-}
-
 func GetOutboundIP() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
@@ -302,36 +341,6 @@ func GetOutboundIP() net.IP {
 	localAddr := conn.LocalAddr().(*net.UDPAddr)
 
 	return localAddr.IP
-}
-
-func startIndirectProbing(targetIP string) {
-	indirectNodes := selectKRandomMembers(targetIP, 1)
-	ackReceived := false
-	if _, exists := membershipList[targetIP]; !exists {
-		fmt.Printf("Node %s is already marked as failed. Skipping PING-REQ.\n", targetIP)
-		return
-	}
-	for _, node := range indirectNodes {
-		fmt.Printf("Sending PING-REQ to %s to check %s\n", node, targetIP)
-		sendMessage(node, fmt.Sprintf("PING-REQ,%s,%s", targetIP, selfIP))
-	}
-
-	// Wait for an ACK from any of the indirect nodes
-	time.Sleep(pingTimeout)
-
-	// Check if any ACK was received indirectly
-	lastAckReceivedMutex.Lock()
-	if lastAckReceivedAt[targetIP] > 0 && time.Now().Unix()-lastAckReceivedAt[targetIP] <= int64(pingTimeout.Seconds()) {
-		ackReceived = true
-	}
-	lastAckReceivedMutex.Unlock()
-
-	// If no ACK was received, mark the target as failed
-	if !ackReceived {
-		fmt.Printf("No ACK received for %s, marking as failed.\n", targetIP)
-		removeMember(targetIP)                       // Remove the failed node from membership list
-		sendToAll(fmt.Sprintf("LEAVE,%s", targetIP)) // Inform others about the failure
-	}
 }
 
 // Handle incoming UDP messages
@@ -371,34 +380,6 @@ func handleMessage(msg string) {
 		senderIP := parts[1]
 		timestamp := time.Now().Unix()
 		updateLastAckReceived(senderIP, timestamp)
-
-	case "PING-REQ":
-		targetIP := parts[1]    // The node that the requester wants to ping
-		requesterIP := parts[2] // The node that originally initiated the request
-		if _, exists := membershipList[targetIP]; !exists {
-			fmt.Printf("Target %s is already marked as failed. Ignoring PING-REQ from %s.\n", targetIP, requesterIP)
-			return
-		}
-		fmt.Printf("\nReceived PING-REQ from %s to check %s\n", requesterIP, targetIP)
-
-		// Send a direct PING to the target node
-		if _, exists := membershipList[targetIP]; !exists {
-			fmt.Printf("Target %s is already marked as failed. Ignoring PING-REQ from %s.\n", targetIP, requesterIP)
-			return
-		}
-		sendMessage(targetIP, fmt.Sprintf("PING,%s", selfIP))
-
-		// Wait for an ACK with a timeout
-		time.Sleep(pingTimeout)
-
-		// Check if an ACK was received from the target node
-		lastAckReceivedMutex.Lock()
-		if lastAckReceivedAt[targetIP] > 0 && time.Now().Unix()-lastAckReceivedAt[targetIP] <= int64(pingTimeout.Seconds()) {
-			fmt.Printf("Received ACK from %s, forwarding to %s\n", targetIP, requesterIP)
-			sendMessage(requesterIP, fmt.Sprintf("ACK,%s", targetIP)) // Forward ACK to the requester
-		}
-		lastAckReceivedMutex.Unlock()
-
 	}
 	// This is where bulk of the SWIM logic will go
 }
