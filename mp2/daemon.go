@@ -18,8 +18,9 @@ import (
 var suspicionEnabled = false
 
 type Member struct {
-	IP        string
-	Timestamp int64
+	IP          string
+	Timestamp   int64
+	Incarnation int64
 }
 
 const k = 3 // Number of entries
@@ -27,12 +28,16 @@ const k = 3 // Number of entries
 const introducerIP = "172.22.94.178"
 
 var (
-	membershipList       = make(map[string]Member)
-	membershipListMutex  = &sync.RWMutex{}
-	lastPingSentAt       = make(map[string]int64)
-	lastAckReceivedAt    = make(map[string]int64)
-	lastPingMutex        = &sync.Mutex{}
-	lastAckReceivedMutex = &sync.Mutex{}
+	membershipList         = make(map[string]Member)
+	membershipListMutex    = &sync.RWMutex{}
+	lastPingSentAt         = make(map[string]int64)
+	lastAckReceivedAt      = make(map[string]int64)
+	lastPingMutex          = &sync.Mutex{}
+	lastAckReceivedMutex   = &sync.Mutex{}
+	suspectedNodes         = make(map[string]bool)
+	suspectedNodesMutex    = &sync.Mutex{}
+	incarnationNumber      = int64(0)
+	incarnationNumberMutex = &sync.Mutex{}
 )
 
 func updateLastPingSent(ip string, timestamp int64) {
@@ -165,6 +170,8 @@ func commandListener() {
 			enableSuspicion()
 		case "disable_sus":
 			disableSuspicion()
+		case "list_suspected":
+			listSuspectedNodes()
 		case "status_sus":
 			statusSuspicion()
 		default:
@@ -235,15 +242,58 @@ func disableSuspicion() {
 	sendToAll("SUS_OFF")
 }
 
+func markNodeAsSuspected(ip string) {
+	suspectedNodesMutex.Lock()
+	suspectedNodes[ip] = true
+	suspectedNodesMutex.Unlock()
+}
+
+func isNodeSuspected(ip string) bool {
+	suspectedNodesMutex.Lock()
+	defer suspectedNodesMutex.Unlock()
+	return suspectedNodes[ip]
+}
+
+func removeNodeFromSuspected(ip string) {
+	suspectedNodesMutex.Lock()
+	delete(suspectedNodes, ip)
+	suspectedNodesMutex.Unlock()
+}
+
+func disseminateSuspicion(ip string) {
+	memberIncarnation := getMemberIncarnation(ip)
+	sendToAll(fmt.Sprintf("SUSPECT,%s,%d", ip, memberIncarnation))
+}
+
+func startSuspicionTimer(ip string) {
+	go func() {
+		time.Sleep(pingTimeout)
+		if isNodeSuspected(ip) {
+			fmt.Printf("Suspicion timeout for %s, marking as failed.\n", ip)
+			removeMember(ip)
+			removeNodeFromSuspected(ip)
+			sendToAll(fmt.Sprintf("LEAVE,%s", ip))
+		}
+	}()
+}
+
+func getMemberIncarnation(ip string) int64 {
+	membershipListMutex.Lock()
+	defer membershipListMutex.Unlock()
+	if member, exists := membershipList[ip]; exists {
+		return member.Incarnation
+	}
+	return 0
+}
 func joinGroup() {
 	var join_ts = fmt.Sprintf("%d", time.Now().Unix())
 	if selfIP == introducerIP {
 		fmt.Printf("I have joined as the introducer\n")
-		addMember(introducerIP, join_ts)
+		addMember(introducerIP, join_ts, fmt.Sprintf("%d", incarnationNumber))
 		return
 	}
 	fmt.Printf("Trying to join the group\n")
-	sendMessageViaTCP(introducerIP, fmt.Sprintf("JOIN,%s,%s", selfIP, join_ts))
+	sendMessageViaTCP(introducerIP, fmt.Sprintf("JOIN,%s,%s,%d", selfIP, join_ts, getIncarnationNumber()))
 }
 
 func listSelf() {
@@ -252,8 +302,11 @@ func listSelf() {
 
 func listMembership() {
 	fmt.Println("Current Membership List:")
+	membershipListMutex.RLock()
+	defer membershipListMutex.RUnlock()
+
 	for _, member := range membershipList {
-		fmt.Printf("IP: %s, Timestamp: %d\n", member.IP, member.Timestamp)
+		fmt.Printf("IP: %s, Timestamp: %d, Incarnation: %d\n", member.IP, member.Timestamp, member.Incarnation)
 	}
 }
 
@@ -262,22 +315,56 @@ func removeMember(ip string) {
 	delete(membershipList, ip)
 	membershipListMutex.Unlock()
 }
+func incrementIncarnation() {
+	incarnationNumberMutex.Lock()
+	incarnationNumber++
+	incarnationNumberMutex.Unlock()
+}
 
-func addMember(ip string, timestamp string) {
-	converted_ts, err := strconv.ParseInt(timestamp, 10, 64)
-	if err != nil {
-		panic(err)
-	}
+func getIncarnationNumber() int64 {
+	incarnationNumberMutex.Lock()
+	defer incarnationNumberMutex.Unlock()
+	return incarnationNumber
+}
+func addMember(ip, timestamp, incarnation string) {
+	convertedTS, _ := strconv.ParseInt(timestamp, 10, 64)
+	convertedInc, _ := strconv.ParseInt(incarnation, 10, 64)
+
 	membershipListMutex.Lock()
-	membershipList[ip] = Member{ip, converted_ts}
+	member, exists := membershipList[ip]
+	if !exists || member.Incarnation < convertedInc {
+		membershipList[ip] = Member{ip, convertedTS, convertedInc}
+	}
 	membershipListMutex.Unlock()
 }
 
+func listSuspectedNodes() {
+	fmt.Println("Currently Suspected Nodes:")
+	suspectedNodesMutex.Lock()
+	defer suspectedNodesMutex.Unlock()
+	for ip := range suspectedNodes {
+		fmt.Println(ip)
+	}
+}
+
+func updateMemberIncarnation(ip string, incarnation int64) {
+	membershipListMutex.Lock()
+	if member, exists := membershipList[ip]; exists && member.Incarnation < incarnation {
+		member.Incarnation = incarnation
+		membershipList[ip] = member
+	}
+	membershipListMutex.Unlock()
+}
+func sendRefutation() {
+	sendToAll(fmt.Sprintf("REFUTE,%s,%d", selfIP, getIncarnationNumber()))
+}
+
 // Sends the entire current membership list to the specified node
+
 func sendFullMembershipList(targetIP string) {
 	for ip, member := range membershipList {
-		if ip != targetIP { // Don't send the new member's entry back to itself
-			sendMessage(targetIP, fmt.Sprintf("NEW_MEMBER,%s,%d", member.IP, member.Timestamp))
+		if ip != targetIP {
+			sendMessage(targetIP, fmt.Sprintf("NEW_MEMBER,%s,%d,%d", member.IP, member.Timestamp, member.Incarnation))
 		}
 	}
 }
@@ -301,9 +388,16 @@ func startPinging() {
 				lastAckReceivedMutex.Unlock()
 
 				if lastAckTime < lastPingTime {
-					fmt.Printf("No ACK received from %s, marking as failed.\n", ip)
-					removeMember(ip)
-					sendToAll(fmt.Sprintf("LEAVE,%s", ip))
+					if suspicionEnabled {
+						fmt.Printf("No ACK from %s, marking as suspected.\n", ip)
+						markNodeAsSuspected(ip)
+						disseminateSuspicion(ip)
+						startSuspicionTimer(ip)
+					} else {
+						fmt.Printf("No ACK from %s, marking as failed.\n", ip)
+						removeMember(ip)
+						sendToAll(fmt.Sprintf("LEAVE,%s", ip))
+					}
 				}
 			}(targetIP)
 		}
@@ -355,20 +449,15 @@ func handleMessage(msg string) {
 	case "JOIN":
 		sender_ip := parts[1]
 		ts := parts[2]
-
-		// Check if the introducer itself is in the membership list
-		if _, exists := membershipList[introducerIP]; !exists {
-			fmt.Printf("Introducer (%s) not in membership list\n", introducerIP)
-			break
-		}
-		// Now add the joining member
-		addMember(sender_ip, ts)                                  // Add sender to the membership list
-		sendToAll(fmt.Sprintf("NEW_MEMBER,%s,%s", sender_ip, ts)) // Inform others about the new member
-		sendFullMembershipList(sender_ip)                         // Send the full membership list to the new member
+		inc := parts[3]
+		addMember(sender_ip, ts, inc)
+		sendToAll(fmt.Sprintf("NEW_MEMBER,%s,%s,%s", sender_ip, ts, inc))
+		sendFullMembershipList(sender_ip)
 	case "NEW_MEMBER":
 		sender_ip := parts[1]
 		ts := parts[2]
-		addMember(sender_ip, ts)
+		inc := parts[3]
+		addMember(sender_ip, ts, inc)
 	case "LEAVE":
 		sender_ip := parts[1]
 		removeMember(sender_ip)
@@ -380,6 +469,32 @@ func handleMessage(msg string) {
 		senderIP := parts[1]
 		timestamp := time.Now().Unix()
 		updateLastAckReceived(senderIP, timestamp)
+	case "SUSPECT":
+		if !suspicionEnabled {
+			return
+		}
+		suspectedIP := parts[1]
+		suspectedIncarnation, _ := strconv.ParseInt(parts[2], 10, 64)
+		if suspectedIP != selfIP {
+			updateMemberIncarnation(suspectedIP, suspectedIncarnation)
+			markNodeAsSuspected(suspectedIP)
+		} else {
+			currentIncarnation := getIncarnationNumber()
+			if suspectedIncarnation < currentIncarnation {
+				return // Ignore outdated suspicion
+			}
+			incrementIncarnation()
+			sendRefutation()
+		}
+
+	case "REFUTE":
+		if !suspicionEnabled {
+			return
+		}
+		refutingIP := parts[1]
+		refuteIncarnation, _ := strconv.ParseInt(parts[2], 10, 64)
+		updateMemberIncarnation(refutingIP, refuteIncarnation)
+		removeNodeFromSuspected(refutingIP)
 	}
 	// This is where bulk of the SWIM logic will go
 }
