@@ -76,13 +76,25 @@ func getLastAckReceived(ip string) int64 {
 	return lastAckReceivedAt[ip]
 }
 
-const (
+var (
 	UDPport        = "5000"          // The UDP port to use for this daemon
 	TCPport        = "5001"          // The TCP port to use for this daemon
 	pingInterval   = 1 * time.Second // Interval for sending pings
 	pingTimeout    = 4 * time.Second // Time to consider a member as failed
 	suspicionTimer = 5 * time.Second
 )
+
+func updateTimerValues() {
+	if suspicionEnabled {
+		pingInterval = 1500 * time.Millisecond
+		pingTimeout = 3 * time.Second
+		suspicionTimer = 4 * time.Second
+	} else {
+		pingInterval = 1 * time.Second
+		pingTimeout = 4 * time.Second
+		suspicionTimer = 5 * time.Second // This won't be used, but set for completeness
+	}
+}
 
 var selfIP = GetOutboundIP().String()
 
@@ -270,12 +282,14 @@ func sendToAll(message string) {
 
 func enableSuspicion() {
 	suspicionEnabled = true
+	updateTimerValues()
 	fmt.Println("Suspicion mechanism enabled.")
 	sendToAll("SUS_ON")
 }
 
 func disableSuspicion() {
 	suspicionEnabled = false
+	updateTimerValues()
 	fmt.Println("Suspicion mechanism disabled.")
 	sendToAll("SUS_OFF")
 }
@@ -466,7 +480,6 @@ func startPinging() {
 							logger.Printf("No ACK from %s, marking as failed.", ip)
 							removeMember(ip)
 							sendToAll(fmt.Sprintf("LEAVE,%s", ip))
-							logger.Printf("%s failure detected at %d", ip, time.Now().Unix())
 						}
 					}
 				} else {
