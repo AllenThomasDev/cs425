@@ -254,7 +254,7 @@ func sendMessage(targetIP, message string) {
 }
 
 func sendMessageViaTCP(targetIP, message string) {
-	address := net.JoinHostPort(targetIP, "5001")
+	address := net.JoinHostPort(targetIP, TCPport)
 	conn, err := net.DialTimeout("tcp", address, 5*time.Second)
 	if err != nil {
 		// fmt.Printf("TCP connection error to %s: %v\n", targetIP, err)
