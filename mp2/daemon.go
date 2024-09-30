@@ -23,6 +23,13 @@ type Member struct {
 	Incarnation int64
 }
 
+var dropProbability float64 = 0.00 // Example: 5% drop rate
+
+// Function to determine if a message should be dropped
+func shouldDropMessage() bool {
+	return rand.Float64() < dropProbability
+}
+
 const introducerIP = "172.22.94.178"
 
 var (
@@ -36,6 +43,13 @@ var (
 	suspectedNodesMutex    = &sync.Mutex{}
 	incarnationNumber      = int64(0)
 	incarnationNumberMutex = &sync.Mutex{}
+)
+
+// Variables for logging
+var (
+	logFile   *os.File
+	logger    *log.Logger
+	startTime time.Time
 )
 
 func updateLastPingSent(ip string, timestamp int64) {
@@ -73,6 +87,17 @@ const (
 var selfIP = GetOutboundIP().String()
 
 func main() {
+	var err error
+	logFile, err = os.OpenFile("mp2.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Println("Failed to open log file:", err)
+		os.Exit(1)
+	}
+	defer logFile.Close()
+
+	logger = log.New(logFile, "", log.LstdFlags|log.Lmicroseconds)
+	startTime = time.Now()
+
 	go startUDPServer()
 	go startTCPServer()
 	go startPinging()
@@ -80,7 +105,7 @@ func main() {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
-
+	logger.Printf("%s was actually terminated at %d", selfIP, time.Now().Unix())
 	fmt.Println("Shutting down daemon...")
 }
 
@@ -103,13 +128,16 @@ func startUDPServer() {
 
 	buf := make([]byte, 1024)
 	for {
-		n, _, err := conn.ReadFromUDP(buf)
+		n, addr, err := conn.ReadFromUDP(buf)
 		if err != nil {
 			fmt.Printf("Error reading from UDP: %v\n", err)
 			continue
 		}
 
-		handleMessage(strings.TrimSpace(string(buf[:n])))
+		message := strings.TrimSpace(string(buf[:n]))
+		// Log the received message
+		logger.Printf("Received UDP message from %s: %s (size: %d bytes)", addr.String(), message, n)
+		handleMessage(message)
 	}
 }
 
@@ -140,6 +168,10 @@ func startTCPServer() {
 				return
 			}
 			message := strings.TrimSpace(string(buf[:n]))
+			// Log the received message
+			remoteAddr := c.RemoteAddr().String()
+			logger.Printf("Received TCP message from %s: %s (size: %d bytes)", remoteAddr, message, n)
+
 			handleMessage(message)
 		}(conn)
 	}
@@ -199,9 +231,13 @@ func sendMessage(targetIP, message string) {
 	}
 	defer conn.Close()
 
-	_, err = conn.Write([]byte(message))
+	messageBytes := []byte(message)
+	bytesSent, err := conn.Write(messageBytes)
 	if err != nil {
 		fmt.Printf("Error writing message to %s: %v\n", targetIP, err)
+	} else {
+		// Log the message sent
+		logger.Printf("Sent UDP message to %s: %s (size: %d bytes)", targetIP, message, bytesSent)
 	}
 }
 
@@ -214,9 +250,13 @@ func sendMessageViaTCP(targetIP, message string) {
 	}
 	defer conn.Close()
 
-	_, err = conn.Write([]byte(message))
+	messageBytes := []byte(message)
+	bytesSent, err := conn.Write(messageBytes)
 	if err != nil {
 		// fmt.Printf("Error sending TCP message to %s: %v\n", targetIP, err)
+	} else {
+		// Log the message sent
+		logger.Printf("Sent TCP message to %s: %s (size: %d bytes)", targetIP, message, bytesSent)
 	}
 }
 
@@ -230,11 +270,10 @@ func sendToAll(message string) {
 
 func enableSuspicion() {
 	suspicionEnabled = true
-	fmt.Println("suspicion enabled.")
+	fmt.Println("Suspicion mechanism enabled.")
 	sendToAll("SUS_ON")
 }
 
-// use sendMessage to tell everyone what the status of suspicion is
 func disableSuspicion() {
 	suspicionEnabled = false
 	fmt.Println("Suspicion mechanism disabled.")
@@ -245,6 +284,7 @@ func markNodeAsSuspected(ip string) {
 	suspectedNodesMutex.Lock()
 	suspectedNodes[ip] = true
 	suspectedNodesMutex.Unlock()
+	logger.Printf("Node %s marked as suspected", ip)
 }
 
 func isNodeSuspected(ip string) bool {
@@ -257,6 +297,7 @@ func removeNodeFromSuspected(ip string) {
 	suspectedNodesMutex.Lock()
 	delete(suspectedNodes, ip)
 	suspectedNodesMutex.Unlock()
+	logger.Printf("Node %s removed from suspected list", ip)
 }
 
 func disseminateSuspicion(ip string) {
@@ -265,15 +306,16 @@ func disseminateSuspicion(ip string) {
 	fmt.Printf("I suspect %s, telling everyone else\n", ip)
 	sendToAll(fmt.Sprintf("SUSPECT,%s,%d", ip, memberIncarnation))
 }
+
 func startSuspicionTimer(ip string) {
 	go func() {
 		time.Sleep(suspicionTimer)
 		if isNodeSuspected(ip) {
-			fmt.Printf("Suspicion timeout for %s, marking as failed.\n", ip)
+			logger.Printf("Suspicion timeout for %s, marking as failed.", ip)
 			removeMember(ip)
 			removeNodeFromSuspected(ip)
-			removeMember(ip)
 			sendToAll(fmt.Sprintf("LEAVE,%s", ip))
+			logger.Printf("%s failure detected at %d", ip, time.Now().Unix())
 		}
 	}()
 }
@@ -286,12 +328,12 @@ func getMemberIncarnation(ip string) int64 {
 	}
 	return 0
 }
+
 func joinGroup() {
 	var join_ts = fmt.Sprintf("%d", time.Now().Unix())
 	if selfIP == introducerIP {
 		fmt.Printf("I have joined as the introducer\n")
 		addMember(introducerIP, join_ts, fmt.Sprintf("%d", incarnationNumber))
-		return
 	} else {
 		fmt.Printf("Trying to join the group\n")
 		sendMessageViaTCP(introducerIP, fmt.Sprintf("JOIN,%s,%s,%d", selfIP, join_ts, getIncarnationNumber()))
@@ -316,7 +358,9 @@ func removeMember(ip string) {
 	membershipListMutex.Lock()
 	delete(membershipList, ip)
 	membershipListMutex.Unlock()
+	logger.Printf("Node %s removed from membership list", ip)
 }
+
 func incrementIncarnation() {
 	incarnationNumberMutex.Lock()
 	incarnationNumber++
@@ -344,6 +388,7 @@ func addMember(ip, timestamp, incarnation string) {
 		member, exists := membershipList[ip]
 		if !exists || member.Incarnation < convertedInc {
 			membershipList[ip] = Member{ip, convertedTS, convertedInc}
+			logger.Printf("Node %s added to membership list with incarnation %d", ip, convertedInc)
 		}
 	}
 }
@@ -380,8 +425,6 @@ func updateMemberIncarnation(ip string, incarnation int64) {
 func sendRefutation() {
 	sendToAll(fmt.Sprintf("REFUTE,%s,%d", selfIP, getIncarnationNumber()))
 }
-
-// Sends the entire current membership list to the specified node
 
 func sendFullMembershipList(targetIP string) {
 	for ip, member := range membershipList {
@@ -420,13 +463,14 @@ func startPinging() {
 								startSuspicionTimer(ip)
 							}
 						} else {
-							fmt.Printf("No ACK from %s, marking as failed.\n", ip)
+							logger.Printf("No ACK from %s, marking as failed.", ip)
 							removeMember(ip)
 							sendToAll(fmt.Sprintf("LEAVE,%s", ip))
+							logger.Printf("%s failure detected at %d", ip, time.Now().Unix())
 						}
 					}
 				} else {
-					// fmt.Print("gobbling up redundant removals")
+					// Node already removed
 				}
 			}(targetIP)
 		}
@@ -466,15 +510,23 @@ func GetOutboundIP() net.IP {
 	return localAddr.IP
 }
 
-// Handle incoming UDP messages
+// Handle incoming messages
 func handleMessage(msg string) {
+	if shouldDropMessage() {
+		logger.Printf("Simulated message drop on receive: %s", msg)
+		return // Ignore this message as if it was dropped
+	}
+
+	// Log the received message (already logged in receive functions)
 	parts := strings.Split(msg, ",")
-	switch command := parts[0]; command {
+	command := parts[0]
+
+	switch command {
 	case "SUS_OFF":
 		suspicionEnabled = false
 	case "SUS_ON":
 		suspicionEnabled = true
-		// Only the introducer can ingest JOIN messages
+	// Only the introducer can ingest JOIN messages
 	case "JOIN":
 		sender_ip := parts[1]
 		ts := parts[2]
@@ -496,6 +548,7 @@ func handleMessage(msg string) {
 		addMember(sender_ip, ts, inc)
 	case "LEAVE":
 		leaver_ip := parts[1]
+		logger.Printf("Received LEAVE message from %s", leaver_ip)
 		if leaver_ip == selfIP {
 			fmt.Printf("I was killed unfortunately, if only you had enabled suspicion earlier\n\n\n :(")
 			os.Exit(0)

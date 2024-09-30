@@ -29,7 +29,7 @@ copy_files() {
   local domain_name=$1
   echo "Copying files to $domain_name..."
   ssh "$USER@$domain_name" "rm -rf $REMOTE_DIR && mkdir -p $REMOTE_DIR"
-  rsync -av --exclude='.*' "$REPO_DIR/" "$USER@$domain_name:$REMOTE_DIR"
+  rsync -av --include='*daemon*' --exclude='*' "$REPO_DIR/" "$USER@$domain_name:$REMOTE_DIR"
   echo "Files copied to $domain_name"
 }
 

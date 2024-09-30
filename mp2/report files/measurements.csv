@@ -1,0 +1,11 @@
+Mode,Entries,Bandwidth Up (Bytes),Bandwidth Down (Bytes)
+PingAck,12,557.0,752.0
+PingAck,14,740.0,828.0
+PingAck,9,535.0,674.0
+PingAck,10,839.0,1040.0
+PingAck,8,757.0,1040.0
+PingAck+S,13,870.0,1380.0
+PingAck+S,11,463.0,662.0
+PingAck+S,14,748.0,1040.0
+PingAck+S,10,718.0,1040.0
+PingAck+S,11,530.0,888.0
