@@ -387,6 +387,13 @@ func getIncarnationNumber() int64 {
 	return incarnationNumber
 }
 
+func checkMembershipList(ip string) (Member, bool) {
+	membershipListMutex.RLock()
+	defer membershipListMutex.RUnlock()
+	member, exists := membershipList[ip]
+	return member, exists
+}
+
 func addMember(ip, timestamp, incarnation string) {
 	convertedTS, _ := strconv.ParseInt(timestamp, 10, 64)
 	convertedInc, _ := strconv.ParseInt(incarnation, 10, 64)
@@ -544,6 +551,11 @@ func handleMessage(msg string) {
 		sender_ip := parts[1]
 		ts := parts[2]
 		inc := parts[3]
+		_, exists := checkMembershipList(selfIP)
+		if !exists {
+			fmt.Print("someone tried to join the group but i am not here")
+			return
+		}
 		addMember(sender_ip, ts, inc)
 		sendToAll(fmt.Sprintf("NEW_MEMBER,%s,%s,%s", sender_ip, ts, inc))
 		sendFullMembershipList(sender_ip)
