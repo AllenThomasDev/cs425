@@ -77,7 +77,6 @@ func getLastAckReceived(ip string) int64 {
 }
 
 var (
-	UDPport        = "5000"          // The UDP port to use for this daemon
 	TCPport        = "5001"          // The TCP port to use for this daemon
 	pingInterval   = 1 * time.Second // Interval for sending pings
 	pingTimeout    = 4 * time.Second // Time to consider a member as failed
@@ -110,7 +109,6 @@ func main() {
 	logger = log.New(logFile, "", log.LstdFlags|log.Lmicroseconds)
 	startTime = time.Now()
 
-	go startUDPServer()
 	go startTCPServer()
 	go startPinging()
 	go commandListener()
@@ -119,38 +117,6 @@ func main() {
 	<-sigs
 	logger.Printf("%s was actually terminated at %d", selfIP, time.Now().Unix())
 	fmt.Println("Shutting down daemon...")
-}
-
-// Start the UDP server to listen for incoming messages from other daemons
-func startUDPServer() {
-	addr, err := net.ResolveUDPAddr("udp", ":"+UDPport)
-	if err != nil {
-		fmt.Printf("Error resolving address: %v\n", err)
-		return
-	}
-
-	conn, err := net.ListenUDP("udp", addr)
-	if err != nil {
-		fmt.Printf("Error starting UDP server: %v\n", err)
-		return
-	}
-	defer conn.Close()
-
-	fmt.Printf("Daemon is listening on %s\n", UDPport)
-
-	buf := make([]byte, 1024)
-	for {
-		n, addr, err := conn.ReadFromUDP(buf)
-		if err != nil {
-			fmt.Printf("Error reading from UDP: %v\n", err)
-			continue
-		}
-
-		message := strings.TrimSpace(string(buf[:n]))
-		// Log the received message
-		logger.Printf("Received UDP message from %s: %s (size: %d bytes)", addr.String(), message, n)
-		handleMessage(message)
-	}
 }
 
 func startTCPServer() {
@@ -233,24 +199,6 @@ func leaveGroup() {
 	// Clear the membership list
 	membershipList = make(map[string]Member)
 	fmt.Println("Left the group.")
-}
-
-func sendMessage(targetIP, message string) {
-	conn, err := net.Dial("udp", targetIP+":"+UDPport)
-	if err != nil {
-		fmt.Printf("Error sending message to %s: %v\n", targetIP, err)
-		return
-	}
-	defer conn.Close()
-
-	messageBytes := []byte(message)
-	bytesSent, err := conn.Write(messageBytes)
-	if err != nil {
-		fmt.Printf("Error writing message to %s: %v\n", targetIP, err)
-	} else {
-		// Log the message sent
-		logger.Printf("Sent UDP message to %s: %s (size: %d bytes)", targetIP, message, bytesSent)
-	}
 }
 
 func sendMessageViaTCP(targetIP, message string) {
@@ -450,7 +398,7 @@ func sendRefutation() {
 func sendFullMembershipList(targetIP string) {
 	for ip, member := range membershipList {
 		if ip != targetIP {
-			sendMessage(targetIP, fmt.Sprintf("NEW_MEMBER,%s,%d,%d", member.IP, member.Timestamp, member.Incarnation))
+			sendMessageViaTCP(targetIP, fmt.Sprintf("NEW_MEMBER,%s,%d,%d", member.IP, member.Timestamp, member.Incarnation))
 		}
 	}
 }
@@ -500,7 +448,7 @@ func startPinging() {
 
 func ping(targetIP string) {
 	var ping_ts = time.Now().Unix()
-	sendMessage(targetIP, fmt.Sprintf("PING,%s,%d", selfIP, ping_ts))
+	sendMessageViaTCP(targetIP, fmt.Sprintf("PING,%s,%d", selfIP, ping_ts))
 	updateLastPingSent(targetIP, ping_ts)
 }
 
@@ -582,7 +530,7 @@ func handleMessage(msg string) {
 	case "PING":
 		senderIP := parts[1]
 		// Send ACK back to the sender
-		sendMessage(senderIP, fmt.Sprintf("ACK,%s", selfIP))
+		sendMessageViaTCP(senderIP, fmt.Sprintf("ACK,%s", selfIP))
 	case "ACK":
 		senderIP := parts[1]
 		timestamp := time.Now().Unix()
@@ -615,5 +563,4 @@ func handleMessage(msg string) {
 		updateMemberIncarnation(refutingIP, refuteIncarnation)
 		removeNodeFromSuspected(refutingIP)
 	}
-	// This is where bulk of the SWIM logic will go
 }
