@@ -19,7 +19,7 @@ type Member struct {
 	Incarnation int64
 }
 
-const introducerIP = "172.22.94.178"
+const introducerIP = "172.22.94.188"
 
 var (
 	membershipList         = make(map[string]Member)
@@ -74,7 +74,7 @@ var (
 
 var selfIP = GetOutboundIP().String()
 
-func main() {
+func daemonMain() {
 	var err error
 	logFile, err = os.OpenFile("mp2.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
@@ -86,7 +86,8 @@ func main() {
 	startTime = time.Now()
 	go startTCPServer()
 	go startPinging()
-	go commandListener()
+	joinGroup()
+	// go commandListener()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
@@ -230,6 +231,7 @@ func addMember(ip, timestamp, incarnation string) {
 		member, exists := membershipList[ip]
 		if !exists || member.Incarnation < convertedInc {
 			membershipList[ip] = Member{ip, convertedTS, convertedInc}
+			updateRoutingTable(ipToVM(ip))
 			logger.Printf("Node %s added to membership list with incarnation %d", ip, convertedInc)
 		}
 	}
