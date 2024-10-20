@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
 	"strings"
 	"time"
@@ -112,8 +111,12 @@ func ping(targetIP string) {
 	updateLastPingSent(targetIP, ping_ts)
 }
 
+var i = 0 // index to iterate through other members in network (allows us to bound max detection time)
 func selectRandomMember() string {
 	var eligibleMembers []string
+	
+	membershipListMutex.RLock()
+	defer membershipListMutex.RUnlock()
 	for ip := range membershipList {
 		if ip != selfIP { // Exclude selfIP
 			eligibleMembers = append(eligibleMembers, ip)
@@ -122,8 +125,9 @@ func selectRandomMember() string {
 	if len(eligibleMembers) == 0 {
 		return ""
 	}
-	randomIndex := rand.Intn(len(eligibleMembers))
-	return eligibleMembers[randomIndex]
+
+	i = (i + 1) % len(eligibleMembers)
+	return eligibleMembers[i]
 }
 
 func GetOutboundIP() net.IP {
