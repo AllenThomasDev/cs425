@@ -19,8 +19,6 @@ type Member struct {
 	Incarnation int64
 }
 
-const introducerIP = "172.22.94.188"
-
 var (
 	membershipList         = make(map[string]Member)
 	membershipListMutex    = &sync.RWMutex{}

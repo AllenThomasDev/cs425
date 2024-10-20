@@ -9,42 +9,13 @@ import (
 	"time"
 )
 
-var (
-	MATT_VMS = 1				// set to 0 to use 54XX VMs
-	MACHINES_IN_NETWORK = 10
-	CREATE_PORT = 5001
-	
-	ipList []string				// initialized based on MATT_VMS
-	currentVM int				// also initialized based on MATT_VMS
-
-	currentIP = GetOutboundIP().String()
-
-	
-	// since our network is just our machine at first, our routing table is just us to start
-	routingTable = map[int]string {
-		0:	currentIP,
-		1:	currentIP,
-		2:	currentIP,
-		3:	currentIP,
-		4:	currentIP,
-		5:	currentIP,
-		6:	currentIP,
-		7:	currentIP,
-		8:	currentIP,
-		9:	currentIP,
-	}
-
-	// list of all nodes in network clockwise from current node
-	successors = make([]int, 0)
-)
-
 func create(args []string) {
 	if len(args) != 2 {
 		fmt.Println("Usage: create localfilename HyDFSfilename")
 	} else {
 		localFile, err := os.OpenFile(args[0], os.O_RDONLY, 0644)
 		if err != nil {
-			fmt.Printf("Error opening local file: %v\n")
+			fmt.Printf("Error opening local file\n")
 		}
 
 		conn, err := net.DialTimeout("tcp", vmToIP(hash(args[0])), 5*time.Second)
@@ -66,7 +37,7 @@ func create(args []string) {
 		}
 
 		message := make([]byte, 0)
-		message = append(message, []byte(args[0] + ",")...)
+		message = append(message, []byte(args[0]+",")...)
 		message = append(message, fileBytes...)
 
 		bytesSent, err := conn.Write(message)
@@ -80,7 +51,7 @@ func create(args []string) {
 
 func listenCreate() {
 	// open connection on CREATE_PORT
-	listener, err := net.Listen("tcp", ":" + string(CREATE_PORT))
+	listener, err := net.Listen("tcp", ":"+string(CREATE_PORT))
 	if err != nil {
 		fmt.Printf("Error opening CREATE_PORT: %v\n", err)
 		return
@@ -97,7 +68,7 @@ func listenCreate() {
 			var newFile *os.File
 			filename := ""
 			buf := make([]byte, 1024)
-			for ;; {
+			for {
 				n, err := c.Read(buf)
 				if err != nil {
 					// read until end of sent data
@@ -107,7 +78,7 @@ func listenCreate() {
 						logger.Printf("Error reading from connection: %v\n", err)
 					}
 				}
-				
+
 				// if we haven't found a filename yet, extract it from the sent data
 				if filename == "" {
 					// split into two substrings
@@ -116,7 +87,7 @@ func listenCreate() {
 						logger.Printf("Error: data received does not contain filename/file data")
 						return
 					}
-					
+
 					newFile, err = os.OpenFile(parts[0], os.O_CREATE|os.O_WRONLY, 0644)
 					defer newFile.Close()
 					if err != nil {
@@ -143,14 +114,14 @@ func removeFromHyDFS(ip string) {
 }
 
 func addToSuccessors(hash int) {
-	found, insertIndex := searchSuccessors(0, len(successors) - 1, hash);
+	found, insertIndex := searchSuccessors(0, len(successors)-1, hash)
 	if !found {
-		if insertIndex > len(successors) - 1 {
-			successors = append(successors, hash)	
+		if insertIndex > len(successors)-1 {
+			successors = append(successors, hash)
 		} else {
-			lastElement := successors[len(successors) - 1]
-			if insertIndex != len(successors) - 1 {
-				copy(successors[insertIndex + 1:], successors[insertIndex:])
+			lastElement := successors[len(successors)-1]
+			if insertIndex != len(successors)-1 {
+				copy(successors[insertIndex+1:], successors[insertIndex:])
 			}
 			successors = append(successors, lastElement)
 			successors[insertIndex] = hash
@@ -160,7 +131,7 @@ func addToSuccessors(hash int) {
 }
 
 func removeFromSuccessors(hash int) {
-	found, index := searchSuccessors(0, len(successors) - 1, hash)
+	found, index := searchSuccessors(0, len(successors)-1, hash)
 	if found {
 		successors = append(successors[0:index], successors[index+1:]...)
 	}
@@ -175,28 +146,28 @@ func addToRoutingTable(hash int) {
 		// change entries in routing table between new node and previous node
 		nextLowest := mod((hash - 1), MACHINES_IN_NETWORK)
 
-		for ;; {
+		for {
 			// fmt.Printf("%d\n", nextLowest)
 			if nextLowest == hash || routingTable[nextLowest] == vmToIP(nextLowest) {
 				break
 			}
 			routingTable[nextLowest] = vmToIP(hash)
 
-			nextLowest = mod((nextLowest - 1) , MACHINES_IN_NETWORK)
+			nextLowest = mod((nextLowest - 1), MACHINES_IN_NETWORK)
 		}
 	}
 	printRoutingTable()
 }
 
 func removeFromRoutingTable(hash int) {
-	if (routingTable[hash] == vmToIP(hash)) {
+	if routingTable[hash] == vmToIP(hash) {
 
-		nextIP := routingTable[(hash + 1) % MACHINES_IN_NETWORK]
+		nextIP := routingTable[(hash+1)%MACHINES_IN_NETWORK]
 		routingTable[hash] = nextIP
 
 		nextLowest := mod((hash - 1), MACHINES_IN_NETWORK)
 
-		for ;; {
+		for {
 			if routingTable[nextLowest] == vmToIP(nextLowest) || nextLowest == hash {
 				break
 			}
@@ -212,15 +183,15 @@ func searchSuccessors(low int, high int, hash int) (bool, int) {
 		return false, low
 	}
 
-	med := (high + low)/2
+	med := (high + low) / 2
 	if successors[med] == hash {
 		return true, med
 	}
 
-	if (clockwiseDistance(currentVM, successors[med]) < clockwiseDistance(currentVM, hash)) {
-		return searchSuccessors(med + 1, high, hash);
+	if clockwiseDistance(currentVM, successors[med]) < clockwiseDistance(currentVM, hash) {
+		return searchSuccessors(med+1, high, hash)
 	} else {
-		return searchSuccessors(low, med - 1, hash);
+		return searchSuccessors(low, med-1, hash)
 	}
 }
 
@@ -232,9 +203,9 @@ func clockwiseDistance(start int, cw int) int {
 	}
 }
 
-func printRoutingTable () {
+func printRoutingTable() {
 	for k, v := range routingTable {
-		fmt.Printf("Hash %d maps to VM %d\n", k, ipToVM(v));
+		fmt.Printf("Hash %d maps to VM %d\n", k, ipToVM(v))
 	}
 }
 
@@ -247,42 +218,11 @@ func printSuccessors() {
 
 // go mod operator allows negative values
 func mod(a int, b int) int {
-	return (a % b + b) % b
+	return (a%b + b) % b
 }
 
-func initIPList () {
-	if MATT_VMS == 1 {
-		ipList = []string {
-			"172.22.94.188",
-			"172.22.156.189",
-			"172.22.158.189",
-			"172.22.94.189",
-			"172.22.156.190",
-			"172.22.158.190",
-			"172.22.94.190",
-			"172.22.156.191",
-			"172.22.158.191",
-			"172.22.94.191",
-		}
-	} else {
-		ipList = []string {
-			"172.22.94.178",
-			"172.22.156.179",
-			"172.22.158.179",
-			"172.22.94.179",
-			"172.22.156.180",
-			"172.22.158.180",
-			"172.22.94.180",
-			"172.22.156.181",
-			"172.22.158.181",
-			"172.22.94.181",
-		}
-	} 
-	currentVM = ipToVM(currentIP)
-}
-
-func ipToVM (ip string) int {
-	switch (ip) {
+func ipToVM(ip string) int {
+	switch ip {
 	case ipList[0]:
 		return 0
 	case ipList[1]:
@@ -308,8 +248,8 @@ func ipToVM (ip string) int {
 	}
 }
 
-func vmToIP (vm int) string {
-	switch (vm) {
+func vmToIP(vm int) string {
+	switch vm {
 	case 0:
 		return ipList[0]
 	case 1:
