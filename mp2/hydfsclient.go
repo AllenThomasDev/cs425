@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func userInput() {
+func commandListener() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("Enter command: ")
@@ -21,10 +21,24 @@ func userInput() {
 			fmt.Println("No command entered")
 			continue
 		}
-		
-		command := args[0]
-		args = args[1:]
-		switch command {
+		input = strings.TrimSpace(input)
+		switch input {
+		case "list_mem":
+			listMembership()
+		case "list_self":
+			listSelf()
+		case "join":
+			joinGroup()
+		case "leave":
+			leaveGroup()
+		case "enable_sus":
+			enableSuspicion()
+		case "disable_sus":
+			disableSuspicion()
+		case "list_sus":
+			listSuspectedNodes()
+		case "status_sus":
+			statusSuspicion()
 		case "create":
 			create(args)
 		default:
