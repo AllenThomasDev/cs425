@@ -14,15 +14,16 @@ func commandListener() {
 		input, err := reader.ReadString('\n')
 		if err != nil {
 			fmt.Println("Error reading input: ", err)
+			continue
 		}
-
 		args := strings.Fields(input)
 		if len(args) < 1 {
 			fmt.Println("No command entered")
 			continue
 		}
-		input = strings.TrimSpace(input)
-		switch input {
+		command := args[0]
+		args = args[1:] // Extract the arguments after the command
+		switch command {
 		case "list_mem":
 			listMembership()
 		case "list_self":
@@ -40,7 +41,17 @@ func commandListener() {
 		case "status_sus":
 			statusSuspicion()
 		case "create":
-			create(args)
+			if len(args) < 2 {
+				fmt.Println("Error: Insufficient arguments. Usage: create localfilename HyDFSfilename")
+				continue
+			}
+			localFilename := args[0]
+			hyDFSFilename := args[1]
+			if _, err := os.Stat(localFilename); os.IsNotExist(err) {
+				fmt.Printf("Error: Local file %s does not exist\n", localFilename)
+				continue
+			}
+			create([]string{localFilename, hyDFSFilename})
 		case "list_successors":
 			printSuccessors()
 		case "routing_table":
