@@ -41,6 +41,10 @@ func commandListener() {
 			statusSuspicion()
 		case "create":
 			create(args)
+		case "list_successors":
+			printSuccessors()
+		case "routing_table":
+			printRoutingTable()
 		default:
 			fmt.Println("Unknown command")
 		}
