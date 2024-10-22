@@ -24,6 +24,46 @@ func checkFileOpens(localFileName string) bool {
 	return true
 }
 
+func writeHyDFSFile(hyDFSFileName string, fileContent string) error {
+	// Open the file with O_CREATE and O_EXCL flags to ensure it fails if the file already exists
+	file, err := os.OpenFile(hyDFSFileName, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
+	if err != nil {
+		if os.IsExist(err) {
+			return fmt.Errorf("file %s already exists", hyDFSFileName)
+		}
+		return fmt.Errorf("error creating file %s: %v", hyDFSFileName, err)
+	}
+	defer file.Close()
+
+	// Write the file content
+	_, err = file.WriteString(fileContent)
+	if err != nil {
+		return fmt.Errorf("error writing to file %s: %v", hyDFSFileName, err)
+	}
+
+	return nil
+}
+
+func appendToHyDFSFile(hyDFSFileName string, fileContent string) error {
+	// Open the file with O_APPEND and O_WRONLY flags, ensuring it fails if the file does not exist
+	file, err := os.OpenFile(hyDFSFileName, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("file %s does not exist", hyDFSFileName)
+		}
+		return fmt.Errorf("error opening file %s: %v", hyDFSFileName, err)
+	}
+	defer file.Close()
+
+	// Append the file content
+	_, err = file.WriteString(fileContent)
+	if err != nil {
+		return fmt.Errorf("error appending to file %s: %v", hyDFSFileName, err)
+	}
+
+	return nil
+}
+
 func readFileToString(localFileName string, hyDFSFileName string) (string, error) {
 	localFile, err := os.Open(localFileName)
 	if err != nil {

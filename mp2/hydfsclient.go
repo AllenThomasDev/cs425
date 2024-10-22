@@ -40,6 +40,16 @@ func commandListener() {
 			listSuspectedNodes()
 		case "status_sus":
 			statusSuspicion()
+		case "append":
+			if len(args) < 2 {
+				fmt.Println("Error: Insufficient arguments. Usage: append localfilename HyDFSfilename")
+				continue
+			}
+			localFilename := args[0]
+			hyDFSFilename := args[1]
+			fileContent := readFileToMessageBuffer(localFilename, hyDFSFilename)
+			// remember tha tfile content is in the format "hyDFSFileName, fileContent"
+			sendMessageViaTCP(introducerIP, fmt.Sprintf("APPEND,%s", fileContent))
 		case "create":
 			if len(args) < 2 {
 				fmt.Println("Error: Insufficient arguments. Usage: create localfilename HyDFSfilename")
@@ -48,8 +58,9 @@ func commandListener() {
 			localFilename := args[0]
 			hyDFSFilename := args[1]
 			fileContent := readFileToMessageBuffer(localFilename, hyDFSFilename)
+			// remember tha tfile content is in the format "hyDFSFileName, fileContent"
 			//@TODO pick targets here
-			sendMessageViaTCP(introducerIP, fmt.Sprintf("%s,%s", "CREATE", fileContent))
+			sendMessageViaTCP(introducerIP, fmt.Sprintf("CREATE,%s", fileContent))
 		case "list_successors":
 			printSuccessors()
 		case "routing_table":

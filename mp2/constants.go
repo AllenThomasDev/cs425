@@ -3,7 +3,6 @@ package main
 var (
 	MATT_VMS            = 0 // set to 0 to use 54XX VMs
 	MACHINES_IN_NETWORK = 10
-	IO_PORT             = "5002"
 	introducerIP        = ""
 	ipList              []string // initialized based on MATT_VMS
 	currentVM           int      // also initialized based on MATT_VMS

@@ -86,9 +86,15 @@ func handleMessage(msg string) {
 		removeNodeFromSuspected(refutingIP)
 	case "APPEND":
 		fmt.Println("Received APPEND message")
+		hyDFSFileName := parts[1]
+		fileContent := parts[2]
+		appendToHyDFSFile(hyDFSFileName, fileContent)
 	case "READ":
 		fmt.Println("Received READ message")
 	case "CREATE":
-		fmt.Println("Received CREATE message")
+		hyDFSFileName := parts[1]
+		fileContent := parts[2]
+		writeHyDFSFile(hyDFSFileName, fileContent)
+		fmt.Printf("Received CREATE message for %s and %s", hyDFSFileName, fileContent)
 	}
 }
