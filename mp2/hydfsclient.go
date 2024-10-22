@@ -47,9 +47,8 @@ func commandListener() {
 			}
 			localFilename := args[0]
 			hyDFSFilename := args[1]
-			fileContent := readFileToMessageBuffer(localFilename, hyDFSFilename)
-			// remember tha tfile content is in the format "hyDFSFileName, fileContent"
-			sendMessageViaTCP(introducerIP, fmt.Sprintf("APPEND,%s", fileContent))
+			fileContent := readFileToMessageBuffer(localFilename)
+			sendMessageViaTCP(introducerIP, fmt.Sprintf("APPEND,%s,%s", hyDFSFilename, fileContent))
 		case "create":
 			if len(args) < 2 {
 				fmt.Println("Error: Insufficient arguments. Usage: create localfilename HyDFSfilename")
@@ -57,10 +56,22 @@ func commandListener() {
 			}
 			localFilename := args[0]
 			hyDFSFilename := args[1]
-			fileContent := readFileToMessageBuffer(localFilename, hyDFSFilename)
+			fileContent := readFileToMessageBuffer(localFilename)
 			// remember tha tfile content is in the format "hyDFSFileName, fileContent"
 			//@TODO pick targets here
-			sendMessageViaTCP(introducerIP, fmt.Sprintf("CREATE,%s", fileContent))
+			//targetIPs := []
+			//for ips in targetIPs {
+			//  sendMessageViaTCP(ip, fmt.Sprintf("CREATE,%s", fileContent))
+			sendMessageViaTCP(introducerIP, fmt.Sprintf("CREATE,%s,%s", hyDFSFilename, fileContent))
+		case "get":
+			if len(args) < 2 {
+				fmt.Println("Error: Insufficient arguments. Usage: get  HyDFSfilename localfilename")
+				continue
+			}
+			hyDFSFilename := args[0]
+			localFilename := args[1]
+			sendMessageViaTCP(introducerIP, fmt.Sprintf("GET,%s,%s,%s", hyDFSFilename, localFilename, selfIP))
+			fmt.Println("I sent a READ message")
 		case "list_successors":
 			printSuccessors()
 		case "routing_table":

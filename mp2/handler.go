@@ -88,13 +88,29 @@ func handleMessage(msg string) {
 		fmt.Println("Received APPEND message")
 		hyDFSFileName := parts[1]
 		fileContent := parts[2]
-		appendToHyDFSFile(hyDFSFileName, fileContent)
-	case "READ":
-		fmt.Println("Received READ message")
+		appendFile(hyDFSFileName, fileContent)
+	case "GET":
+		hyDFSFileName := parts[1] // The file to be fetched from HyDFS
+		localFileName := parts[2] // The local file where content will be saved
+		senderIP := parts[3]      // IP of the sender requesting the file
+		fmt.Printf("Received GET message from %s to fetch %s", senderIP, hyDFSFileName)
+		fileContent := readFileToMessageBuffer(hyDFSFileName)
+		response := fmt.Sprintf("FILE_CONTENT,%s,%s,%s", hyDFSFileName, fileContent, localFileName)
+		sendMessageViaTCP(senderIP, response)
+
+		fmt.Printf("\nSent file content to %s", senderIP)
+
+	case "FILE_CONTENT":
+		hyDFSFileName := parts[1] // Extract the HyDFS file name
+		fileContent := parts[2]   // Extract the file content
+		localFileName := parts[3] // Extract the local file name to save content
+		fmt.Printf("Received FILE_CONTENT for %s\n saving to %s", hyDFSFileName, localFileName)
+		writeFile(localFileName, fileContent)
+		fmt.Printf("File content saved successfully to %s", localFileName)
 	case "CREATE":
 		hyDFSFileName := parts[1]
 		fileContent := parts[2]
-		writeHyDFSFile(hyDFSFileName, fileContent)
+		writeFile(hyDFSFileName, fileContent)
 		fmt.Printf("Received CREATE message for %s and %s", hyDFSFileName, fileContent)
 	}
 }
