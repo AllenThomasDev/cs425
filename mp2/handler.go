@@ -84,5 +84,11 @@ func handleMessage(msg string) {
 		refuteIncarnation, _ := strconv.ParseInt(parts[2], 10, 64)
 		updateMemberIncarnation(refutingIP, refuteIncarnation)
 		removeNodeFromSuspected(refutingIP)
+	case "APPEND":
+		fmt.Println("Received APPEND message")
+	case "READ":
+		fmt.Println("Received READ message")
+	case "CREATE":
+		fmt.Println("Received CREATE message")
 	}
 }

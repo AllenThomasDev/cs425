@@ -47,11 +47,9 @@ func commandListener() {
 			}
 			localFilename := args[0]
 			hyDFSFilename := args[1]
-			if _, err := os.Stat(localFilename); os.IsNotExist(err) {
-				fmt.Printf("Error: Local file %s does not exist\n", localFilename)
-				continue
-			}
-			create([]string{localFilename, hyDFSFilename})
+			fileContent := readFileToMessageBuffer(localFilename, hyDFSFilename)
+			//@TODO pick targets here
+			sendMessageViaTCP(introducerIP, fmt.Sprintf("%s,%s", "CREATE", fileContent))
 		case "list_successors":
 			printSuccessors()
 		case "routing_table":
