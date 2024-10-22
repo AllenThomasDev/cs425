@@ -18,22 +18,24 @@ func create(args []string) {
 			fmt.Printf("Error opening local file\n")
 		}
 
-		conn, err := net.DialTimeout("tcp", vmToIP(hash(args[0])), 5*time.Second)
+		// @TODO right now all writes go to introducer, this is just for testing, wwill fix this
+		address := net.JoinHostPort(introducerIP, IO_PORT)
+		conn, err := net.DialTimeout("tcp", address, 5*time.Second)
 		if err != nil {
-			logger.Printf("Error connecting to host %d: %v\n", hash(args[0]), err)
+			fmt.Printf("Error connecting to host %d: %v\n", hash(args[0]), err)
 			return
 		}
 		defer conn.Close()
 
 		fStats, err := localFile.Stat()
 		if err != nil {
-			logger.Printf("Error retrieving size of file: %v\n", err)
+			fmt.Printf("Error retrieving size of file: %v\n", err)
 		}
 
 		fileBytes := make([]byte, fStats.Size())
 		readLen, err := localFile.Read(fileBytes)
 		if err != nil || int64(readLen) != fStats.Size() {
-			logger.Printf("Error reading file into buffer: %v\n", err)
+			fmt.Printf("Error reading file into buffer: %v\n", err)
 		}
 
 		message := make([]byte, 0)
@@ -42,22 +44,21 @@ func create(args []string) {
 
 		bytesSent, err := conn.Write(message)
 		if err != nil {
-			logger.Printf("Error sending file to host %d: %v\n", hash(args[0]), err)
+			fmt.Printf("Error sending file to host %d: %v\n", hash(args[0]), err)
 		} else {
-			logger.Printf("Sent new file to %s: %s (message size: %d bytes)", vmToIP(hash(args[0])), message, bytesSent)
+			fmt.Printf("Sent new file to %s: %s (message size: %d bytes)", vmToIP(hash(args[0])), message, bytesSent)
 		}
 	}
 }
 
-func listenCreate() {
+func listenFileIo() {
 	// open connection on CREATE_PORT
-	listener, err := net.Listen("tcp", ":"+string(CREATE_PORT))
+	listener, err := net.Listen("tcp", ":"+string(IO_PORT))
 	if err != nil {
-		fmt.Printf("Error opening CREATE_PORT: %v\n", err)
+		fmt.Printf("Error opening IO Port: %v\n", err)
 		return
 	}
 	defer listener.Close()
-
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
@@ -75,23 +76,21 @@ func listenCreate() {
 					if err == io.EOF {
 						break
 					} else {
-						logger.Printf("Error reading from connection: %v\n", err)
+						fmt.Printf("Error reading from connection: %v\n", err)
 					}
 				}
-
 				// if we haven't found a filename yet, extract it from the sent data
 				if filename == "" {
 					// split into two substrings
 					parts := strings.SplitAfterN(string(buf[:n]), ",", 2)
 					if len(parts) < 2 {
-						logger.Printf("Error: data received does not contain filename/file data")
+						fmt.Printf("Error: data received does not contain filename/file data")
 						return
 					}
-
 					newFile, err = os.OpenFile(parts[0], os.O_CREATE|os.O_WRONLY, 0644)
 					defer newFile.Close()
 					if err != nil {
-						logger.Printf("Error opening file %s: %v\n", parts[0], err)
+						fmt.Printf("Error opening file %s: %v\n", parts[0], err)
 					}
 					newFile.Write([]byte(parts[1]))
 				} else {
@@ -100,7 +99,6 @@ func listenCreate() {
 			}
 		}(conn)
 	}
-	// write to successors
 }
 
 func addToHyDFS(ip string) {

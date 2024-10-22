@@ -83,9 +83,10 @@ func daemonMain() {
 	logger = log.New(logFile, "", log.LstdFlags|log.Lmicroseconds)
 	startTime = time.Now()
 	go startTCPServer()
+	go listenFileIo()
 	go startPinging()
 	joinGroup()
-	// go commandListener()
+	go commandListener()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
