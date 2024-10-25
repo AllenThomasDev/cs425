@@ -19,6 +19,8 @@ type Member struct {
 	Incarnation int64
 }
 
+// what happens if we have to create a big file? subsequent appends can only happen AFTER the create
+
 var (
 	membershipList         = make(map[string]Member)
 	membershipListMutex    = &sync.RWMutex{}
@@ -66,11 +68,9 @@ func getLastAckReceived(ip string) int64 {
 var (
 	TCPport        = "5001"          // The TCP port to use for this daemon
 	pingInterval   = 1 * time.Second // Interval for sending pings
-	pingTimeout    = 4 * time.Second // Time to consider a member as failed
+	pingTimeout    = 2 * time.Second // Time to consider a member as failed
 	suspicionTimer = 5 * time.Second
 )
-
-var selfIP = GetOutboundIP().String()
 
 func daemonMain() {
 	var err error
@@ -170,10 +170,14 @@ func joinGroup() {
 	var join_ts = fmt.Sprintf("%d", time.Now().Unix())
 	if selfIP == introducerIP {
 		fmt.Printf("I have joined as the introducer\n")
-		addMember(introducerIP, join_ts, fmt.Sprintf("%d", incarnationNumber))
+		addMember(introducerIP, join_ts, fmt.Sprintf("%d", incarnationNumber), NEW_MEMBER)
 	} else {
 		fmt.Printf("Trying to join the group\n")
-		sendMessageViaTCP(introducerIP, fmt.Sprintf("JOIN,%s,%s,%d", selfIP, join_ts, getIncarnationNumber()))
+		err := sendMessageViaTCP(introducerIP, fmt.Sprintf("JOIN,%s,%s,%d", selfIP, join_ts, getIncarnationNumber()))
+		if err != nil {
+			fmt.Printf("Error joining group: %v\n", err)
+			os.Exit(1)
+		}
 	}
 }
 
@@ -217,7 +221,7 @@ func checkMembershipList(ip string) (Member, bool) {
 	return member, exists
 }
 
-func addMember(ip, timestamp, incarnation string) {
+func addMember(ip, timestamp, incarnation string, memType member_type_t) {
 	convertedTS, _ := strconv.ParseInt(timestamp, 10, 64)
 	convertedInc, _ := strconv.ParseInt(incarnation, 10, 64)
 	membershipListMutex.Lock()
@@ -230,7 +234,7 @@ func addMember(ip, timestamp, incarnation string) {
 		member, exists := membershipList[ip]
 		if !exists || member.Incarnation < convertedInc {
 			membershipList[ip] = Member{ip, convertedTS, convertedInc}
-			addToHyDFS(ip)
+			addToHyDFS(ip, memType)
 			logger.Printf("Node %s added to membership list with incarnation %d", ip, convertedInc)
 		}
 	}
@@ -271,7 +275,7 @@ func sendRefutation() {
 func sendFullMembershipList(targetIP string) {
 	for ip, member := range membershipList {
 		if ip != targetIP {
-			sendMessageViaTCP(targetIP, fmt.Sprintf("NEW_MEMBER,%s,%d,%d", member.IP, member.Timestamp, member.Incarnation))
+			sendMessageViaTCP(targetIP, fmt.Sprintf("OLD_MEMBER,%s,%d,%d", member.IP, member.Timestamp, member.Incarnation))
 		}
 	}
 }

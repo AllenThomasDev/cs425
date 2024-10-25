@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	initIPList()
+	initHyDFS()
 	go daemonMain()
 	go commandListener()
 	sigs := make(chan os.Signal, 1)

@@ -38,20 +38,23 @@ func startTCPServer() {
 	}
 }
 
-func sendMessageViaTCP(targetIP, message string) {
+func sendMessageViaTCP(targetIP, message string) error {
 	address := net.JoinHostPort(targetIP, TCPport)
 	conn, err := net.DialTimeout("tcp", address, 5*time.Second)
 	if err != nil {
-		return
+		fmt.Printf("Error on connection to %s: %v\n", targetIP, err)
+		return err
 	}
 	defer conn.Close()
 
 	messageBytes := []byte(message)
 	bytesSent, err := conn.Write(messageBytes)
 	if err != nil {
+		fmt.Printf("Error on write to %s: %v\n", targetIP, err)
 	} else {
 		logger.Printf("Sent TCP message to %s: %s (size: %d bytes)", targetIP, message, bytesSent)
 	}
+	return err
 }
 
 func sendToAll(message string) {
