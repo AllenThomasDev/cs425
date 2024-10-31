@@ -199,6 +199,27 @@ func commandListener() {
 			printSuccessors()
 		case "routing_table":
 			printRoutingTable()
+		case "list_local":
+			files, err := os.ReadDir("./")
+			if err != nil {
+				fmt.Printf("Error reading local directory: %v\n", err)
+			} else {
+				fmt.Println("Local Files:")
+				for _, file := range files {
+					fmt.Println(file.Name())
+				}
+			}
+		case "list_server":
+			files, err := os.ReadDir("./server")
+
+			if err != nil {
+				fmt.Printf("Error reading server directory: %v\n", err)
+			} else {
+				fmt.Println("Server Files:")
+				for _, file := range files {
+					fmt.Println(file.Name())
+				}
+			}
 		default:
 			fmt.Println("Unknown command")
 		}

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -9,6 +10,15 @@ import (
 )
 
 func main() {
+	err := os.MkdirAll("./client", os.ModePerm)
+	if err != nil {
+		log.Fatalf("Failed to create ./client directory: %v", err)
+	}
+
+	err = os.MkdirAll("./server", os.ModePerm)
+	if err != nil {
+		log.Fatalf("Failed to create ./server directory: %v", err)
+	}
 	initHyDFS()
 	go daemonMain()
 	go commandListener()
