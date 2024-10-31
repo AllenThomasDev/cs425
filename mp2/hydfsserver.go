@@ -140,7 +140,7 @@ func replicateFiles(ip string, repFiles []string) ack_type_t {
 func findOwnedFiles() []string {
 	// DO NOT LOCK: called from functions which already lock
 	fileList := make([]string, 0)
-	for k, _ := range(fileLogs) {
+	for k := range(fileLogs) {
 		if routingTable[hash(k)] == currentVM {
 			fileList = append(fileList, k)
 			fmt.Printf("File %s owned\n", k)
