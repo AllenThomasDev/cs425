@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"time"
+	"github.com/hashicorp/golang-lru/v2/expirable"
+)
 
 // this is slightly goofy, but the aID needs to persist after write to file while the fileContent doesn't
 type append_log_t struct {
@@ -24,6 +27,8 @@ const (
 	NEW_MEMBER member_type_t = iota
 	OLD_MEMBER
 )
+
+var cache = expirable.NewLRU[string, string](5, nil, 5*time.Second)
 
 type ack_type_t int
 const (
