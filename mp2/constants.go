@@ -2,21 +2,10 @@ package main
 
 import "time"
 
-// this is slightly goofy, but the aID needs to persist after write to file while the fileContent doesn't
-type append_log_t struct {
-	aID append_id_t // ID of append
-	fileContent string // content to be written in append
-}
-
-type append_info_t struct {
-	aID append_id_t // 
-	fileIndex int64
-}
-
 // note this is hashable, so we can use it as a key in a map
 type append_id_t struct {
-	vm int
-	timestamp string
+	Vm int
+	Timestamp string
 }
 
 type member_type_t int
@@ -33,7 +22,7 @@ const (
 )
 
 var (
-	MATT_VMS            = 1 // set to 0 to use 54XX VMs
+	MATT_VMS            = 0 // set to 0 to use 54XX VMs
 	MACHINES_IN_NETWORK = 10
 	HYDFS_TIMEOUT		= 10 * time.Second
 	PANIC_ON_ERROR		= 0

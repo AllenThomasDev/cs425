@@ -123,7 +123,7 @@ func replicateFiles(ip string, repFiles []string) ack_type_t {
 			}
 
 			err = sendMessageViaTCP(ip, fmt.Sprintf("APPEND,%s,%s,%s,%s,%d", repFiles[i], shardContent, selfIP,
-									fileLogs[repFiles[i]][j].timestamp, fileLogs[repFiles[i]][j].vm))
+									fileLogs[repFiles[i]][j].Timestamp, fileLogs[repFiles[i]][j].Vm))
 			if err != nil {
 				fmt.Printf("TCP error: %v\n", err)
 				return ERROR_ACK

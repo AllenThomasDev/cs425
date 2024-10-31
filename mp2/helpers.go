@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"io"
 	"os"
@@ -98,7 +100,18 @@ func readFileToMessageBuffer(localFileName string, writeFrom string) (string, er
 	return message, nil
 }
 
-func removeFiles(repFiles []string) {
+func removeShards(filename string) error {
+	for j := 0; j < len(fileLogs[filename]); j++ {
+		// REMINDER: aIDtoFile uses filename, append id to give us randomized filename
+		err := os.Remove("server/" + aIDtoFile[filename][fileLogs[filename][j]])
+		if err != nil {
+			return fmt.Errorf("Error removing shard %s: %v\n", aIDtoFile[filename][fileLogs[filename][j]], err)
+		}
+	}
+	return nil
+}
+
+func removeFiles(repFiles []string) error {
 	for i := 0; i < len(repFiles); i++ {
 		fmt.Printf("Removing file %s\n", repFiles[i])
 		err := os.Remove("server/" + repFiles[i])
@@ -106,15 +119,99 @@ func removeFiles(repFiles []string) {
 			fmt.Printf("Error removing file %s: %v\n", repFiles[i], err)
 			continue
 		} else {
-			for j := 0; j < len(fileLogs[repFiles[i]]); j++ {
-				// REMINDER: aIDtoFile uses filename, append id to give us randomized filename
-				err = os.Remove("server/" + aIDtoFile[repFiles[i]][fileLogs[repFiles[i]][j]])
-				if err != nil {
-					fmt.Printf("Error removing shard %s: %v\n", aIDtoFile[repFiles[i]][fileLogs[repFiles[i]][j]], err)
-				}
+			err = removeShards(repFiles[i])
+			if err != nil {
+				return err
 			}
 		}
 		// close channel, which will subsequently remove all file bookkeeping information
 		close(fileChannels[repFiles[i]])
+	}
+	return nil
+}
+
+func appendRandomFile(fp *os.File, randomFilename string) error {
+	fileContent, err := readFileToMessageBuffer(randomFilename, "server")
+	if err != nil {
+		return err
+	}
+
+	// Append the file content
+	_, err = fp.WriteString(fileContent)
+	if err != nil {
+		return fmt.Errorf("error appending random file %s: %v", randomFilename, err)
+	}
+
+	return nil
+}
+
+
+func mergeFile(filename string, fileLog []append_id_t) error {
+	file, err := os.OpenFile("server/" + filename, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("file %s does not exist", filename)
+		}
+		return fmt.Errorf("error opening file %s: %v", filename, err)
+	}
+	defer file.Close()
+
+	for i := 0; i < len(fileLog); i++ {
+		randomFilename := aIDtoFile[filename][fileLog[i]]
+		err := appendRandomFile(file, randomFilename)
+		if err != nil {
+			return err
+		}
+	}
+	
+	// remove all shards after writing them
+	err = removeShards(filename)
+	if err != nil {
+		return err
+	}
+
+	// clear corresponding bookkeeping info as well
+	fileLogs[filename] = make([]append_id_t, 0)
+	aIDtoFile[filename] = make(map[append_id_t]string)
+	
+	return nil
+}
+
+func decodeFileLog(encodedLog string) []append_id_t {
+	var decodedLog []append_id_t
+	decoder := gob.NewDecoder(bytes.NewReader([]byte(encodedLog)))
+        err := decoder.Decode(&decodedLog)
+	if err != nil {
+		fmt.Printf("Failed to decode fileLog: %v\n", err)
+		return nil
+	}
+
+	return decodedLog
+}
+
+func encodeFileLog(hyDFSFilename string) string {
+	fileLog := fileLogs[hyDFSFilename]
+	var buf bytes.Buffer
+	encoder := gob.NewEncoder(&buf)
+	err := encoder.Encode(&fileLog)
+	if err != nil {
+		fmt.Printf("Failed to encode file log: %v\n", err)
+		return ""
+	}
+	
+	return string(buf.Bytes()[:])
+}
+
+func forwardMerge(hyDFSFilename string) {
+	successorsMutex.RLock()
+	defer successorsMutex.RUnlock()
+	if len(successors) == 1 {
+		return
+	}
+	
+	encodedLog := encodeFileLog(hyDFSFilename)
+	sendMessageViaTCP(vmToIP(successors[0]), fmt.Sprintf("MERGE_FORWARD,%s,%s", hyDFSFilename, encodedLog))
+	if len(successors) > 2 {
+		sendMessageViaTCP(vmToIP(successors[1]), fmt.Sprintf("MERGE_FORWARD,%s,%s", hyDFSFilename, encodedLog))
 	}
 }

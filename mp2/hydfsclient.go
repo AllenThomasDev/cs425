@@ -87,6 +87,20 @@ func sendGet(message string, hash int) ack_type_t {
 	}
 }
 
+func sendMerge(message string, hash int) ack_type_t {
+	routingTableMutex.RLock()
+	defer routingTableMutex.RUnlock()
+
+	var ack ack_type_t
+	err := sendMessageViaTCP(vmToIP(routingTable[hash]), message)
+	if err != nil {
+		fmt.Printf("Error on merge send: %v\n", err)
+	}
+
+	ack = waitForAck()
+	return ack
+}
+
 func commandListener() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
@@ -133,7 +147,7 @@ func commandListener() {
 			} else {
 				ts := time.Now()
 				for {
-					ack := sendCreateAppend(fmt.Sprintf("APPEND,%s,%s,%s,%s,%d", hyDFSFilename, fileContent, selfIP, ts.String(), currentVM),
+					ack := sendCreateAppend(fmt.Sprintf("APPEND,%s,%s,%s,%d,%s", hyDFSFilename, selfIP, ts.String(), currentVM, fileContent),
 							routingTable[hash(hyDFSFilename)])
 					
 					if ack == ERROR_ACK {
@@ -195,6 +209,26 @@ func commandListener() {
 				}
 			}
 			fmt.Println("I sent a GET message")
+		case "merge":
+			if len(args) < 1 {
+				fmt.Println("Error: Insufficient arguments. Usage: merge HyDFSfilename")
+				continue
+			}
+			hyDFSFilename := args[0]
+			for {
+				ack := sendMerge(fmt.Sprintf("MERGE,%s,%s", hyDFSFilename, selfIP), hash(hyDFSFilename))
+				if ack == ERROR_ACK {
+					fmt.Printf("Error on operation: system in undetermined state!\n")
+					if PANIC_ON_ERROR == 1 {
+						panic(fmt.Errorf("System in undetermined state"))
+					}
+					break
+				}
+				if ack == GOOD_ACK {
+					break
+				}
+			}
+			
 		case "list_successors":
 			printSuccessors()
 		case "routing_table":
