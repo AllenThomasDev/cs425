@@ -19,7 +19,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create ./server directory: %v", err)
 	}
-	initHyDFS()
 	go daemonMain()
 	go commandListener()
 	go startRPCListener()

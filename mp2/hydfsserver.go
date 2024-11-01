@@ -40,6 +40,11 @@ func addToHyDFS(ip string, memType member_type_t) {
 	
 	addToRoutingTable(ipToVM(ip))
 	insertIndex := addToSuccessors(ipToVM(ip))
+
+	successorsMutex.RLock()
+	defer successorsMutex.RUnlock()
+	routingTableMutex.RLock()
+	defer routingTableMutex.RUnlock()
 	// if we aren't the one being added to the network, and we have an insert at index 0 or 1, data owned by this node must be replicated
 	if memType == NEW_MEMBER && insertIndex > -1 && insertIndex < 2 {
 		// if we have owned files, replicate them
@@ -53,8 +58,6 @@ func addToHyDFS(ip string, memType member_type_t) {
 				return
 			}
 			// if we have > 3 successors (last one is current node), the node at index 2 has replicas it shouldn't
-			successorsMutex.RLock()
-			defer successorsMutex.RUnlock()
 			if len(successors) > 3 {
 				args := RemoveArgs{ownedFiles}
 				client, _ := rpc.DialHTTP("tcp", vmToIP(successors[2]) + ":" + RPC_PORT)
@@ -66,14 +69,15 @@ func addToHyDFS(ip string, memType member_type_t) {
 
 	// for when the node that's just been added is the owner of files previously owned by this node
 	if (len(successors) > 3) {
-		fmt.Println("Getting files repossessed :(")
 		var repossessedFiles []string
 		for i := 0; i < len(ownedFiles); i++ {
 			if (routingTable[hash(ownedFiles[i])] != currentVM) {
 				repossessedFiles = append(repossessedFiles, ownedFiles[i])
 			}
 		}
-		fmt.Println(repossessedFiles)
+		if len(repossessedFiles) > 0 {
+			fmt.Println("Getting files repossessed :(")
+		}
 		replicateFiles(ip, repossessedFiles)
 
 		args := RemoveArgs{repossessedFiles}
@@ -83,8 +87,6 @@ func addToHyDFS(ip string, memType member_type_t) {
 		client.Call("HyDFSReq.Remove", args, &reply)
 	}
 }
-
-// when i get added just before the current owner of file and i should be the owner shit breaks
 
 func removeFromHyDFS(ip string) {
 	removeFromRoutingTable(ipToVM(ip))
@@ -103,8 +105,6 @@ func removeFromHyDFS(ip string) {
 		ownedFiles := findOwnedFiles()
 		if len(ownedFiles) > 0 {
 			err := replicateFiles(vmToIP(successors[1]), ownedFiles)
-			// only need to panic on ERROR_ACK since on timeout failure detector will eventually call 
-			// removeFromHyDFS on timed out node which will call replicate again
 			if err != nil {
 				fmt.Printf("Error on deduplicaton: %v\n", err)
 				if PANIC_ON_ERROR == 1 {

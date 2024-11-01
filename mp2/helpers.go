@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/gob"
 	"fmt"
 	"io"
 	"net/rpc"
@@ -166,31 +164,6 @@ func mergeFile(filename string, fileLog []Append_id_t) error {
 	aIDtoFile[filename] = make(map[Append_id_t]string)
 	
 	return nil
-}
-
-func decodeFileLog(encodedLog string) []Append_id_t {
-	var decodedLog []Append_id_t
-	decoder := gob.NewDecoder(bytes.NewReader([]byte(encodedLog)))
-        err := decoder.Decode(&decodedLog)
-	if err != nil {
-		fmt.Printf("Failed to decode fileLog: %v\n", err)
-		return nil
-	}
-
-	return decodedLog
-}
-
-func encodeFileLog(hyDFSFilename string) string {
-	fileLog := fileLogs[hyDFSFilename]
-	var buf bytes.Buffer
-	encoder := gob.NewEncoder(&buf)
-	err := encoder.Encode(&fileLog)
-	if err != nil {
-		fmt.Printf("Failed to encode file log: %v\n", err)
-		return ""
-	}
-	
-	return string(buf.Bytes()[:])
 }
 
 func forwardMerge(hyDFSFilename string) {
