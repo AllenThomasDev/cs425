@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -10,10 +9,8 @@ import (
 )
 
 func handleMessage(msg string) {
-	// if file content contains commas we're screwed, handle a little more carefully
-	parts := strings.SplitN(msg, ",", 2)
+	parts := strings.Split(msg, ",")
 	command := parts[0]
-	args := parts[1]
 	switch command {
 	case "SUS_OFF":
 		suspicionEnabled = false
@@ -21,10 +18,9 @@ func handleMessage(msg string) {
 		suspicionEnabled = true
 	// Only the introducer can ingest JOIN messages
 	case "JOIN":
-		joinParts := strings.SplitN(args, ",", 3)
-		sender_ip := joinParts[0]
-		ts := joinParts[1]
-		inc := joinParts[2]
+		sender_ip := parts[1]
+		ts := parts[2]
+		inc := parts[3]
 		_, exists := checkMembershipList(selfIP)
 		if !exists {
 			fmt.Print("someone tried to join the group but i am not here")
@@ -41,19 +37,17 @@ func handleMessage(msg string) {
 			sendMessageViaTCP(sender_ip, sus_status)
 		}
 	case "NEW_MEMBER":
-		memberParts := strings.SplitN(args, ",", 3)
-		sender_ip := memberParts[0]
-		ts := memberParts[1]
-		inc := memberParts[2]
+		sender_ip := parts[1]
+		ts := parts[2]
+		inc := parts[3]
 		addMember(sender_ip, ts, inc, NEW_MEMBER)
 	case "OLD_MEMBER":
-		memberParts := strings.SplitN(args, ",", 3)
-		sender_ip := memberParts[0]
-		ts := memberParts[1]
-		inc := memberParts[2]
+		sender_ip := parts[1]
+		ts := parts[2]
+		inc := parts[3]
 		addMember(sender_ip, ts, inc, OLD_MEMBER)
 	case "LEAVE":
-		leaver_ip := args
+		leaver_ip := parts[1]
 		logger.Printf("Received LEAVE message from %s", leaver_ip)
 		if leaver_ip == selfIP {
 			fmt.Printf("I was killed unfortunately, if only you had enabled suspicion earlier\n\n\n :(")
@@ -61,28 +55,20 @@ func handleMessage(msg string) {
 		}
 		removeMember(leaver_ip)
 	case "PING":
-		senderIP := args
+		senderIP := parts[1]
 		// Send ACK back to the sender
 		sendMessageViaTCP(senderIP, fmt.Sprintf("ACK,%s", selfIP))
 	case "ACK":
-		senderIP := args
+		senderIP := parts[1]
 		timestamp := time.Now().Unix()
 		updateLastAckReceived(senderIP, timestamp)
 		removeNodeFromSuspected(senderIP)
-	case "HYDFSACK":
-		ack, err := strconv.Atoi(args)
-		if err != nil {
-			ackChannel <- ERROR_ACK
-		} else {
-			ackChannel <- ack_type_t(ack)
-		}
 	case "SUSPECT":
 		if !suspicionEnabled {
 			return
 		}
-		susParts := strings.SplitN(args, ",", 2)
-		suspectedIP := susParts[0]
-		suspectedIncarnation, _ := strconv.ParseInt(susParts[1], 10, 64)
+		suspectedIP := parts[1]
+		suspectedIncarnation, _ := strconv.ParseInt(parts[2], 10, 64)
 		if suspectedIP == selfIP {
 			if suspectedIncarnation >= getIncarnationNumber() {
 				incrementIncarnation()
@@ -98,101 +84,10 @@ func handleMessage(msg string) {
 		if !suspicionEnabled {
 			return
 		}
-		refParts := strings.SplitN(args, ",", 2)
-		refutingIP := refParts[0]
-		refuteIncarnation, _ := strconv.ParseInt(refParts[1], 10, 64)
+		refutingIP := parts[1]
+		refuteIncarnation, _ := strconv.ParseInt(parts[2], 10, 64)
 		updateMemberIncarnation(refutingIP, refuteIncarnation)
 		removeNodeFromSuspected(refutingIP)
-	case "APPEND":
-		fmt.Println("Received APPEND message")
-		appParts := strings.SplitN(args, ",", 5)
-		hyDFSFileName := appParts[0]
-		senderIP := appParts[1]
-		timestamp := appParts[2]
-		vmNo, err := strconv.Atoi(appParts[3])
-		if err != nil {
-			fmt.Printf("Error: could not extract vm number\n")
-			sendMessageViaTCP(senderIP, fmt.Sprintf("HYDFSACK,%d", ERROR_ACK))
-			return
-		}
-		fileContent := appParts[4]
-		
-		aID := append_id_t{vmNo, timestamp}
-		randFilename, err := appendFile(hyDFSFileName, fileContent)
-		if err != nil {
-			fmt.Printf("Error appending file\n")
-			sendMessageViaTCP(senderIP, fmt.Sprintf("HYDFSACK,%d", ERROR_ACK))
-			return
-		}
-
-		fmt.Printf("Append to %s at file %s from vm %d\n", hyDFSFileName, randFilename, vmNo)
-		fileChannels[hyDFSFileName] <- aID
-		aIDtoFile[hyDFSFileName][aID] = randFilename
-		sendMessageViaTCP(senderIP, fmt.Sprintf("HYDFSACK,%d", GOOD_ACK))
-	case "GET":
-		hyDFSFileName := parts[1] // The file to be fetched from HyDFS
-		localFileName := parts[2] // The local file where content will be saved
-		senderIP := parts[3]      // IP of the sender requesting the file
-		fmt.Printf("Received GET message from %s to fetch %s", senderIP, hyDFSFileName)
-		fileContent, err := readFileToMessageBuffer(hyDFSFileName, "server")
-		if err != nil {
-			fmt.Printf("Error writing file content: %v\n", err)
-			sendMessageViaTCP(senderIP, fmt.Sprintf("HYDFSACK,%d", ERROR_ACK))
-			return
-		}
-
-		// get shards
-		for i := 0; i < len(fileLogs[hyDFSFileName]); i++ {
-			// REMINDER: aIDtoFile uses filename, append id to give us randomized filename
-			shardContent, err := readFileToMessageBuffer(aIDtoFile[hyDFSFileName][fileLogs[hyDFSFileName][i]], "server")
-			if err != nil {
-				fmt.Printf("Error writing file content: %v\n", err)
-				sendMessageViaTCP(senderIP, fmt.Sprintf("HYDFSACK,%d", ERROR_ACK))
-				return
-			}
-
-			fileContent = fileContent + shardContent
-		}
-		sendMessageViaTCP(senderIP, fmt.Sprintf("HYDFSACK,%d", GOOD_ACK))
-		response := fmt.Sprintf("FILE_CONTENT,%s,%s,%s", hyDFSFileName, fileContent, localFileName)
-		sendMessageViaTCP(senderIP, response)
-
-		fmt.Printf("\nSent file content to %s", senderIP)
-	case "FILE_CONTENT":
-		hyDFSFileName := parts[1] // Extract the HyDFS file name
-		fileContent := parts[2]   // Extract the file content
-		localFileName := parts[3] // Extract the local file name to save content
-		fmt.Printf("Received FILE_CONTENT for %s\n saving to %s\n", hyDFSFileName, localFileName)
-		err := writeFile(localFileName, fileContent, "client")
-		if err != nil {
-			fmt.Printf("Error on file receipt: %v\n", err);
-		} else {
-			fmt.Printf("File content saved successfully to %s\n", localFileName)
-		}
-	case "CREATE":
-		hyDFSFileName := parts[1]
-		fileContent := parts[2]
-		senderIP := parts[3]
-		err := writeFile(hyDFSFileName, fileContent, "server")
-		if err != nil {
-			if errors.Is(err, os.ErrExist) {
-				// file already exists, acknowledge to indicate we have it
-				sendMessageViaTCP(senderIP, fmt.Sprintf("HYDFSACK,%d", GOOD_ACK))
-				return
-			} else {
-				fmt.Printf("Error on file creation: %v\n", err);
-				sendMessageViaTCP(senderIP, fmt.Sprintf("HYDFSACK,%d", ERROR_ACK))
-				return
-			}
-		}
-
-		fmt.Printf("Received CREATE message for %s and %s\n", hyDFSFileName, fileContent)
-		fileChannels[hyDFSFileName] = make(chan append_id_t, 100)
-		fileLogs[hyDFSFileName] = make([]append_id_t, 0)
-		aIDtoFile[hyDFSFileName] = make(map[append_id_t]string, 0)
-		// launch thread to manage appends
-		go writeToLog(hyDFSFileName)
-		sendMessageViaTCP(senderIP, fmt.Sprintf("HYDFSACK,%d", GOOD_ACK))
 	case "MERGE":
 		hyDFSFilename := parts[1]
 		senderIP := parts[2]
@@ -205,6 +100,10 @@ func handleMessage(msg string) {
 			return
 		}
 		sendMessageViaTCP(senderIP, fmt.Sprintf("HYDFSACK,%d", GOOD_ACK))
+	
+	// Note: we don't use RPCs for these two cases since we don't care if they complete or not.
+	// if we get a connection error on a merge, the merged file will be replicated at the next node post-merge,
+	// and if we get a connection error on a removal, well the files are gone from the system
 	case "MERGE_FORWARD":
 		hyDFSFilename := parts[1]
 		encodedLog := parts[2]

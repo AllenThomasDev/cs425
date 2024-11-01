@@ -3,102 +3,158 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net/rpc"
 	"os"
 	"strings"
 	"time"
 )
 
-// returns true on success, false on failure
-func sendCreateAppend(message string, hash int) ack_type_t {
+func sendAppend(args AppendArgs, ip string) error {
+	client, err := rpc.DialHTTP("tcp", ip + ":" + RPC_PORT)
+	if err != nil {
+		return err
+	}
+
+	var reply string
+	err = client.Call("HyDFSReq.Append", args, &reply)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func sendAppendToQuorum(args AppendArgs, hash int) error {
 	successorsMutex.RLock()
 	defer successorsMutex.RUnlock()
-
+	
 	if len(successors) <= 3 {
 		for i := 0; i < len(successors); i++ {
-			err := sendMessageViaTCP(vmToIP(successors[i]), message)
+			err := sendAppend(args, vmToIP(successors[i]))
 			if err != nil {
-				return TIMEOUT_ACK
-			}
-			
-			ack := waitForAck()
-			if ack == TIMEOUT_ACK || ack == ERROR_ACK {
-				return ack
+				return err
 			}
 		}
-		return GOOD_ACK
+		return nil
 	} else {
 		routingTableMutex.RLock()
 		defer routingTableMutex.RUnlock()
 
 		_, baseIndex := searchSuccessors(hash)
 		for i := baseIndex; i != (baseIndex + 3) % len(successors); i = (i+1) % len(successors){
-			err := sendMessageViaTCP(vmToIP(successors[i]), message)
+			err := sendAppend(args, vmToIP(successors[i]))
 			if err != nil {
-				return TIMEOUT_ACK
-			}
-
-			ack := waitForAck()
-			if ack == TIMEOUT_ACK || ack == ERROR_ACK {
-				return ack
+				return err
 			}
 		}
-		print(len(ackChannel))
-		return GOOD_ACK
+		return nil
 	}
+}
+
+func sendCreate(args CreateArgs, ip string) error {
+	client, err := rpc.DialHTTP("tcp", ip + ":" + RPC_PORT)
+	if err != nil {
+		return err
+	}
+
+	var reply string
+	err = client.Call("HyDFSReq.Create", args, &reply)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func sendCreateToQuorum(args CreateArgs, hash int) error {
+	successorsMutex.RLock()
+	defer successorsMutex.RUnlock()
+	
+	if len(successors) <= 3 {
+		for i := 0; i < len(successors); i++ {
+			err := sendCreate(args, vmToIP(successors[i]))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	} else {
+		routingTableMutex.RLock()
+		defer routingTableMutex.RUnlock()
+
+		_, baseIndex := searchSuccessors(hash)
+		for i := baseIndex; i != (baseIndex + 3) % len(successors); i = (i+1) % len(successors){
+			err := sendCreate(args, vmToIP(successors[i]))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+}
+
+func sendGet(args GetArgs, ip string) (string, error) {
+	client, err := rpc.DialHTTP("tcp", ip + ":" + RPC_PORT)
+	if err != nil {
+		return "", err
+	}
+
+	var reply string
+	err = client.Call("HyDFSReq.Get", args, &reply)
+	if err != nil {
+		return "", err
+	}
+
+	return reply, nil
 }
 
 // this is different from the above function in that we only need to receive one get,
 // where with create append we want to make sure it goes through at all machines
-func sendGet(message string, hash int) ack_type_t {
+func sendGetToQuorum(args GetArgs, hash int) string {
 	successorsMutex.RLock()
 	defer successorsMutex.RUnlock()
 
-	var ack ack_type_t
 	if len(successors) <= 3 {
 		for i := 0; i < len(successors); i++ {
-			err := sendMessageViaTCP(vmToIP(successors[i]), message)
+			reply, err := sendGet(args, vmToIP(successors[i]))
 			if err != nil {
 				continue
 			}
-
-			ack = waitForAck()
-			if ack == GOOD_ACK {
-				return ack
-			}
+			
+			return reply
 		}
-		return ack
+		return ""
 	} else {
 		routingTableMutex.RLock()
 		defer routingTableMutex.RUnlock()
 
 		_, baseIndex := searchSuccessors(hash)
 		for i := baseIndex; i != (baseIndex + 3) % len(successors); i = (i+1) % len(successors){
-			err := sendMessageViaTCP(vmToIP(successors[i]), message)
+			reply, err := sendGet(args, vmToIP(successors[i]))
 			if err != nil {
 				continue
 			}
 			
-			ack = waitForAck()
-			if ack == GOOD_ACK {
-				return ack
-			}
+			return reply
 		}
-		return ack
+		return ""
 	}
 }
 
-func sendMerge(message string, hash int) ack_type_t {
+func sendMerge(args MergeArgs, hash int) error {
 	routingTableMutex.RLock()
 	defer routingTableMutex.RUnlock()
 
-	var ack ack_type_t
-	err := sendMessageViaTCP(vmToIP(routingTable[hash]), message)
+	client, err := rpc.DialHTTP("tcp", vmToIP(routingTable[hash]) + ":" + RPC_PORT)
 	if err != nil {
-		fmt.Printf("Error on merge send: %v\n", err)
+		return err
 	}
 
-	ack = waitForAck()
-	return ack
+	var reply string
+	err = client.Call("HyDFSReq.Merge", args, &reply)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func commandListener() {
@@ -144,22 +200,13 @@ func commandListener() {
 			fileContent, err := readFileToMessageBuffer(localFilename, "client")
 			if err != nil {
 				fmt.Printf("Error reading file: %v\n", err)
-			} else {
-				ts := time.Now()
-				for {
-					ack := sendCreateAppend(fmt.Sprintf("APPEND,%s,%s,%s,%d,%s", hyDFSFilename, selfIP, ts.String(), currentVM, fileContent),
-							routingTable[hash(hyDFSFilename)])
-					
-					if ack == ERROR_ACK {
-						fmt.Printf("Error on operation: system in undetermined state!\n")
-						if PANIC_ON_ERROR == 1 {
-							panic(fmt.Errorf("System in undetermined state"))
-						}
-						break
-					}
-					if ack == GOOD_ACK {
-						break
-					}
+				return
+			}
+			ts := time.Now()
+			for {
+				err := sendAppendToQuorum(AppendArgs{hyDFSFilename, fileContent, ts.String(), currentVM}, routingTable[hash(hyDFSFilename)])
+				if err == nil {
+					break
 				}
 			}
 		case "create":
@@ -172,43 +219,37 @@ func commandListener() {
 			fileContent, err := readFileToMessageBuffer(localFilename, "client")
 			if err != nil {
 				fmt.Printf("Error reading file: %v\n", err)
-			} else {
-				for {
-					ack := sendCreateAppend(fmt.Sprintf("CREATE,%s,%s,%s", hyDFSFilename, fileContent, selfIP), routingTable[hash(hyDFSFilename)])
-					if ack == ERROR_ACK {
-						fmt.Printf("Error on operation: system in undetermined state!\n")
-						if PANIC_ON_ERROR == 1 {
-							panic(fmt.Errorf("System in undetermined state"))
-						}
-						break
-					}
-					if ack == GOOD_ACK {
-						break
-					}
+				return
+			}
+			for {
+				err := sendCreateToQuorum(CreateArgs{hyDFSFilename, fileContent}, routingTable[hash(hyDFSFilename)])
+				if err == nil {
+					break
 				}
 			}
 		case "get":
 			if len(args) < 2 {
-				fmt.Println("Error: Insufficient arguments. Usage: get  HyDFSfilename localfilename")
+				fmt.Println("Error: Insufficient arguments. Usage: get HyDFSfilename localfilename")
 				continue
 			}
 			hyDFSFilename := args[0]
 			localFilename := args[1]
+			var fileContent string
 			
 			for {
-				ack := sendGet(fmt.Sprintf("GET,%s,%s,%s", hyDFSFilename, localFilename, selfIP), routingTable[hash(hyDFSFilename)])
-				if ack == ERROR_ACK {
-					fmt.Printf("Error on operation: system in undetermined state!\n")
-					if PANIC_ON_ERROR == 1 {
-						panic(fmt.Errorf("System in undetermined state"))
-					}
-					break
-				}
-				if ack == GOOD_ACK {
+				fileContent = sendGetToQuorum(GetArgs{hyDFSFilename}, routingTable[hash(hyDFSFilename)])
+				if fileContent != "" {
 					break
 				}
 			}
 			fmt.Println("I sent a GET message")
+
+			err := writeFile(localFilename, fileContent, "client")
+			if err != nil {
+				fmt.Printf("Error on file receipt: %v\n", err);
+			} else {
+				fmt.Printf("File content saved successfully to %s\n", localFilename)
+			}
 		case "merge":
 			if len(args) < 1 {
 				fmt.Println("Error: Insufficient arguments. Usage: merge HyDFSfilename")
@@ -216,19 +257,11 @@ func commandListener() {
 			}
 			hyDFSFilename := args[0]
 			for {
-				ack := sendMerge(fmt.Sprintf("MERGE,%s,%s", hyDFSFilename, selfIP), hash(hyDFSFilename))
-				if ack == ERROR_ACK {
-					fmt.Printf("Error on operation: system in undetermined state!\n")
-					if PANIC_ON_ERROR == 1 {
-						panic(fmt.Errorf("System in undetermined state"))
-					}
-					break
-				}
-				if ack == GOOD_ACK {
+				err := sendMerge(MergeArgs{hyDFSFilename}, hash(hyDFSFilename))
+				if err == nil {
 					break
 				}
 			}
-			
 		case "list_successors":
 			printSuccessors()
 		case "routing_table":

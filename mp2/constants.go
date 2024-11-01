@@ -3,7 +3,7 @@ package main
 import "time"
 
 // note this is hashable, so we can use it as a key in a map
-type append_id_t struct {
+type Append_id_t struct {
 	Vm int
 	Timestamp string
 }
@@ -26,6 +26,7 @@ var (
 	MACHINES_IN_NETWORK = 10
 	HYDFS_TIMEOUT		= 10 * time.Second
 	PANIC_ON_ERROR		= 0
+	RPC_PORT			= "2233"
 	introducerIP        = ""
 	ipList              []string // initialized based on MATT_VMS
 	currentVM           int      // also initialized based on MATT_VMS

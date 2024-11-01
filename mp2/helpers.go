@@ -5,18 +5,9 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
+	"net/rpc"
 	"os"
-	"time"
 )
-
-func waitForAck() ack_type_t {
-	select {
-	case ack := <-ackChannel:
-		return ack
-	case <-time.After(HYDFS_TIMEOUT):
-		return TIMEOUT_ACK
-	}
-}
 
 func checkFileExists(localFileName string) bool {
 	_, err := os.Stat(localFileName)
@@ -146,7 +137,7 @@ func appendRandomFile(fp *os.File, randomFilename string) error {
 }
 
 
-func mergeFile(filename string, fileLog []append_id_t) error {
+func mergeFile(filename string, fileLog []Append_id_t) error {
 	file, err := os.OpenFile("server/" + filename, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -171,14 +162,14 @@ func mergeFile(filename string, fileLog []append_id_t) error {
 	}
 
 	// clear corresponding bookkeeping info as well
-	fileLogs[filename] = make([]append_id_t, 0)
-	aIDtoFile[filename] = make(map[append_id_t]string)
+	fileLogs[filename] = make([]Append_id_t, 0)
+	aIDtoFile[filename] = make(map[Append_id_t]string)
 	
 	return nil
 }
 
-func decodeFileLog(encodedLog string) []append_id_t {
-	var decodedLog []append_id_t
+func decodeFileLog(encodedLog string) []Append_id_t {
+	var decodedLog []Append_id_t
 	decoder := gob.NewDecoder(bytes.NewReader([]byte(encodedLog)))
         err := decoder.Decode(&decodedLog)
 	if err != nil {
@@ -209,9 +200,14 @@ func forwardMerge(hyDFSFilename string) {
 		return
 	}
 	
-	encodedLog := encodeFileLog(hyDFSFilename)
-	sendMessageViaTCP(vmToIP(successors[0]), fmt.Sprintf("MERGE_FORWARD,%s,%s", hyDFSFilename, encodedLog))
+	args := ForwardedMergeArgs{hyDFSFilename, fileLogs[hyDFSFilename]}
+	client, _ := rpc.DialHTTP("tcp", vmToIP(successors[0]) + ":" + RPC_PORT)
+
+	var reply string
+	client.Call("HyDFSReq.ForwardedMerge", args, &reply)
+	
 	if len(successors) > 2 {
-		sendMessageViaTCP(vmToIP(successors[1]), fmt.Sprintf("MERGE_FORWARD,%s,%s", hyDFSFilename, encodedLog))
+		client, _ := rpc.DialHTTP("tcp", vmToIP(successors[1]) + ":" + RPC_PORT)
+		client.Call("HyDFSReq.ForwardedMerge", args, &reply)
 	}
 }

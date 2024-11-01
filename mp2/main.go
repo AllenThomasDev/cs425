@@ -22,6 +22,7 @@ func main() {
 	initHyDFS()
 	go daemonMain()
 	go commandListener()
+	go startRPCListener()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs

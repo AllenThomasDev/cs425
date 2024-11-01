@@ -3,17 +3,16 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"net/rpc"
 	"strconv"
-	"strings"
 	"sync"
 )
 var (
 	routingTableMutex = &sync.RWMutex{}
 	successorsMutex = &sync.RWMutex{}
-	fileChannels = make(map[string]chan append_id_t) // channel used to write to fileLogs
-	fileLogs = make(map[string] []append_id_t) // log of appends to file in order received
-	aIDtoFile = make(map[string]map[append_id_t]string) // map linking append ids to random filenames
-	ackChannel = make(chan ack_type_t, 3) // channel allowing us to enable timeouts on acks
+	fileChannels = make(map[string]chan Append_id_t) // channel used to write to fileLogs
+	fileLogs = make(map[string] []Append_id_t) // log of appends to file in order received
+	aIDtoFile = make(map[string]map[Append_id_t]string) // map linking append ids to random filenames
 )
 
 func writeToLog(fileName string) {
@@ -35,19 +34,19 @@ func genRandomFileName() string {
 }
 
 func addToHyDFS(ip string, memType member_type_t) {
+	routingTableMutex.RLock()
+	ownedFiles := findOwnedFiles()
+	routingTableMutex.RUnlock()
+	
 	addToRoutingTable(ipToVM(ip))
 	insertIndex := addToSuccessors(ipToVM(ip))
 	// if we aren't the one being added to the network, and we have an insert at index 0 or 1, data owned by this node must be replicated
 	if memType == NEW_MEMBER && insertIndex > -1 && insertIndex < 2 {
-		routingTableMutex.RLock()
-		ownedFiles := findOwnedFiles()
-		routingTableMutex.RUnlock()
-		
 		// if we have owned files, replicate them
 		if len(ownedFiles) > 0 {
-			ack := replicateFiles(ip, ownedFiles)
-			if ack == TIMEOUT_ACK || ack == ERROR_ACK {
-				fmt.Printf("Error: replication timed out or otherwise failed\n")
+			err := replicateFiles(ip, ownedFiles)
+			if err != nil {
+				fmt.Printf("Error on replication: %v\n", err)
 				if PANIC_ON_ERROR == 1 {
 					panic("System in undetermined state")
 				}
@@ -57,11 +56,35 @@ func addToHyDFS(ip string, memType member_type_t) {
 			successorsMutex.RLock()
 			defer successorsMutex.RUnlock()
 			if len(successors) > 3 {
-				sendMessageViaTCP(vmToIP(successors[2]), fmt.Sprintf("REMOVE,%s", strings.Join(ownedFiles, ",")))
+				args := RemoveArgs{ownedFiles}
+				client, _ := rpc.DialHTTP("tcp", vmToIP(successors[2]) + ":" + RPC_PORT)
+				var reply string
+				client.Call("HyDFSReq.Remove", args, &reply)
 			}
 		}
 	}
+
+	// for when the node that's just been added is the owner of files previously owned by this node
+	if (len(successors) > 3) {
+		fmt.Println("Getting files repossessed :(")
+		var repossessedFiles []string
+		for i := 0; i < len(ownedFiles); i++ {
+			if (routingTable[hash(ownedFiles[i])] != currentVM) {
+				repossessedFiles = append(repossessedFiles, ownedFiles[i])
+			}
+		}
+		fmt.Println(repossessedFiles)
+		replicateFiles(ip, repossessedFiles)
+
+		args := RemoveArgs{repossessedFiles}
+		// successors looks like: [new owner], [me], [node1], [node2], need to remove from node2
+		client, _ := rpc.DialHTTP("tcp", vmToIP(successors[1]) + ":" + RPC_PORT)
+		var reply string
+		client.Call("HyDFSReq.Remove", args, &reply)
+	}
 }
+
+// when i get added just before the current owner of file and i should be the owner shit breaks
 
 func removeFromHyDFS(ip string) {
 	removeFromRoutingTable(ipToVM(ip))
@@ -79,11 +102,11 @@ func removeFromHyDFS(ip string) {
 	if len(successors) > 2 && ((removeIndex > -1 && removeIndex < 2) || routingTable[ipToVM(ip)] == currentVM) {
 		ownedFiles := findOwnedFiles()
 		if len(ownedFiles) > 0 {
-			ack := replicateFiles(vmToIP(successors[1]), ownedFiles)
+			err := replicateFiles(vmToIP(successors[1]), ownedFiles)
 			// only need to panic on ERROR_ACK since on timeout failure detector will eventually call 
 			// removeFromHyDFS on timed out node which will call replicate again
-			if ack == ERROR_ACK {
-				fmt.Printf("Error on replication, system in undetermined state\n")
+			if err != nil {
+				fmt.Printf("Error on deduplicaton: %v\n", err)
 				if PANIC_ON_ERROR == 1 {
 					panic("System in undetermined state")
 				}
@@ -92,25 +115,20 @@ func removeFromHyDFS(ip string) {
 	}
 }
 
-func replicateFiles(ip string, repFiles []string) ack_type_t {
+func replicateFiles(ip string, repFiles []string) error {
 	for i := 0; i < len(repFiles); i++ {
 		// write initial file (data written from CREATE call)
 		fmt.Printf("Replicating file %s at vm %d\n", repFiles[i], ipToVM(ip))
 		fileContent, err := readFileToMessageBuffer(repFiles[i], "server")
 		if err != nil {
 			fmt.Printf("Error reading file content: %v\n", err)
-			return ERROR_ACK
+			return err
 		}
 
-		err = sendMessageViaTCP(ip, fmt.Sprintf("CREATE,%s,%s,%s", repFiles[i], fileContent, selfIP))
+		err = sendCreate(CreateArgs{repFiles[i], fileContent}, ip)
 		if err != nil {
-			fmt.Printf("TCP error: %v\n", err)
-			return ERROR_ACK
-		}
-
-		ack := waitForAck()
-		if ack == TIMEOUT_ACK || ack == ERROR_ACK {
-			return ack
+			fmt.Printf("Error on replication creation: %v\n", err)
+			return err
 		}
 
 		// write shards (data from APPEND calls)
@@ -119,22 +137,17 @@ func replicateFiles(ip string, repFiles []string) ack_type_t {
 			shardContent, err := readFileToMessageBuffer(aIDtoFile[repFiles[i]][fileLogs[repFiles[i]][j]], "server")
 			if err != nil {
 				fmt.Printf("Error reading shard content: %v\n", err)
-				return ERROR_ACK
+				return err
 			}
 
-			err = sendMessageViaTCP(ip, fmt.Sprintf("APPEND,%s,%s,%s,%s,%d", repFiles[i], shardContent, selfIP,
-									fileLogs[repFiles[i]][j].Timestamp, fileLogs[repFiles[i]][j].Vm))
+			err = sendAppend(AppendArgs{repFiles[i], shardContent, fileLogs[repFiles[i]][j].Timestamp, fileLogs[repFiles[i]][j].Vm}, ip)
 			if err != nil {
 				fmt.Printf("TCP error: %v\n", err)
-				return ERROR_ACK
-			}
-			
-			if ack == TIMEOUT_ACK || ack == ERROR_ACK {
-				return ack
+				return err
 			}
 		}
 	}
-	return GOOD_ACK
+	return nil
 }
 
 func findOwnedFiles() []string {
