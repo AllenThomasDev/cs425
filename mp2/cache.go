@@ -13,3 +13,7 @@ func readFileFromCache(filename string) (string, bool) {
 	contents, ok := cache.Get(filename)
 	return contents, ok
 }
+
+func removeFileFromCache(filename string) {
+	cache.Remove(filename)
+}

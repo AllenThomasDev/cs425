@@ -208,6 +208,8 @@ func commandListener() {
 				if err == nil {
 					break
 				}
+				removeFileFromCache(hyDFSFilename)
+        fmt.Println("evicted from cache")
 			}
 		case "create":
 			if len(args) < 2 {
@@ -226,6 +228,8 @@ func commandListener() {
 				if err == nil {
 					break
 				}
+				removeFileFromCache(hyDFSFilename)
+        fmt.Println("evicted from cache")
 			}
 		case "get":
 			if len(args) < 2 {
@@ -234,6 +238,16 @@ func commandListener() {
 			}
 			hyDFSFilename := args[0]
 			localFilename := args[1]
+      if cachedContent, ok := readFileFromCache(hyDFSFilename); ok {
+        fmt.Println("Serving from cache")
+        err := writeFile(localFilename, cachedContent, "client")
+        if err != nil {
+          fmt.Printf("Error on file receipt: %v\n", err)
+        } else {
+          fmt.Printf("File content saved successfully to %s from cache\n", localFilename)
+        }
+        continue
+      }
 			var fileContent string
 
 			for {
