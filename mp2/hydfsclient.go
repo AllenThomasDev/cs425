@@ -276,15 +276,14 @@ func commandListener() {
 					fmt.Println(file.Name())
 				}
 			}
-		case "list_server":
+		case "store":
 			files, err := os.ReadDir("./server")
-
 			if err != nil {
 				fmt.Printf("Error reading server directory: %v\n", err)
 			} else {
 				fmt.Println("Server Files:")
 				for _, file := range files {
-					fmt.Println(file.Name())
+					fmt.Printf("File name %s has the hash of %s", file, hash((file.Name())))
 				}
 			}
 		default:
