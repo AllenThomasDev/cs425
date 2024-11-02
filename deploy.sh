@@ -8,8 +8,8 @@ fi
 VMDomainNames=(
   "fa24-cs425-5401.cs.illinois.edu"
   "fa24-cs425-5402.cs.illinois.edu"
-  # "fa24-cs425-5403.cs.illinois.edu"
-  # "fa24-cs425-5404.cs.illinois.edu"
+  "fa24-cs425-5403.cs.illinois.edu"
+  "fa24-cs425-5404.cs.illinois.edu"
   # "fa24-cs425-5405.cs.illinois.edu"
   # "fa24-cs425-5406.cs.illinois.edu"
   # "fa24-cs425-5407.cs.illinois.edu"
