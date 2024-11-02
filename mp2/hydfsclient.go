@@ -208,6 +208,8 @@ func commandListener() {
 				if err == nil {
 					break
 				}
+				removeFileFromCache(hyDFSFilename)
+        fmt.Println("evicted from cache")
 			}
       removeFileFromCache(hyDFSFilename)
       fmt.Println("evicted from cache")
@@ -228,6 +230,8 @@ func commandListener() {
 				if err == nil {
 					break
 				}
+				removeFileFromCache(hyDFSFilename)
+        fmt.Println("evicted from cache")
 			}
       removeFileFromCache(hyDFSFilename)
       fmt.Println("evicted from cache")
