@@ -276,6 +276,21 @@ func commandListener() {
 					fmt.Println(file.Name())
 				}
 			}
+    case "getfromreplica":
+      if len(args) < 3 {
+        fmt.Println("Error: Insufficient arguments. Usage:  VMAddress HyDFSfilename localfilename")
+      }
+      vmAddress := args[0]
+      HyDFSfilename := args[1]
+      localfilename := args[2]
+      fmt.Println("Downloading file from replica...")
+      contents, err := sendGet(GetArgs{HyDFSfilename}, vmAddress)
+      writeFile(localfilename, contents, "client")
+      if err != nil {
+        fmt.Printf("Error on file receipt: %v\n", err);
+      } else {
+        fmt.Printf("File content saved successfully to %s\n", localfilename)
+      }
 		case "store":
 			files, err := os.ReadDir("./server")
 			if err != nil {
