@@ -10,7 +10,7 @@ import (
 )
 
 func sendAppend(args AppendArgs, ip string) error {
-	client, err := rpc.DialHTTP("tcp", ip + ":" + RPC_PORT)
+	client, err := rpc.DialHTTP("tcp", ip+":"+RPC_PORT)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func sendAppend(args AppendArgs, ip string) error {
 func sendAppendToQuorum(args AppendArgs, hash int) error {
 	successorsMutex.RLock()
 	defer successorsMutex.RUnlock()
-	
+
 	if len(successors) <= 3 {
 		for i := 0; i < len(successors); i++ {
 			err := sendAppend(args, vmToIP(successors[i]))
@@ -40,7 +40,7 @@ func sendAppendToQuorum(args AppendArgs, hash int) error {
 		defer routingTableMutex.RUnlock()
 
 		_, baseIndex := searchSuccessors(hash)
-		for i := baseIndex; i != (baseIndex + 3) % len(successors); i = (i+1) % len(successors){
+		for i := baseIndex; i != (baseIndex+3)%len(successors); i = (i + 1) % len(successors) {
 			err := sendAppend(args, vmToIP(successors[i]))
 			if err != nil {
 				return err
@@ -51,7 +51,7 @@ func sendAppendToQuorum(args AppendArgs, hash int) error {
 }
 
 func sendCreate(args CreateArgs, ip string) error {
-	client, err := rpc.DialHTTP("tcp", ip + ":" + RPC_PORT)
+	client, err := rpc.DialHTTP("tcp", ip+":"+RPC_PORT)
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func sendCreate(args CreateArgs, ip string) error {
 func sendCreateToQuorum(args CreateArgs, hash int) error {
 	successorsMutex.RLock()
 	defer successorsMutex.RUnlock()
-	
+
 	if len(successors) <= 3 {
 		for i := 0; i < len(successors); i++ {
 			err := sendCreate(args, vmToIP(successors[i]))
@@ -81,7 +81,7 @@ func sendCreateToQuorum(args CreateArgs, hash int) error {
 		defer routingTableMutex.RUnlock()
 
 		_, baseIndex := searchSuccessors(hash)
-		for i := baseIndex; i != (baseIndex + 3) % len(successors); i = (i+1) % len(successors){
+		for i := baseIndex; i != (baseIndex+3)%len(successors); i = (i + 1) % len(successors) {
 			err := sendCreate(args, vmToIP(successors[i]))
 			if err != nil {
 				return err
@@ -92,7 +92,7 @@ func sendCreateToQuorum(args CreateArgs, hash int) error {
 }
 
 func sendGet(args GetArgs, ip string) (string, error) {
-	client, err := rpc.DialHTTP("tcp", ip + ":" + RPC_PORT)
+	client, err := rpc.DialHTTP("tcp", ip+":"+RPC_PORT)
 	if err != nil {
 		return "", err
 	}
@@ -118,7 +118,7 @@ func sendGetToQuorum(args GetArgs, hash int) string {
 			if err != nil {
 				continue
 			}
-			
+
 			return reply
 		}
 		return ""
@@ -127,12 +127,12 @@ func sendGetToQuorum(args GetArgs, hash int) string {
 		defer routingTableMutex.RUnlock()
 
 		_, baseIndex := searchSuccessors(hash)
-		for i := baseIndex; i != (baseIndex + 3) % len(successors); i = (i+1) % len(successors){
+		for i := baseIndex; i != (baseIndex+3)%len(successors); i = (i + 1) % len(successors) {
 			reply, err := sendGet(args, vmToIP(successors[i]))
 			if err != nil {
 				continue
 			}
-			
+
 			return reply
 		}
 		return ""
@@ -143,7 +143,7 @@ func sendMerge(args MergeArgs, hash int) error {
 	routingTableMutex.RLock()
 	defer routingTableMutex.RUnlock()
 
-	client, err := rpc.DialHTTP("tcp", vmToIP(routingTable[hash]) + ":" + RPC_PORT)
+	client, err := rpc.DialHTTP("tcp", vmToIP(routingTable[hash])+":"+RPC_PORT)
 	if err != nil {
 		return err
 	}
@@ -235,7 +235,7 @@ func commandListener() {
 			hyDFSFilename := args[0]
 			localFilename := args[1]
 			var fileContent string
-			
+
 			for {
 				fileContent = sendGetToQuorum(GetArgs{hyDFSFilename}, routingTable[hash(hyDFSFilename)])
 				if fileContent != "" {
@@ -246,7 +246,7 @@ func commandListener() {
 
 			err := writeFile(localFilename, fileContent, "client")
 			if err != nil {
-				fmt.Printf("Error on file receipt: %v\n", err);
+				fmt.Printf("Error on file receipt: %v\n", err)
 			} else {
 				fmt.Printf("File content saved successfully to %s\n", localFilename)
 			}
@@ -267,7 +267,7 @@ func commandListener() {
 		case "routing_table":
 			printRoutingTable()
 		case "list_local":
-			files, err := os.ReadDir("./")
+			files, err := os.ReadDir("./client")
 			if err != nil {
 				fmt.Printf("Error reading local directory: %v\n", err)
 			} else {
@@ -276,21 +276,36 @@ func commandListener() {
 					fmt.Println(file.Name())
 				}
 			}
-    case "getfromreplica":
-      if len(args) < 3 {
-        fmt.Println("Error: Insufficient arguments. Usage:  VMAddress HyDFSfilename localfilename")
-      }
-      vmAddress := args[0]
-      HyDFSfilename := args[1]
-      localfilename := args[2]
-      fmt.Println("Downloading file from replica...")
-      contents, err := sendGet(GetArgs{HyDFSfilename}, vmAddress)
-      writeFile(localfilename, contents, "client")
-      if err != nil {
-        fmt.Printf("Error on file receipt: %v\n", err);
-      } else {
-        fmt.Printf("File content saved successfully to %s\n", localfilename)
-      }
+		case "getfromreplica":
+			if len(args) < 3 {
+				fmt.Println("Error: Insufficient arguments. Usage:  VMAddress HyDFSfilename localfilename")
+				continue
+			}
+			vmAddress := args[0]
+			HyDFSfilename := args[1]
+			localfilename := args[2]
+			fmt.Println("Downloading file from replica...")
+			contents, _ := sendGet(GetArgs{HyDFSfilename}, vmAddress)
+			err := writeFile(localfilename, contents, "client")
+			if err != nil {
+				fmt.Printf("Error on file receipt: %v\n", err)
+			} else {
+				fmt.Printf("File content saved successfully to %s\n", localfilename)
+			}
+		case "ls":
+			if len(args) < 1 {
+				fmt.Println("Error: Insufficient arguments. Usage: ls HyDFSfilename")
+				continue
+			}
+			hyDFSFilename := args[0]
+			fileHash := hash(hyDFSFilename)
+			fmt.Printf(
+				"File %s is being stored at - %d address is %s\n",
+				hyDFSFilename,
+				routingTable[fileHash],
+				vmToIP(routingTable[fileHash]),
+			)
+			//@TODO: this returns only the first owner of the file
 		case "store":
 			files, err := os.ReadDir("./server")
 			if err != nil {
@@ -298,7 +313,7 @@ func commandListener() {
 			} else {
 				fmt.Println("Server Files:")
 				for _, file := range files {
-					fmt.Printf("File name %s has the hash of %s", file, hash((file.Name())))
+					fmt.Printf("File name %s has the hash of %d \n", file, hash((file.Name())))
 				}
 			}
 		default:
