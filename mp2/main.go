@@ -14,7 +14,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create ./client directory: %v", err)
 	}
-
+	deleteFilesOnServer()
 	err = os.MkdirAll("./server", os.ModePerm)
 	if err != nil {
 		log.Fatalf("Failed to create ./server directory: %v", err)

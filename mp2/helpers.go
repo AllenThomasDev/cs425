@@ -184,3 +184,8 @@ func forwardMerge(hyDFSFilename string) {
 		client.Call("HyDFSReq.ForwardedMerge", args, &reply)
 	}
 }
+
+func deleteFilesOnServer() {
+  os.RemoveAll("./server")
+  fmt.Println("Deleted server directory")
+}

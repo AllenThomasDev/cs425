@@ -181,6 +181,7 @@ func commandListener() {
 		case "join":
 			joinGroup()
 		case "leave":
+      deleteFilesOnServer()
 			leaveGroup()
 		case "enable_sus":
 			enableSuspicion()
