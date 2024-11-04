@@ -181,7 +181,7 @@ func commandListener() {
 		case "join":
 			joinGroup()
 		case "leave":
-      deleteFilesOnServer()
+			deleteFilesOnServer()
 			leaveGroup()
 		case "enable_sus":
 			enableSuspicion()
@@ -210,10 +210,10 @@ func commandListener() {
 					break
 				}
 				removeFileFromCache(hyDFSFilename)
-        fmt.Println("evicted from cache")
+				fmt.Println("evicted from cache")
 			}
-      removeFileFromCache(hyDFSFilename)
-      fmt.Println("evicted from cache")
+			removeFileFromCache(hyDFSFilename)
+			fmt.Println("evicted from cache")
 		case "create":
 			if len(args) < 2 {
 				fmt.Println("Error: Insufficient arguments. Usage: create localfilename HyDFSfilename")
@@ -232,10 +232,10 @@ func commandListener() {
 					break
 				}
 				removeFileFromCache(hyDFSFilename)
-        fmt.Println("evicted from cache")
+				fmt.Println("evicted from cache")
 			}
-      removeFileFromCache(hyDFSFilename)
-      fmt.Println("evicted from cache")
+			removeFileFromCache(hyDFSFilename)
+			fmt.Println("evicted from cache")
 		case "get":
 			if len(args) < 2 {
 				fmt.Println("Error: Insufficient arguments. Usage: get HyDFSfilename localfilename")
@@ -243,16 +243,16 @@ func commandListener() {
 			}
 			hyDFSFilename := args[0]
 			localFilename := args[1]
-      if cachedContent, ok := readFileFromCache(hyDFSFilename); ok {
-        fmt.Println("Serving from cache")
-        err := writeFile(localFilename, cachedContent, "client")
-        if err != nil {
-          fmt.Printf("Error on file receipt: %v\n", err)
-        } else {
-          fmt.Printf("File content saved successfully to %s from cache\n", localFilename)
-        }
-        continue
-      }
+			if cachedContent, ok := readFileFromCache(hyDFSFilename); ok {
+				fmt.Println("Serving from cache")
+				err := writeFile(localFilename, cachedContent, "client")
+				if err != nil {
+					fmt.Printf("Error on file receipt: %v\n", err)
+				} else {
+					fmt.Printf("File content saved successfully to %s from cache\n", localFilename)
+				}
+				continue
+			}
 			var fileContent string
 
 			for {
@@ -318,12 +318,24 @@ func commandListener() {
 			}
 			hyDFSFilename := args[0]
 			fileHash := hash(hyDFSFilename)
-			fmt.Printf(
-				"File %s is being stored at - %d address is %s\n",
-				hyDFSFilename,
-				routingTable[fileHash],
-				vmToIP(routingTable[fileHash]),
-			)
+
+			fmt.Printf("File %s is stored on the following machines:\n", hyDFSFilename)
+
+			// Lock for safe access to successors and routing table
+			routingTableMutex.RLock()
+			successorsMutex.RLock()
+			defer routingTableMutex.RUnlock()
+			defer successorsMutex.RUnlock()
+
+			_, baseIndex := searchSuccessors(fileHash)
+
+			n := 3 // Assuming 3 replicas; adjust based on your replication factor
+			for i := 0; i < n; i++ {
+				successorIndex := (baseIndex + i) % len(successors)
+				vmID := successors[successorIndex]
+				vmIP := vmToIP(vmID)
+				fmt.Printf("VM Address: %s, VM ID on ring: %d\n", vmIP, vmID)
+			}
 			//@TODO: this returns only the first owner of the file
 		case "store":
 			files, err := os.ReadDir("./server")
