@@ -268,6 +268,7 @@ func commandListener() {
 				fmt.Printf("Error on file receipt: %v\n", err)
 			} else {
 				fmt.Printf("File content saved successfully to %s\n", localFilename)
+				addFileToCache(hyDFSFilename, fileContent)
 			}
 		case "merge":
 			if len(args) < 1 {
@@ -297,19 +298,33 @@ func commandListener() {
 			}
 		case "getfromreplica":
 			if len(args) < 3 {
-				fmt.Println("Error: Insufficient arguments. Usage:  VMAddress HyDFSfilename localfilename")
+				fmt.Println("Error: Insufficient arguments. Usage: VMAddress HyDFSfilename localfilename")
 				continue
 			}
+
 			vmAddress := args[0]
 			HyDFSfilename := args[1]
 			localfilename := args[2]
+
 			fmt.Println("Downloading file from replica...")
-			contents, _ := sendGet(GetArgs{HyDFSfilename}, vmAddress)
-			err := writeFile(localfilename, contents, "client")
+
+			contents, err := sendGet(GetArgs{HyDFSfilename}, vmAddress)
 			if err != nil {
-				fmt.Printf("Error on file receipt: %v\n", err)
+				fmt.Printf("Error: Failed to retrieve file from %s. Reason: %v\n", vmAddress, err)
+				continue
+			}
+
+			if len(contents) == 0 {
+				fmt.Println("Warning: Received empty file content. File may not exist on the replica.")
+				continue
+			}
+
+			// Attempt to write the file to the local system
+			err = writeFile(localfilename, contents, "client")
+			if err != nil {
+				fmt.Printf("Error: Failed to save file content to %s. Reason: %v\n", localfilename, err)
 			} else {
-				fmt.Printf("File content saved successfully to %s\n", localfilename)
+				fmt.Printf("File content saved successfully to %s\n %s", localfilename, contents)
 			}
 		case "ls":
 			if len(args) < 1 {
