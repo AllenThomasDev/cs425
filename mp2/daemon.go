@@ -182,8 +182,23 @@ func joinGroup() {
 }
 
 func listSelf() {
-	fmt.Printf("I am %s \n", selfIP)
-}
+	VMID := ipToVM(selfIP)
+	var hashList []int
+	fmt.Printf(
+		"I am %s , ID= %d",
+		selfIP,
+		VMID,
+	)
+  fmt.Printf("New files with hashes - ")
+	for k, v := range routingTable {
+		if v == VMID {
+      hashList = append(hashList, k)
+		}
+	}
+  fmt.Printf("%v\n", hashList)
+  fmt.Printf("will be routed to this node")
+  }
+
 
 func listMembership() {
 	fmt.Println("Current Membership List:")

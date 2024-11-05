@@ -15,13 +15,13 @@ vm_hosts=(
 )
 
 # Start a new tmux session named 'vm-session' and log into the first VM
-tmux new-session -d -s vm-session "ssh ${vm_hosts[0]}"
+# tmux new-session -d -s vm-session "ssh ${vm_hosts[0]}"
 
 # Loop through the remaining VM hosts and create new panes
-for host in "${vm_hosts[@]:1}"; do
+for host in "${vm_hosts[@]:0}"; do
   tmux split-window -h "ssh $host"
   tmux select-layout tiled
 done
 
 # Attach to the tmux session
-tmux attach -t vm-session
+# tmux attach -t vm-session
