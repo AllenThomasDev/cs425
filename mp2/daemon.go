@@ -205,7 +205,7 @@ func listMembership() {
 	membershipListMutex.RLock()
 	defer membershipListMutex.RUnlock()
 	for _, member := range membershipList {
-		fmt.Printf("IP: %s, I have been alive for : %d seconds, Incarnation: %d\n", member.IP, time.Now().Unix()-member.Timestamp, member.Incarnation)
+    fmt.Printf("IP: %s, I have VMid= %d" , member.IP, ipToVM(member.IP))
 	}
 }
 
