@@ -49,6 +49,8 @@ func appendFile(fileName string, fileContent string) (string, error) {
 	exists := checkFileExists("server/" + fileName)
 	if exists {
 		randFileName := genRandomFileName()
+		//@TODO:maybe move appends to another folder? it can cause confusion when using "store" command, 
+    //or we could add a check in store to ignore purely numeric file entires 
 		err := writeFile(randFileName, fileContent, "server")
 		if err != nil {
 			fmt.Printf("ERROR IN APPEND\n")
