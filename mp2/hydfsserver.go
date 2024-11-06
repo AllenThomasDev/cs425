@@ -2,9 +2,7 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
 	"net/rpc"
-	"strconv"
 	"sync"
 )
 var (
@@ -13,6 +11,7 @@ var (
 	fileChannels = make(map[string]chan Append_id_t) // channel used to write to fileLogs
 	fileLogs = make(map[string] []Append_id_t) // log of appends to file in order received
 	aIDtoFile = make(map[string]map[Append_id_t]string) // map linking append ids to random filenames
+	allSlashIndices = make(map[string] []int)
 )
 
 func writeToLog(fileName string) {
@@ -27,10 +26,6 @@ func writeToLog(fileName string) {
 			fileLogs[fileName] = append(fileLogs[fileName], appendID)
 		}	
 	}
-}
-
-func genRandomFileName() string {
-	return(strconv.Itoa(int(rand.Int31())))
 }
 
 func addToHyDFS(ip string, memType member_type_t) {
@@ -156,7 +151,6 @@ func findOwnedFiles() []string {
 	for k := range(fileLogs) {
 		if routingTable[hash(k)] == currentVM {
 			fileList = append(fileList, k)
-			fmt.Printf("File %s owned\n", k)
 		}
 	}
 	return fileList

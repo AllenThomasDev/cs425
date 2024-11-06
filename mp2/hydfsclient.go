@@ -31,6 +31,10 @@ func sendAppendToQuorum(args AppendArgs, hash int) error {
 		for i := 0; i < len(successors); i++ {
 			err := sendAppend(args, vmToIP(successors[i]))
 			if err != nil {
+				if err.Error() == "NO EXIST\n" {
+					fmt.Printf("File %s does not exist\n", backticksToSlashes(args.HyDFSFilename))
+					return nil
+				}
 				return err
 			}
 		}
@@ -43,6 +47,10 @@ func sendAppendToQuorum(args AppendArgs, hash int) error {
 		for i := baseIndex; i != (baseIndex+3)%len(successors); i = (i + 1) % len(successors) {
 			err := sendAppend(args, vmToIP(successors[i]))
 			if err != nil {
+				if err.Error() == "NO EXIST\n" {
+					fmt.Printf("File %s does not exist\n", backticksToSlashes(args.HyDFSFilename))
+					return nil
+				}
 				return err
 			}
 		}
@@ -108,34 +116,38 @@ func sendGet(args GetArgs, ip string) (string, error) {
 
 // this is different from the above function in that we only need to receive one get,
 // where with create append we want to make sure it goes through at all machines
-func sendGetToQuorum(args GetArgs, hash int) string {
+func sendGetToQuorum(args GetArgs, hash int) (string, error) {
 	successorsMutex.RLock()
 	defer successorsMutex.RUnlock()
 
+	var reply string
+	var err error
+	
 	if len(successors) <= 3 {
+		
 		for i := 0; i < len(successors); i++ {
-			reply, err := sendGet(args, vmToIP(successors[i]))
+			reply, err = sendGet(args, vmToIP(successors[i]))
 			if err != nil {
 				continue
 			}
 
-			return reply
+			return reply, nil
 		}
-		return ""
+		return "", err
 	} else {
 		routingTableMutex.RLock()
 		defer routingTableMutex.RUnlock()
 
 		_, baseIndex := searchSuccessors(hash)
 		for i := baseIndex; i != (baseIndex+3)%len(successors); i = (i + 1) % len(successors) {
-			reply, err := sendGet(args, vmToIP(successors[i]))
+			reply, err = sendGet(args, vmToIP(successors[i]))
 			if err != nil {
 				continue
 			}
 
-			return reply
+			return reply, nil
 		}
-		return ""
+		return "", err
 	}
 }
 
@@ -198,6 +210,7 @@ func commandListener() {
 			}
 			localFilename := args[0]
 			hyDFSFilename := args[1]
+			modifiedFilename := slashesToBackticks(hyDFSFilename)
 			fileContent, err := readFileToMessageBuffer(localFilename, "client")
 			if err != nil {
 				fmt.Printf("Error reading file: %v\n", err)
@@ -205,7 +218,7 @@ func commandListener() {
 			}
 			ts := time.Now()
 			for {
-				err := sendAppendToQuorum(AppendArgs{hyDFSFilename, fileContent, ts.String(), currentVM}, routingTable[hash(hyDFSFilename)])
+				err := sendAppendToQuorum(AppendArgs{modifiedFilename, fileContent, ts.String(), currentVM}, routingTable[hash(modifiedFilename)])
 				if err == nil {
 					break
 				}
@@ -221,13 +234,14 @@ func commandListener() {
 			}
 			localFilename := args[0]
 			hyDFSFilename := args[1]
+			modifiedFilename := slashesToBackticks(hyDFSFilename)
 			fileContent, err := readFileToMessageBuffer(localFilename, "client")
 			if err != nil {
 				fmt.Printf("Error reading file: %v\n", err)
 				return
 			}
 			for {
-				err := sendCreateToQuorum(CreateArgs{hyDFSFilename, fileContent}, routingTable[hash(hyDFSFilename)])
+				err := sendCreateToQuorum(CreateArgs{modifiedFilename, fileContent}, routingTable[hash(modifiedFilename)])
 				if err == nil {
 					break
 				}
@@ -253,19 +267,31 @@ func commandListener() {
 				}
 				continue
 			}
-			var fileContent string
+			fmt.Println("I sent a GET message")
 
+			modifiedFilename := slashesToBackticks(hyDFSFilename)
+			var fileContent string
+			var err error
 			for {
-				fileContent = sendGetToQuorum(GetArgs{hyDFSFilename}, routingTable[hash(hyDFSFilename)])
-				if fileContent != "" {
+				fileContent, err = sendGetToQuorum(GetArgs{modifiedFilename}, routingTable[hash(modifiedFilename)])
+				// if we get an error that isn't the file not existing, keep trying, otherwise give up
+				if err != nil {
+					if err.Error() == "NO EXIST\n" {
+						fmt.Printf("File %s does not exist\n", hyDFSFilename)
+						break
+					}
+				} else {
 					break
 				}
 			}
-			fmt.Println("I sent a GET message")
 
-			err := writeFile(localFilename, fileContent, "client")
+			if err != nil && err.Error() == "NO EXIST\n" {
+				continue
+			}
+
+			err = writeFile(localFilename, fileContent, "client")
 			if err != nil {
-				fmt.Printf("Error on file receipt: %v\n", err)
+				fmt.Printf("Error on file write: %v\n", err)
 			} else {
 				fmt.Printf("File content saved successfully to %s\n", localFilename)
 				addFileToCache(hyDFSFilename, fileContent)
@@ -276,8 +302,9 @@ func commandListener() {
 				continue
 			}
 			hyDFSFilename := args[0]
+			modifiedFilename := slashesToBackticks(hyDFSFilename)
 			for {
-				err := sendMerge(MergeArgs{hyDFSFilename}, hash(hyDFSFilename))
+				err := sendMerge(MergeArgs{modifiedFilename}, hash(modifiedFilename))
 				if err == nil {
 					break
 				}
@@ -304,11 +331,12 @@ func commandListener() {
 
 			vmAddress := args[0]
 			HyDFSfilename := args[1]
+			modifiedFilename := slashesToBackticks(HyDFSfilename)
 			localfilename := args[2]
 
 			fmt.Println("Downloading file from replica...")
 
-			contents, err := sendGet(GetArgs{HyDFSfilename}, vmAddress)
+			contents, err := sendGet(GetArgs{modifiedFilename}, vmAddress)
 			if err != nil {
 				fmt.Printf("Error: Failed to retrieve file from %s. Reason: %v\n", vmAddress, err)
 				continue
@@ -332,15 +360,14 @@ func commandListener() {
 				continue
 			}
 			hyDFSFilename := args[0]
-			fileHash := hash(hyDFSFilename)
+			modifiedFilename := slashesToBackticks(hyDFSFilename)
+			fileHash := hash(modifiedFilename)
 
 			fmt.Printf("File %s is stored on the following machines:\n", hyDFSFilename)
 
 			// Lock for safe access to successors and routing table
 			routingTableMutex.RLock()
 			successorsMutex.RLock()
-			defer routingTableMutex.RUnlock()
-			defer successorsMutex.RUnlock()
 
 			_, baseIndex := searchSuccessors(fileHash)
 
@@ -351,16 +378,15 @@ func commandListener() {
 				vmIP := vmToIP(vmID)
 				fmt.Printf("VM Address: %s, VM ID on ring: %d\n", vmIP, vmID)
 			}
+
+			routingTableMutex.RUnlock()
+			successorsMutex.RUnlock()
 			//@TODO: this returns only the first owner of the file
 		case "store":
-			files, err := os.ReadDir("./server")
-			if err != nil {
-				fmt.Printf("Error reading server directory: %v\n", err)
-			} else {
-				fmt.Println("Server Files:")
-				for _, file := range files {
-					fmt.Printf("File name %s has the hash of %d \n", file, hash((file.Name())))
-				}
+			fmt.Printf("I have the hash %d\n", ipToVM(selfIP))
+			fmt.Println("Server Files:")
+			for k := range(fileLogs) {
+				fmt.Printf("File name %s has the hash of %d \n", backticksToSlashes(k), hash(k))
 			}
 		default:
 			fmt.Println("Unknown command")

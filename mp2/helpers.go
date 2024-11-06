@@ -3,9 +3,57 @@ package main
 import (
 	"fmt"
 	"io"
+	"math/rand"
 	"net/rpc"
 	"os"
+	"strconv"
 )
+
+func genRandomFileName() string {
+	return(strconv.Itoa(int(rand.Int31())))
+}
+
+// checks file name for slashes and returns indices of slashes
+func checkFileNameForSlashes(filename string) []int {
+	slashIndices := make([]int, 0)
+	for i := 0; i < len(filename); i++ {
+		if filename[i] == '/' {
+			slashIndices = append(slashIndices, i)
+		}
+	}
+	return slashIndices
+}
+
+func removeSlashes(filename string, slashIndices []int) string {
+	for i := 0; i < len(slashIndices); i++ {
+		filename = filename[:i] + "`" + filename[i+1:]
+	}
+	return filename
+}
+
+func slashesToBackticks(filename string) string {
+	btStr := ""
+	for i := 0; i < len(filename); i++ {
+		if filename[i] == '/' {
+			btStr = btStr + "`"
+		} else {
+			btStr = btStr + string(filename[i])
+		}
+	}
+	return btStr
+}
+
+func backticksToSlashes(filename string) string {
+	slStr := ""
+	for i := 0; i < len(filename); i++ {
+		if filename[i] == '`' {
+			slStr = slStr + "/"
+		} else {
+			slStr = slStr + string(filename[i])
+		}
+	}
+	return slStr
+}
 
 func checkFileExists(localFileName string) bool {
 	_, err := os.Stat(localFileName)
@@ -49,8 +97,6 @@ func appendFile(fileName string, fileContent string) (string, error) {
 	exists := checkFileExists("server/" + fileName)
 	if exists {
 		randFileName := genRandomFileName()
-		//@TODO:maybe move appends to another folder? it can cause confusion when using "store" command, 
-    //or we could add a check in store to ignore purely numeric file entires 
 		err := writeFile(randFileName, fileContent, "server")
 		if err != nil {
 			fmt.Printf("ERROR IN APPEND\n")
@@ -59,14 +105,17 @@ func appendFile(fileName string, fileContent string) (string, error) {
 		return randFileName, nil
 	} else {
 		fmt.Printf("ERROR IN APPEND\n")
-		return "", fmt.Errorf("Error: file does not exist\n")
+		return "", fmt.Errorf("NO EXIST\n")
 	}
 }
 
 func readFileToString(localFileName string, writeFrom string) (string, error) {
 	localFile, err := os.Open(writeFrom + "/" + localFileName)
 	if err != nil {
-		return "", fmt.Errorf("error opening local file %s: %v", localFileName, err)
+		if os.IsNotExist(err) {
+			err = fmt.Errorf("NO EXIST\n")
+		}
+		return "", err
 	}
 	defer localFile.Close()
 
@@ -138,6 +187,7 @@ func appendRandomFile(fp *os.File, randomFilename string) error {
 
 
 func mergeFile(filename string, fileLog []Append_id_t) error {
+
 	file, err := os.OpenFile("server/" + filename, os.O_APPEND|os.O_WRONLY, 0644)
 	if err != nil {
 		if os.IsNotExist(err) {
