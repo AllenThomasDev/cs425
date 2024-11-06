@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -42,14 +41,6 @@ type RemoveArgs struct {
 }
 
 func startRPCListener() {
-	logFile, err := os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Println("Failed to open log file:", err)
-		os.Exit(1)
-	}
-	defer logFile.Close()
-	logger = log.New(logFile, "", log.LstdFlags|log.Lmicroseconds)
-
 	hydfsreq := new(HyDFSReq)
 	rpc.Register(hydfsreq)
 	rpc.HandleHTTP()

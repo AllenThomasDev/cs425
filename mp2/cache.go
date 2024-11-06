@@ -1,9 +1,7 @@
 package main
 
-import "log"
-
 func addFileToCache(filename string, contents string) {
-	log.Printf("File '%s': was cached\n", filename)
+	logger.Printf("File '%s': was cached\n", filename)
 	cache.Add(filename, contents)
 }
 

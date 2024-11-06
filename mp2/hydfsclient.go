@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"net/rpc"
 	"os"
 	"strconv"
@@ -172,14 +171,6 @@ func sendMerge(args MergeArgs, hash int) error {
 }
 
 func commandListener() {
-	logFile, err := os.OpenFile("client.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Println("Failed to open log file:", err)
-		os.Exit(1)
-	}
-	defer logFile.Close()
-	logger = log.New(logFile, "", log.LstdFlags|log.Lmicroseconds)
-
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("Enter command: ")
