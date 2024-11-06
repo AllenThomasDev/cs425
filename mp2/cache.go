@@ -1,11 +1,9 @@
 package main
 
-import (
-	"fmt"
-)
+import "log"
 
 func addFileToCache(filename string, contents string) {
-	fmt.Printf("File '%s': was cached\n", filename)
+	log.Printf("File '%s': was cached\n", filename)
 	cache.Add(filename, contents)
 }
 

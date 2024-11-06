@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"net/rpc"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -170,6 +172,14 @@ func sendMerge(args MergeArgs, hash int) error {
 }
 
 func commandListener() {
+	logFile, err := os.OpenFile("client.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Println("Failed to open log file:", err)
+		os.Exit(1)
+	}
+	defer logFile.Close()
+	logger = log.New(logFile, "", log.LstdFlags|log.Lmicroseconds)
+
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Print("Enter command: ")
@@ -223,10 +233,11 @@ func commandListener() {
 					break
 				}
 				removeFileFromCache(hyDFSFilename)
-				fmt.Println("evicted from cache")
+				logger.Println("evicted from cache")
 			}
+			fmt.Println("APPEND completed")
 			removeFileFromCache(hyDFSFilename)
-			fmt.Println("evicted from cache")
+			logger.Println("evicted from cache")
 		case "create":
 			if len(args) < 2 {
 				fmt.Println("Error: Insufficient arguments. Usage: create localfilename HyDFSfilename")
@@ -246,10 +257,11 @@ func commandListener() {
 					break
 				}
 				removeFileFromCache(hyDFSFilename)
-				fmt.Println("evicted from cache")
+				logger.Println("evicted from cache")
 			}
+			fmt.Println("CREATE completed")
 			removeFileFromCache(hyDFSFilename)
-			fmt.Println("evicted from cache")
+			logger.Println("evicted from cache")
 		case "get":
 			if len(args) < 2 {
 				fmt.Println("Error: Insufficient arguments. Usage: get HyDFSfilename localfilename")
@@ -263,11 +275,12 @@ func commandListener() {
 				if err != nil {
 					fmt.Printf("Error on file receipt: %v\n", err)
 				} else {
-					fmt.Printf("File content saved successfully to %s from cache\n", localFilename)
+					logger.Printf("File content saved successfully to %s from cache\n", localFilename)
+					fmt.Println("GET (from cache) completed")
 				}
 				continue
 			}
-			fmt.Println("I sent a GET message")
+			logger.Println("I sent a GET message")
 
 			modifiedFilename := slashesToBackticks(hyDFSFilename)
 			var fileContent string
@@ -289,11 +302,13 @@ func commandListener() {
 				continue
 			}
 
+			fmt.Println("GET completed")
+
 			err = writeFile(localFilename, fileContent, "client")
 			if err != nil {
 				fmt.Printf("Error on file write: %v\n", err)
 			} else {
-				fmt.Printf("File content saved successfully to %s\n", localFilename)
+				logger.Printf("File content saved successfully to %s\n", localFilename)
 				addFileToCache(hyDFSFilename, fileContent)
 			}
 		case "merge":
@@ -329,16 +344,16 @@ func commandListener() {
 				continue
 			}
 
-			vmAddress := args[0]
+			vmAddress, _ := strconv.Atoi(args[0])
 			HyDFSfilename := args[1]
 			modifiedFilename := slashesToBackticks(HyDFSfilename)
 			localfilename := args[2]
 
-			fmt.Println("Downloading file from replica...")
+			logger.Println("Downloading file from replica...")
 
-			contents, err := sendGet(GetArgs{modifiedFilename}, vmAddress)
+			contents, err := sendGet(GetArgs{modifiedFilename}, vmToIP(vmAddress))
 			if err != nil {
-				fmt.Printf("Error: Failed to retrieve file from %s. Reason: %v\n", vmAddress, err)
+				fmt.Printf("Error: Failed to retrieve file from %d. Reason: %v\n", vmAddress, err)
 				continue
 			}
 
@@ -352,8 +367,10 @@ func commandListener() {
 			if err != nil {
 				fmt.Printf("Error: Failed to save file content to %s. Reason: %v\n", localfilename, err)
 			} else {
-				fmt.Printf("File content saved successfully to %s\n %s", localfilename, contents)
+				logger.Printf("File content saved successfully to %s\n %s", localfilename, contents)
 			}
+
+			fmt.Println("GET from replica completed")
 		case "ls":
 			if len(args) < 1 {
 				fmt.Println("Error: Insufficient arguments. Usage: ls HyDFSfilename")

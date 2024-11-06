@@ -85,7 +85,6 @@ func daemonMain() {
 	go startTCPServer()
 	go startPinging()
 	joinGroup()
-	go commandListener()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
@@ -201,11 +200,16 @@ func listSelf() {
 
 
 func listMembership() {
+	memberListSorted := make([]string, 10)
 	fmt.Println("Current Membership List:")
 	membershipListMutex.RLock()
 	defer membershipListMutex.RUnlock()
 	for _, member := range membershipList {
-    fmt.Printf("IP: %s, I have VMid= %d" , member.IP, ipToVM(member.IP))
+    memberListSorted[ipToVM(member.IP)] = fmt.Sprintf("IP: %s, I have VMid= %d\n" , member.IP, ipToVM(member.IP))
+	}
+
+	for i := 0; i < len(membershipList); i++ {
+		fmt.Printf(memberListSorted[i])
 	}
 }
 

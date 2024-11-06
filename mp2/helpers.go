@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"net/rpc"
 	"os"
@@ -58,7 +59,7 @@ func backticksToSlashes(filename string) string {
 func checkFileExists(localFileName string) bool {
 	_, err := os.Stat(localFileName)
 	if os.IsNotExist(err) {
-		fmt.Printf("Error: Local file %s does not exist\n", localFileName)
+		log.Printf("Error: Local file %s does not exist\n", localFileName)
 		return false
 	}
 	return true
@@ -67,7 +68,7 @@ func checkFileExists(localFileName string) bool {
 func checkFileOpens(localFileName string) bool {
 	_, err := os.OpenFile(localFileName, os.O_RDONLY, 0644)
 	if err != nil {
-		fmt.Printf("Error opening local file\n")
+		log.Printf("Error opening local file\n")
 		return false
 	}
 	return true
@@ -78,7 +79,7 @@ func writeFile(fileName string, fileContent string, writeTo string) error {
 	file, err := os.OpenFile(writeTo + "/" + fileName, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
 	if err != nil {
 		if os.IsExist(err) {
-			fmt.Printf("File already exists\n")
+			logger.Printf("File already exists\n")
 			return err
 		}
 		return fmt.Errorf("error creating file %s: %v", fileName, err)
@@ -99,12 +100,10 @@ func appendFile(fileName string, fileContent string) (string, error) {
 		randFileName := genRandomFileName()
 		err := writeFile(randFileName, fileContent, "server")
 		if err != nil {
-			fmt.Printf("ERROR IN APPEND\n")
 			return "", fmt.Errorf("Error appending file %s: %v\n", fileName, err)
 		}
 		return randFileName, nil
 	} else {
-		fmt.Printf("ERROR IN APPEND\n")
 		return "", fmt.Errorf("NO EXIST\n")
 	}
 }
@@ -134,7 +133,7 @@ func readFileToString(localFileName string, writeFrom string) (string, error) {
 func readFileToMessageBuffer(localFileName string, writeFrom string) (string, error) {
 	message, err := readFileToString(localFileName, writeFrom)
 	if err != nil {
-		fmt.Printf("Error reading file %s into buffer: %v\n", localFileName, err)
+		logger.Printf("Error reading file %s into buffer: %v\n", localFileName, err)
 		return "", err
 	}
 	return message, nil
@@ -153,10 +152,10 @@ func removeShards(filename string) error {
 
 func removeFiles(repFiles []string) error {
 	for i := 0; i < len(repFiles); i++ {
-		fmt.Printf("Removing file %s\n", repFiles[i])
+		logger.Printf("Removing file %s\n", repFiles[i])
 		err := os.Remove("server/" + repFiles[i])
 		if err != nil {
-			fmt.Printf("Error removing file %s: %v\n", repFiles[i], err)
+			logger.Printf("Error removing file %s: %v\n", repFiles[i], err)
 			continue
 		} else {
 			err = removeShards(repFiles[i])

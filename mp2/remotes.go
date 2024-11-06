@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -41,6 +42,14 @@ type RemoveArgs struct {
 }
 
 func startRPCListener() {
+	logFile, err := os.OpenFile("server.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Println("Failed to open log file:", err)
+		os.Exit(1)
+	}
+	defer logFile.Close()
+	logger = log.New(logFile, "", log.LstdFlags|log.Lmicroseconds)
+
 	hydfsreq := new(HyDFSReq)
 	rpc.Register(hydfsreq)
 	rpc.HandleHTTP()
@@ -52,7 +61,7 @@ func startRPCListener() {
 }
 
 func (h *HyDFSReq) Get(args *GetArgs, reply *string) error {
-	fmt.Printf("Received GET message to fetch %s", args.HyDFSFilename)
+	fmt.Printf("Received GET message to fetch %s\n", args.HyDFSFilename)
 	fileContent, err := readFileToMessageBuffer(args.HyDFSFilename, "server")
 	if err != nil {
 		fmt.Printf("Error writing file content: %v\n", err)
@@ -73,11 +82,13 @@ func (h *HyDFSReq) Get(args *GetArgs, reply *string) error {
 	}
 
 	*reply = fileContent
-	fmt.Printf("\nSent file content")
+	fmt.Printf("Sent file content\n")
 	return nil
 }
 
 func (h *HyDFSReq) Create(args *CreateArgs, reply *string) error {
+	fmt.Printf("Received CREATE message for %s\n", args.HyDFSFilename)
+
 	err := writeFile(args.HyDFSFilename, args.FileContent, "server")
 	if err != nil {
 		if errors.Is(err, os.ErrExist) {
@@ -88,12 +99,13 @@ func (h *HyDFSReq) Create(args *CreateArgs, reply *string) error {
 		}
 	}
 
-	fmt.Printf("Received CREATE message for %s and %s\n", args.HyDFSFilename, args.FileContent)
 	fileChannels[args.HyDFSFilename] = make(chan Append_id_t, 100)
 	fileLogs[args.HyDFSFilename] = make([]Append_id_t, 0)
 	aIDtoFile[args.HyDFSFilename] = make(map[Append_id_t]string, 0)
 	// launch thread to manage appends
 	go writeToLog(args.HyDFSFilename)
+
+	fmt.Println("CREATE completed")
 	return nil
 }
 
@@ -109,10 +121,12 @@ func (h *HyDFSReq) Append(args *AppendArgs, reply *string) error {
 			return err
 		}
 
-		fmt.Printf("Append to %s at file %s from vm %d\n", args.HyDFSFilename, randFilename, args.CallerVM)
+		logger.Printf("Append to %s at file %s from vm %d\n", args.HyDFSFilename, randFilename, args.CallerVM)
 		fileChannels[args.HyDFSFilename] <- aID
 		aIDtoFile[args.HyDFSFilename][aID] = randFilename
 	}
+
+	fmt.Println("APPEND completed")
 	return nil
 }
 

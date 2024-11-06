@@ -71,7 +71,7 @@ func addToHyDFS(ip string, memType member_type_t) {
 			}
 		}
 		if len(repossessedFiles) > 0 {
-			fmt.Println("Getting files repossessed :(")
+			logger.Println("Getting files repossessed :(")
 		}
 		replicateFiles(ip, repossessedFiles)
 
@@ -113,16 +113,16 @@ func removeFromHyDFS(ip string) {
 func replicateFiles(ip string, repFiles []string) error {
 	for i := 0; i < len(repFiles); i++ {
 		// write initial file (data written from CREATE call)
-		fmt.Printf("Replicating file %s at vm %d\n", repFiles[i], ipToVM(ip))
+		logger.Printf("Replicating file %s at vm %d\n", repFiles[i], ipToVM(ip))
 		fileContent, err := readFileToMessageBuffer(repFiles[i], "server")
 		if err != nil {
-			fmt.Printf("Error reading file content: %v\n", err)
+			logger.Printf("Error reading file content: %v\n", err)
 			return err
 		}
 
 		err = sendCreate(CreateArgs{repFiles[i], fileContent}, ip)
 		if err != nil {
-			fmt.Printf("Error on replication creation: %v\n", err)
+			logger.Printf("Error on replication creation: %v\n", err)
 			return err
 		}
 
@@ -131,13 +131,13 @@ func replicateFiles(ip string, repFiles []string) error {
 			// REMINDER: aIDtoFile uses filename, append id to give us randomized filename
 			shardContent, err := readFileToMessageBuffer(aIDtoFile[repFiles[i]][fileLogs[repFiles[i]][j]], "server")
 			if err != nil {
-				fmt.Printf("Error reading shard content: %v\n", err)
+				logger.Printf("Error reading shard content: %v\n", err)
 				return err
 			}
 
 			err = sendAppend(AppendArgs{repFiles[i], shardContent, fileLogs[repFiles[i]][j].Timestamp, fileLogs[repFiles[i]][j].Vm}, ip)
 			if err != nil {
-				fmt.Printf("TCP error: %v\n", err)
+				logger.Printf("TCP error: %v\n", err)
 				return err
 			}
 		}
@@ -173,10 +173,8 @@ func addToSuccessors(hash int) int {
 			successors[insertIndex] = hash
 		}
 		
-		//printSuccessors()
 		return insertIndex
 	}
-	//printSuccessors()
 	return -1
 }
 
@@ -190,7 +188,6 @@ func removeFromSuccessors(hash int) int {
 		return index
 	}
 
-	//printSuccessors()
 	return -1
 }
 
@@ -214,7 +211,6 @@ func addToRoutingTable(hash int) {
 			nextLowest = mod((nextLowest - 1), MACHINES_IN_NETWORK)
 		}
 	}
-	//printRoutingTable()
 }
 
 func removeFromRoutingTable(hash int) {
@@ -236,8 +232,6 @@ func removeFromRoutingTable(hash int) {
 			nextLowest = mod((nextLowest - 1), MACHINES_IN_NETWORK)
 		}
 	}
-
-	//printRoutingTable()
 }
 
 // find whether element is in list or not, and if not, index to insert
