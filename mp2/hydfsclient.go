@@ -123,9 +123,9 @@ func sendGetToQuorum(args GetArgs, hash int) (string, error) {
 
 	var reply string
 	var err error
-	
+
 	if len(successors) <= 3 {
-		
+
 		for i := 0; i < len(successors); i++ {
 			reply, err = sendGet(args, vmToIP(successors[i]))
 			if err != nil {
@@ -258,6 +258,8 @@ func commandListener() {
 				fmt.Println("Error: Insufficient arguments. Usage: get HyDFSfilename localfilename")
 				continue
 			}
+			startTime := time.Now()
+			servedFromCache := false
 			hyDFSFilename := args[0]
 			localFilename := args[1]
 			if cachedContent, ok := readFileFromCache(hyDFSFilename); ok {
@@ -268,6 +270,7 @@ func commandListener() {
 				} else {
 					logger.Printf("File content saved successfully to %s from cache\n", localFilename)
 					fmt.Println("GET (from cache) completed")
+					servedFromCache = true
 				}
 				continue
 			}
@@ -294,7 +297,8 @@ func commandListener() {
 			}
 
 			fmt.Println("GET completed")
-
+			duration := time.Since(startTime)
+			logger.Printf("GET took %s, cache status %v \n", duration, servedFromCache)
 			err = writeFile(localFilename, fileContent, "client")
 			if err != nil {
 				fmt.Printf("Error on file write: %v\n", err)
@@ -393,7 +397,7 @@ func commandListener() {
 		case "store":
 			fmt.Printf("I have the hash %d\n", ipToVM(selfIP))
 			fmt.Println("Server Files:")
-			for k := range(fileLogs) {
+			for k := range fileLogs {
 				fmt.Printf("File name %s has the hash of %d \n", backticksToSlashes(k), hash(k))
 			}
 		default:
