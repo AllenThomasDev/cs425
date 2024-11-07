@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"sync"
 )
 
 type HyDFSReq string
@@ -92,6 +93,7 @@ func (h *HyDFSReq) Create(args *CreateArgs, reply *string) error {
 
 	fileChannels[args.HyDFSFilename] = make(chan Append_id_t, 100)
 	fileLogs[args.HyDFSFilename] = make([]Append_id_t, 0)
+	fileLogMutexes[args.HyDFSFilename] = &sync.Mutex{}
 	aIDtoFile[args.HyDFSFilename] = make(map[Append_id_t]string, 0)
 	// launch thread to manage appends
 	go writeToLog(args.HyDFSFilename)
@@ -123,8 +125,10 @@ func (h *HyDFSReq) Append(args *AppendArgs, reply *string) error {
 
 func (h *HyDFSReq) Merge(args *MergeArgs, reply *string) error {
 	fmt.Printf("Merging file %s\n", args.HyDFSFilename)
+	fileLogMutexes[args.HyDFSFilename].Lock()
 	forwardMerge(args.HyDFSFilename)
 	err := mergeFile(args.HyDFSFilename, fileLogs[args.HyDFSFilename])
+	fileLogMutexes[args.HyDFSFilename].Unlock()
 	if err != nil {
 		fmt.Printf("Error merging file: %v\n", err)
 		return err
@@ -133,8 +137,10 @@ func (h *HyDFSReq) Merge(args *MergeArgs, reply *string) error {
 }
 
 func (h *HyDFSReq) ForwardedMerge(args *ForwardedMergeArgs, reply *string) error {
-	fmt.Printf("Merging file %s\n", args.HyDFSFilename)
+	logger.Printf("Merging file %s\n", args.HyDFSFilename)
+	fileLogMutexes[args.HyDFSFilename].Lock()
 	err := mergeFile(args.HyDFSFilename, args.FileLog)
+	fileLogMutexes[args.HyDFSFilename].Unlock()
 	if err != nil {
 		fmt.Printf("Error merging file: %v\n", err)
 		return err

@@ -76,7 +76,6 @@ func sendCreate(args CreateArgs, ip string) error {
 func sendCreateToQuorum(args CreateArgs, hash int) error {
 	successorsMutex.RLock()
 	defer successorsMutex.RUnlock()
-
 	if len(successors) <= 3 {
 		for i := 0; i < len(successors); i++ {
 			err := sendCreate(args, vmToIP(successors[i]))
@@ -230,8 +229,8 @@ func commandListener() {
 			removeFileFromCache(hyDFSFilename)
 			logger.Println("evicted from cache")
 		case "create":
-			if len(args) < 2 {
-				fmt.Println("Error: Insufficient arguments. Usage: create localfilename HyDFSfilename")
+			if len(args) != 2 {
+				fmt.Println("Error: Incorrect arguments. Usage: create localfilename HyDFSfilename")
 				continue
 			}
 			localFilename := args[0]
@@ -396,6 +395,15 @@ func commandListener() {
 			for k := range(fileLogs) {
 				fmt.Printf("File name %s has the hash of %d \n", backticksToSlashes(k), hash(k))
 			}
+		case "merge_perf":
+			if len(args) < 3 {
+				fmt.Println("Error: Insufficient arguments. Usage: HyDFSFilename append_size conc_appends")
+				continue
+			}
+			filename := args[0]
+			append_size, _ := strconv.Atoi(args[1])
+			conc_appends, _ := strconv.Atoi(args[2])
+			gen_merge_files(filename, append_size, conc_appends)
 		default:
 			fmt.Println("Unknown command")
 		}

@@ -8,7 +8,30 @@ import (
 	"net/rpc"
 	"os"
 	"strconv"
+	"time"
 )
+
+func periodicMerge() {
+	for {
+		routingTableMutex.RLock()
+		ownedFiles := findOwnedFiles()
+		routingTableMutex.RUnlock()
+		logger.Println("Trying to run periodic merge")
+		if len(ownedFiles) > 0 {
+			randFile := ownedFiles[rand.Intn(len(ownedFiles))]
+			logger.Printf("Running periodic merge on file %s\n", randFile)
+			fileLogMutexes[randFile].Lock()
+			forwardMerge(randFile)
+			err := mergeFile(randFile, fileLogs[randFile])
+			if err != nil {
+				fmt.Printf("Error running periodic merge: %v\n", err)
+				return;
+			}
+			fileLogMutexes[randFile].Unlock()
+		}
+		time.Sleep(time.Minute)
+	}
+}
 
 func genRandomFileName() string {
 	return(strconv.Itoa(int(rand.Int31())))
@@ -196,23 +219,25 @@ func mergeFile(filename string, fileLog []Append_id_t) error {
 	}
 	defer file.Close()
 
+	var filesMerged int;
 	for i := 0; i < len(fileLog); i++ {
 		randomFilename := aIDtoFile[filename][fileLog[i]]
 		err := appendRandomFile(file, randomFilename)
 		if err != nil {
 			return err
 		}
-	}
-	
-	// remove all shards after writing them
-	err = removeShards(filename)
-	if err != nil {
-		return err
+
+		err = os.Remove("server/" + aIDtoFile[filename][fileLog[i]])
+		if err != nil {
+			return fmt.Errorf("Error removing shard %s: %v\n", aIDtoFile[filename][fileLog[i]], err)
+		}
+
+		delete(aIDtoFile[filename], fileLog[i])
+		filesMerged++
 	}
 
 	// clear corresponding bookkeeping info as well
-	fileLogs[filename] = make([]Append_id_t, 0)
-	aIDtoFile[filename] = make(map[Append_id_t]string)
+	fileLogs[filename] = fileLogs[filename][filesMerged:]
 	
 	return nil
 }

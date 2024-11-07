@@ -10,8 +10,8 @@ var (
 	successorsMutex = &sync.RWMutex{}
 	fileChannels = make(map[string]chan Append_id_t) // channel used to write to fileLogs
 	fileLogs = make(map[string] []Append_id_t) // log of appends to file in order received
+	fileLogMutexes = make(map[string] *sync.Mutex)
 	aIDtoFile = make(map[string]map[Append_id_t]string) // map linking append ids to random filenames
-	allSlashIndices = make(map[string] []int)
 )
 
 func writeToLog(fileName string) {
@@ -23,7 +23,9 @@ func writeToLog(fileName string) {
 			delete(fileLogs, fileName)
 			delete(aIDtoFile, fileName)
 		} else {
+			fileLogMutexes[fileName].Lock()
 			fileLogs[fileName] = append(fileLogs[fileName], appendID)
+			fileLogMutexes[fileName].Unlock()
 		}	
 	}
 }
