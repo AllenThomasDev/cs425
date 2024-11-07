@@ -395,15 +395,6 @@ func commandListener() {
 			for k := range(fileLogs) {
 				fmt.Printf("File name %s has the hash of %d \n", backticksToSlashes(k), hash(k))
 			}
-		case "merge_perf":
-			if len(args) < 3 {
-				fmt.Println("Error: Insufficient arguments. Usage: HyDFSFilename append_size conc_appends")
-				continue
-			}
-			filename := args[0]
-			append_size, _ := strconv.Atoi(args[1])
-			conc_appends, _ := strconv.Atoi(args[2])
-			gen_merge_files(filename, append_size, conc_appends)
 		default:
 			fmt.Println("Unknown command")
 		}
