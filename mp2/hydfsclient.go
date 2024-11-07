@@ -270,6 +270,8 @@ func commandListener() {
 				} else {
 					logger.Printf("File content saved successfully to %s from cache\n", localFilename)
 					fmt.Println("GET (from cache) completed")
+					duration := time.Since(startTime)
+					logger.Printf("GET took %s, cache status %v \n", duration, servedFromCache)
 					servedFromCache = true
 				}
 				continue
