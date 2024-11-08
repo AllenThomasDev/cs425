@@ -11,6 +11,31 @@ import (
 	"time"
 )
 
+func gen_merge_files(filename string, append_size int, num_clients int) {
+	appString := ""
+	for i := 0; i < append_size; i++ {
+		appString = appString + "A"
+	}
+
+	fmt.Println("string generation finished")
+	ns := 0
+	for i := 0; i < num_clients * 1000; i++ {
+		ts := time.Date(2024, time.November, 11, 11, 11, 11, ns, time.UTC).String()
+		randFname := genRandomFileName()
+
+		fmt.Println("writing file")
+
+		writeFile(randFname, appString, "server")
+		fmt.Println("file writing finished")
+
+		aID := Append_id_t{1, ts};
+
+		fileChannels[filename] <- aID
+		aIDtoFile[filename][aID] = randFname
+		ns++
+	}
+}
+
 func periodicMerge() {
 	for {
 		routingTableMutex.RLock()
@@ -250,14 +275,17 @@ func forwardMerge(hyDFSFilename string) {
 	}
 	
 	args := ForwardedMergeArgs{hyDFSFilename, fileLogs[hyDFSFilename]}
-	client, _ := rpc.DialHTTP("tcp", vmToIP(successors[0]) + ":" + RPC_PORT)
-
+	client, err := rpc.DialHTTP("tcp", vmToIP(successors[0]) + ":" + RPC_PORT)
 	var reply string
-	client.Call("HyDFSReq.ForwardedMerge", args, &reply)
+	if err == nil {
+		client.Call("HyDFSReq.ForwardedMerge", args, &reply)
+	}
 	
 	if len(successors) > 2 {
-		client, _ := rpc.DialHTTP("tcp", vmToIP(successors[1]) + ":" + RPC_PORT)
-		client.Call("HyDFSReq.ForwardedMerge", args, &reply)
+		client, err := rpc.DialHTTP("tcp", vmToIP(successors[1]) + ":" + RPC_PORT)
+		if err == nil {
+			client.Call("HyDFSReq.ForwardedMerge", args, &reply)
+		}
 	}
 }
 

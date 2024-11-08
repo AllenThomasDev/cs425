@@ -22,7 +22,7 @@ func main() {
 	go daemonMain()
 	go commandListener()
 	go startRPCListener()
-	go periodicMerge()
+	// go periodicMerge()
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	<-sigs
