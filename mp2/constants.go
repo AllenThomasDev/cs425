@@ -16,7 +16,7 @@ const (
 	OLD_MEMBER
 )
 
-var cache = expirable.NewLRU[string, string](5, nil, 15*time.Second)
+var cache = expirable.NewLRU[string, string](0, nil, 15*time.Second)
 
 type ack_type_t int
 const (
