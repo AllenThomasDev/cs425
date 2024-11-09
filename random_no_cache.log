@@ -1,0 +1,2348 @@
+2024/11/09 15:33:31.433469 File content saved successfully to local_b1_run1.txt
+2024/11/09 15:33:31.433477 File 'b1.txt': was cached
+2024/11/09 15:33:31.619375 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188011 (size: 29 bytes)
+2024/11/09 15:33:31.619857 Received TCP message from 172.22.158.180:39676: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:33:31.619866 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:33:31.975703 I sent a GET message
+2024/11/09 15:33:31.977694 GET took 1.992169ms, cache status false 
+2024/11/09 15:33:31.977810 File content saved successfully to local_b2_run1.txt
+2024/11/09 15:33:31.977814 File 'b2.txt': was cached
+2024/11/09 15:33:32.499853 I sent a GET message
+2024/11/09 15:33:32.501695 GET took 1.843435ms, cache status false 
+2024/11/09 15:33:32.501839 File content saved successfully to local_b3_run1.txt
+2024/11/09 15:33:32.501844 File 'b3.txt': was cached
+2024/11/09 15:33:32.620817 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188012 (size: 29 bytes)
+2024/11/09 15:33:32.621338 Received TCP message from 172.22.156.180:33642: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:33:32.621353 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:33:32.735480 Received TCP message from 172.22.156.181:36290: PING,172.22.156.181,1731188012 (size: 30 bytes)
+2024/11/09 15:33:32.735824 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:33.037796 I sent a GET message
+2024/11/09 15:33:33.039167 GET took 1.372142ms, cache status false 
+2024/11/09 15:33:33.039296 File content saved successfully to local_b4_run1.txt
+2024/11/09 15:33:33.039301 File 'b4.txt': was cached
+2024/11/09 15:33:33.593066 I sent a GET message
+2024/11/09 15:33:33.594760 GET took 1.695948ms, cache status false 
+2024/11/09 15:33:33.594961 File content saved successfully to local_b5_run1.txt
+2024/11/09 15:33:33.594970 File 'b5.txt': was cached
+2024/11/09 15:33:33.621867 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188013 (size: 29 bytes)
+2024/11/09 15:33:33.622420 Received TCP message from 172.22.158.179:59926: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:33:33.622474 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:33:34.106726 I sent a GET message
+2024/11/09 15:33:34.108642 GET took 1.917392ms, cache status false 
+2024/11/09 15:33:34.108798 File content saved successfully to local_b6_run1.txt
+2024/11/09 15:33:34.108802 File 'b6.txt': was cached
+2024/11/09 15:33:34.622447 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188014 (size: 29 bytes)
+2024/11/09 15:33:34.622942 Received TCP message from 172.22.94.179:56312: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:33:34.622976 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:33:34.649103 I sent a GET message
+2024/11/09 15:33:34.650515 GET took 1.413345ms, cache status false 
+2024/11/09 15:33:34.650711 File content saved successfully to local_b7_run1.txt
+2024/11/09 15:33:34.650716 File 'b7.txt': was cached
+2024/11/09 15:33:35.204158 I sent a GET message
+2024/11/09 15:33:35.205364 GET took 1.207833ms, cache status false 
+2024/11/09 15:33:35.205502 File content saved successfully to local_b8_run1.txt
+2024/11/09 15:33:35.205509 File 'b8.txt': was cached
+2024/11/09 15:33:35.624131 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188015 (size: 29 bytes)
+2024/11/09 15:33:35.624778 Received TCP message from 172.22.156.180:33654: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:33:35.624837 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:33:35.708955 I sent a GET message
+2024/11/09 15:33:35.710431 GET took 1.478323ms, cache status false 
+2024/11/09 15:33:35.710560 File content saved successfully to local_b9_run1.txt
+2024/11/09 15:33:35.710564 File 'b9.txt': was cached
+2024/11/09 15:33:36.244015 I sent a GET message
+2024/11/09 15:33:36.245329 GET took 1.315523ms, cache status false 
+2024/11/09 15:33:36.245449 File content saved successfully to local_b10_run1.txt
+2024/11/09 15:33:36.245453 File 'b10.txt': was cached
+2024/11/09 15:33:36.624893 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188016 (size: 29 bytes)
+2024/11/09 15:33:36.625429 Received TCP message from 172.22.156.181:36292: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:33:36.625457 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:33:36.738948 Received TCP message from 172.22.94.179:56316: PING,172.22.94.179,1731188016 (size: 29 bytes)
+2024/11/09 15:33:36.739181 Received TCP message from 172.22.94.180:40964: PING,172.22.94.180,1731188016 (size: 29 bytes)
+2024/11/09 15:33:36.739337 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:36.739433 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:36.794092 I sent a GET message
+2024/11/09 15:33:36.795262 GET took 1.171348ms, cache status false 
+2024/11/09 15:33:36.795419 File content saved successfully to local_b11_run1.txt
+2024/11/09 15:33:36.795424 File 'b11.txt': was cached
+2024/11/09 15:33:37.317311 I sent a GET message
+2024/11/09 15:33:37.318627 GET took 1.318168ms, cache status false 
+2024/11/09 15:33:37.318750 File content saved successfully to local_b12_run1.txt
+2024/11/09 15:33:37.318754 File 'b12.txt': was cached
+2024/11/09 15:33:37.626055 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188017 (size: 29 bytes)
+2024/11/09 15:33:37.626710 Received TCP message from 172.22.156.181:36306: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:33:37.626728 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:33:37.849660 I sent a GET message
+2024/11/09 15:33:37.850565 GET took 906.988µs, cache status false 
+2024/11/09 15:33:37.850693 File content saved successfully to local_b13_run1.txt
+2024/11/09 15:33:37.850697 File 'b13.txt': was cached
+2024/11/09 15:33:38.365923 I sent a GET message
+2024/11/09 15:33:38.367570 GET took 1.648205ms, cache status false 
+2024/11/09 15:33:38.367694 File content saved successfully to local_b14_run1.txt
+2024/11/09 15:33:38.367698 File 'b14.txt': was cached
+2024/11/09 15:33:38.626903 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188018 (size: 29 bytes)
+2024/11/09 15:33:38.627511 Received TCP message from 172.22.156.179:44372: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:33:38.627538 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:33:38.741592 Received TCP message from 172.22.158.181:37280: PING,172.22.158.181,1731188018 (size: 30 bytes)
+2024/11/09 15:33:38.741933 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:38.889792 I sent a GET message
+2024/11/09 15:33:38.891329 GET took 1.537978ms, cache status false 
+2024/11/09 15:33:38.892120 File content saved successfully to local_b15_run1.txt
+2024/11/09 15:33:38.892126 File 'b15.txt': was cached
+2024/11/09 15:33:39.422453 I sent a GET message
+2024/11/09 15:33:39.423358 GET took 907.293µs, cache status false 
+2024/11/09 15:33:39.423468 File content saved successfully to local_b16_run1.txt
+2024/11/09 15:33:39.423473 File 'b16.txt': was cached
+2024/11/09 15:33:39.627493 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188019 (size: 29 bytes)
+2024/11/09 15:33:39.628159 Received TCP message from 172.22.94.179:56328: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:33:39.628232 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:33:39.914220 Received TCP message from 172.22.158.179:59930: PING,172.22.158.179,1731188019 (size: 30 bytes)
+2024/11/09 15:33:39.914519 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:39.962737 I sent a GET message
+2024/11/09 15:33:39.964637 GET took 1.901536ms, cache status false 
+2024/11/09 15:33:39.964759 File content saved successfully to local_b17_run1.txt
+2024/11/09 15:33:39.964763 File 'b17.txt': was cached
+2024/11/09 15:33:40.486777 I sent a GET message
+2024/11/09 15:33:40.487692 GET took 916.87µs, cache status false 
+2024/11/09 15:33:40.487818 File content saved successfully to local_b18_run1.txt
+2024/11/09 15:33:40.487823 File 'b18.txt': was cached
+2024/11/09 15:33:40.628873 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188020 (size: 29 bytes)
+2024/11/09 15:33:40.629465 Received TCP message from 172.22.158.180:34576: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:33:40.629496 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:33:41.025586 I sent a GET message
+2024/11/09 15:33:41.026984 GET took 1.3998ms, cache status false 
+2024/11/09 15:33:41.027140 File content saved successfully to local_b19_run1.txt
+2024/11/09 15:33:41.027145 File 'b19.txt': was cached
+2024/11/09 15:33:41.562384 I sent a GET message
+2024/11/09 15:33:41.563869 GET took 1.486366ms, cache status false 
+2024/11/09 15:33:41.564047 File content saved successfully to local_b20_run1.txt
+2024/11/09 15:33:41.564052 File 'b20.txt': was cached
+2024/11/09 15:33:41.630038 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188021 (size: 29 bytes)
+2024/11/09 15:33:41.630701 Received TCP message from 172.22.156.181:47538: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:33:41.630766 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:33:41.743740 Received TCP message from 172.22.156.180:48442: PING,172.22.156.180,1731188021 (size: 30 bytes)
+2024/11/09 15:33:41.744039 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:41.915902 Received TCP message from 172.22.158.179:59946: PING,172.22.158.179,1731188021 (size: 30 bytes)
+2024/11/09 15:33:41.916216 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:42.089926 I sent a GET message
+2024/11/09 15:33:42.091198 GET took 1.273074ms, cache status false 
+2024/11/09 15:33:42.091326 File content saved successfully to local_b21_run1.txt
+2024/11/09 15:33:42.091331 File 'b21.txt': was cached
+2024/11/09 15:33:42.628829 I sent a GET message
+2024/11/09 15:33:42.630083 GET took 1.255604ms, cache status false 
+2024/11/09 15:33:42.630322 File content saved successfully to local_b22_run1.txt
+2024/11/09 15:33:42.630328 File 'b22.txt': was cached
+2024/11/09 15:33:42.630518 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188022 (size: 29 bytes)
+2024/11/09 15:33:42.630959 Received TCP message from 172.22.158.181:37296: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:33:42.630974 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:33:42.745147 Received TCP message from 172.22.94.179:56338: PING,172.22.94.179,1731188022 (size: 29 bytes)
+2024/11/09 15:33:42.745447 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:43.156142 I sent a GET message
+2024/11/09 15:33:43.157567 GET took 1.425782ms, cache status false 
+2024/11/09 15:33:43.157694 File content saved successfully to local_b23_run1.txt
+2024/11/09 15:33:43.157698 File 'b23.txt': was cached
+2024/11/09 15:33:43.631298 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188023 (size: 29 bytes)
+2024/11/09 15:33:43.631929 Received TCP message from 172.22.156.180:48446: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:33:43.631955 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:33:43.687387 I sent a GET message
+2024/11/09 15:33:43.688927 GET took 1.541829ms, cache status false 
+2024/11/09 15:33:43.689099 File content saved successfully to local_b24_run1.txt
+2024/11/09 15:33:43.689107 File 'b24.txt': was cached
+2024/11/09 15:33:44.212327 I sent a GET message
+2024/11/09 15:33:44.213575 GET took 1.249555ms, cache status false 
+2024/11/09 15:33:44.213707 File content saved successfully to local_b25_run1.txt
+2024/11/09 15:33:44.213711 File 'b25.txt': was cached
+2024/11/09 15:33:44.632252 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188024 (size: 29 bytes)
+2024/11/09 15:33:44.632829 Received TCP message from 172.22.94.181:57538: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:33:44.632859 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:33:44.746476 Received TCP message from 172.22.156.181:47546: PING,172.22.156.181,1731188024 (size: 30 bytes)
+2024/11/09 15:33:44.746825 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:44.750921 I sent a GET message
+2024/11/09 15:33:44.752284 GET took 1.363002ms, cache status false 
+2024/11/09 15:33:44.752421 File content saved successfully to local_b26_run1.txt
+2024/11/09 15:33:44.752426 File 'b26.txt': was cached
+2024/11/09 15:33:45.279404 I sent a GET message
+2024/11/09 15:33:45.280654 GET took 1.251485ms, cache status false 
+2024/11/09 15:33:45.280778 File content saved successfully to local_b27_run1.txt
+2024/11/09 15:33:45.280782 File 'b27.txt': was cached
+2024/11/09 15:33:45.633056 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188025 (size: 29 bytes)
+2024/11/09 15:33:45.633842 Received TCP message from 172.22.156.180:48456: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:33:45.633884 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:33:45.795713 I sent a GET message
+2024/11/09 15:33:45.797235 GET took 1.523929ms, cache status false 
+2024/11/09 15:33:45.797445 File content saved successfully to local_b28_run1.txt
+2024/11/09 15:33:45.797450 File 'b28.txt': was cached
+2024/11/09 15:33:45.945988 Received TCP message from 172.22.94.181:57550: PING,172.22.94.181,1731188025 (size: 29 bytes)
+2024/11/09 15:33:45.946278 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:46.330011 I sent a GET message
+2024/11/09 15:33:46.331156 GET took 1.146068ms, cache status false 
+2024/11/09 15:33:46.331277 File content saved successfully to local_b29_run1.txt
+2024/11/09 15:33:46.331283 File 'b29.txt': was cached
+2024/11/09 15:33:46.633712 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188026 (size: 29 bytes)
+2024/11/09 15:33:46.634344 Received TCP message from 172.22.156.179:35950: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:33:46.634364 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:33:46.863767 I sent a GET message
+2024/11/09 15:33:46.865144 GET took 1.379314ms, cache status false 
+2024/11/09 15:33:46.865363 File content saved successfully to local_b30_run1.txt
+2024/11/09 15:33:46.865370 File 'b30.txt': was cached
+2024/11/09 15:33:46.948595 Received TCP message from 172.22.94.181:57558: PING,172.22.94.181,1731188026 (size: 29 bytes)
+2024/11/09 15:33:46.948942 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:47.402163 I sent a GET message
+2024/11/09 15:33:47.403648 GET took 1.485704ms, cache status false 
+2024/11/09 15:33:47.403799 File content saved successfully to local_b31_run1.txt
+2024/11/09 15:33:47.403804 File 'b31.txt': was cached
+2024/11/09 15:33:47.634699 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188027 (size: 29 bytes)
+2024/11/09 15:33:47.635301 Received TCP message from 172.22.156.180:48462: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:33:47.635339 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:33:47.941202 I sent a GET message
+2024/11/09 15:33:47.942726 GET took 1.524746ms, cache status false 
+2024/11/09 15:33:47.942865 File content saved successfully to local_b32_run1.txt
+2024/11/09 15:33:47.942869 File 'b32.txt': was cached
+2024/11/09 15:33:48.482502 I sent a GET message
+2024/11/09 15:33:48.483690 GET took 1.189955ms, cache status false 
+2024/11/09 15:33:48.483821 File content saved successfully to local_b33_run1.txt
+2024/11/09 15:33:48.483830 File 'b33.txt': was cached
+2024/11/09 15:33:48.635797 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188028 (size: 29 bytes)
+2024/11/09 15:33:48.636273 Received TCP message from 172.22.94.179:59878: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:33:48.636320 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:33:48.750839 Received TCP message from 172.22.94.180:58526: PING,172.22.94.180,1731188028 (size: 29 bytes)
+2024/11/09 15:33:48.751104 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:48.982407 I sent a GET message
+2024/11/09 15:33:48.983633 GET took 1.228161ms, cache status false 
+2024/11/09 15:33:48.983771 File content saved successfully to local_b34_run1.txt
+2024/11/09 15:33:48.983775 File 'b34.txt': was cached
+2024/11/09 15:33:49.527058 I sent a GET message
+2024/11/09 15:33:49.528383 GET took 1.326485ms, cache status false 
+2024/11/09 15:33:49.528517 File content saved successfully to local_b35_run1.txt
+2024/11/09 15:33:49.528522 File 'b35.txt': was cached
+2024/11/09 15:33:49.636498 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188029 (size: 29 bytes)
+2024/11/09 15:33:49.637016 Received TCP message from 172.22.94.179:59888: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:33:49.637037 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:33:50.047077 I sent a GET message
+2024/11/09 15:33:50.048638 GET took 1.563018ms, cache status false 
+2024/11/09 15:33:50.048777 File content saved successfully to local_b36_run1.txt
+2024/11/09 15:33:50.048781 File 'b36.txt': was cached
+2024/11/09 15:33:50.587599 I sent a GET message
+2024/11/09 15:33:50.589051 GET took 1.453581ms, cache status false 
+2024/11/09 15:33:50.589215 File content saved successfully to local_b37_run1.txt
+2024/11/09 15:33:50.589224 File 'b37.txt': was cached
+2024/11/09 15:33:50.638124 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188030 (size: 29 bytes)
+2024/11/09 15:33:50.638759 Received TCP message from 172.22.156.181:47548: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:33:50.638810 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:33:50.752290 Received TCP message from 172.22.158.180:38358: PING,172.22.158.180,1731188030 (size: 30 bytes)
+2024/11/09 15:33:50.752616 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:50.752880 Received TCP message from 172.22.156.179:45960: PING,172.22.156.179,1731188030 (size: 30 bytes)
+2024/11/09 15:33:50.753119 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:51.107270 I sent a GET message
+2024/11/09 15:33:51.108573 GET took 1.305464ms, cache status false 
+2024/11/09 15:33:51.108729 File content saved successfully to local_b38_run1.txt
+2024/11/09 15:33:51.108733 File 'b38.txt': was cached
+2024/11/09 15:33:51.639582 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188031 (size: 29 bytes)
+2024/11/09 15:33:51.640206 Received TCP message from 172.22.94.180:54728: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:33:51.640224 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:33:51.655236 I sent a GET message
+2024/11/09 15:33:51.656658 GET took 1.42365ms, cache status false 
+2024/11/09 15:33:51.656799 File content saved successfully to local_b39_run1.txt
+2024/11/09 15:33:51.656804 File 'b39.txt': was cached
+2024/11/09 15:33:51.926926 Received TCP message from 172.22.158.179:37134: PING,172.22.158.179,1731188031 (size: 30 bytes)
+2024/11/09 15:33:51.927383 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:52.172693 I sent a GET message
+2024/11/09 15:33:52.174117 GET took 1.42546ms, cache status false 
+2024/11/09 15:33:52.174255 File content saved successfully to local_b40_run1.txt
+2024/11/09 15:33:52.174262 File 'b40.txt': was cached
+2024/11/09 15:33:52.640824 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188032 (size: 29 bytes)
+2024/11/09 15:33:52.641559 Received TCP message from 172.22.156.179:45970: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:33:52.641593 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:33:52.721021 I sent a GET message
+2024/11/09 15:33:52.722388 GET took 1.368569ms, cache status false 
+2024/11/09 15:33:52.722524 File content saved successfully to local_b41_run1.txt
+2024/11/09 15:33:52.722529 File 'b41.txt': was cached
+2024/11/09 15:33:52.953984 Received TCP message from 172.22.94.181:57572: PING,172.22.94.181,1731188032 (size: 29 bytes)
+2024/11/09 15:33:52.954349 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:53.239709 I sent a GET message
+2024/11/09 15:33:53.241006 GET took 1.29856ms, cache status false 
+2024/11/09 15:33:53.241150 File content saved successfully to local_b42_run1.txt
+2024/11/09 15:33:53.241155 File 'b42.txt': was cached
+2024/11/09 15:33:53.641490 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188033 (size: 29 bytes)
+2024/11/09 15:33:53.642260 Received TCP message from 172.22.94.181:57584: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:33:53.642275 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:33:53.755458 Received TCP message from 172.22.158.181:48628: PING,172.22.158.181,1731188033 (size: 30 bytes)
+2024/11/09 15:33:53.755686 Received TCP message from 172.22.94.180:54742: PING,172.22.94.180,1731188033 (size: 29 bytes)
+2024/11/09 15:33:53.755862 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:53.755927 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:53.776626 I sent a GET message
+2024/11/09 15:33:53.778024 GET took 1.399318ms, cache status false 
+2024/11/09 15:33:53.778148 File content saved successfully to local_b43_run1.txt
+2024/11/09 15:33:53.778152 File 'b43.txt': was cached
+2024/11/09 15:33:53.954842 Received TCP message from 172.22.94.181:57600: PING,172.22.94.181,1731188033 (size: 29 bytes)
+2024/11/09 15:33:53.955148 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:54.307630 I sent a GET message
+2024/11/09 15:33:54.308874 GET took 1.24576ms, cache status false 
+2024/11/09 15:33:54.309003 File content saved successfully to local_b44_run1.txt
+2024/11/09 15:33:54.309007 File 'b44.txt': was cached
+2024/11/09 15:33:54.642287 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188034 (size: 29 bytes)
+2024/11/09 15:33:54.642894 Received TCP message from 172.22.156.181:35462: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:33:54.642919 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:33:54.756380 Received TCP message from 172.22.94.179:53186: PING,172.22.94.179,1731188034 (size: 29 bytes)
+2024/11/09 15:33:54.756674 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:54.756811 Received TCP message from 172.22.156.181:35472: PING,172.22.156.181,1731188034 (size: 30 bytes)
+2024/11/09 15:33:54.757036 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:54.823969 I sent a GET message
+2024/11/09 15:33:54.824867 GET took 900.39µs, cache status false 
+2024/11/09 15:33:54.825752 File content saved successfully to local_b45_run1.txt
+2024/11/09 15:33:54.825759 File 'b45.txt': was cached
+2024/11/09 15:33:55.362149 I sent a GET message
+2024/11/09 15:33:55.363469 GET took 1.321547ms, cache status false 
+2024/11/09 15:33:55.363596 File content saved successfully to local_b46_run1.txt
+2024/11/09 15:33:55.363601 File 'b46.txt': was cached
+2024/11/09 15:33:55.642871 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188035 (size: 29 bytes)
+2024/11/09 15:33:55.643463 Received TCP message from 172.22.156.181:35488: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:33:55.643501 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:33:55.884664 I sent a GET message
+2024/11/09 15:33:55.886336 GET took 1.674129ms, cache status false 
+2024/11/09 15:33:55.886484 File content saved successfully to local_b47_run1.txt
+2024/11/09 15:33:55.886488 File 'b47.txt': was cached
+2024/11/09 15:33:56.423820 I sent a GET message
+2024/11/09 15:33:56.425033 GET took 1.214867ms, cache status false 
+2024/11/09 15:33:56.425150 File content saved successfully to local_b48_run1.txt
+2024/11/09 15:33:56.425154 File 'b48.txt': was cached
+2024/11/09 15:33:56.644301 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188036 (size: 29 bytes)
+2024/11/09 15:33:56.644824 Received TCP message from 172.22.94.180:54748: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:33:56.644852 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:33:56.956534 I sent a GET message
+2024/11/09 15:33:56.958047 GET took 1.514195ms, cache status false 
+2024/11/09 15:33:56.958176 File content saved successfully to local_b49_run1.txt
+2024/11/09 15:33:56.958180 File 'b49.txt': was cached
+2024/11/09 15:33:57.476243 I sent a GET message
+2024/11/09 15:33:57.477614 GET took 1.371566ms, cache status false 
+2024/11/09 15:33:57.477757 File content saved successfully to local_b50_run1.txt
+2024/11/09 15:33:57.477762 File 'b50.txt': was cached
+2024/11/09 15:33:57.644905 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188037 (size: 29 bytes)
+2024/11/09 15:33:57.645481 Received TCP message from 172.22.158.181:48642: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:33:57.645507 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:33:57.760472 Received TCP message from 172.22.156.179:45976: PING,172.22.156.179,1731188037 (size: 30 bytes)
+2024/11/09 15:33:57.760781 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:57.995253 I sent a GET message
+2024/11/09 15:33:57.995979 GET took 727.147µs, cache status false 
+2024/11/09 15:33:57.996124 File content saved successfully to local_b51_run1.txt
+2024/11/09 15:33:57.996128 File 'b51.txt': was cached
+2024/11/09 15:33:58.539152 I sent a GET message
+2024/11/09 15:33:58.540651 GET took 1.500283ms, cache status false 
+2024/11/09 15:33:58.540774 File content saved successfully to local_b52_run1.txt
+2024/11/09 15:33:58.540778 File 'b52.txt': was cached
+2024/11/09 15:33:58.646352 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188038 (size: 29 bytes)
+2024/11/09 15:33:58.646849 Received TCP message from 172.22.94.179:53196: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:33:58.646877 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:33:58.761356 Received TCP message from 172.22.158.181:48652: PING,172.22.158.181,1731188038 (size: 30 bytes)
+2024/11/09 15:33:58.761667 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:33:59.065880 I sent a GET message
+2024/11/09 15:33:59.067261 GET took 1.382688ms, cache status false 
+2024/11/09 15:33:59.067382 File content saved successfully to local_b53_run1.txt
+2024/11/09 15:33:59.067386 File 'b53.txt': was cached
+2024/11/09 15:33:59.598401 I sent a GET message
+2024/11/09 15:33:59.599658 GET took 1.25869ms, cache status false 
+2024/11/09 15:33:59.599777 File content saved successfully to local_b54_run1.txt
+2024/11/09 15:33:59.599781 File 'b54.txt': was cached
+2024/11/09 15:33:59.647785 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188039 (size: 29 bytes)
+2024/11/09 15:33:59.648356 Received TCP message from 172.22.94.179:53200: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:33:59.648399 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:33:59.762621 Received TCP message from 172.22.156.181:35498: PING,172.22.156.181,1731188039 (size: 30 bytes)
+2024/11/09 15:33:59.762931 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:00.142251 I sent a GET message
+2024/11/09 15:34:00.143574 GET took 1.325315ms, cache status false 
+2024/11/09 15:34:00.143712 File content saved successfully to local_b55_run1.txt
+2024/11/09 15:34:00.143716 File 'b55.txt': was cached
+2024/11/09 15:34:00.648373 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188040 (size: 29 bytes)
+2024/11/09 15:34:00.649144 Received TCP message from 172.22.156.180:34322: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:34:00.649161 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:34:00.670626 I sent a GET message
+2024/11/09 15:34:00.672120 GET took 1.495188ms, cache status false 
+2024/11/09 15:34:00.672330 File content saved successfully to local_b56_run1.txt
+2024/11/09 15:34:00.672343 File 'b56.txt': was cached
+2024/11/09 15:34:00.938018 Received TCP message from 172.22.158.179:35634: PING,172.22.158.179,1731188040 (size: 30 bytes)
+2024/11/09 15:34:00.938394 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:01.201912 I sent a GET message
+2024/11/09 15:34:01.203145 GET took 1.233998ms, cache status false 
+2024/11/09 15:34:01.203281 File content saved successfully to local_b57_run1.txt
+2024/11/09 15:34:01.203287 File 'b57.txt': was cached
+2024/11/09 15:34:01.649018 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188041 (size: 29 bytes)
+2024/11/09 15:34:01.649728 Received TCP message from 172.22.158.179:35638: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:34:01.649746 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:34:01.756160 I sent a GET message
+2024/11/09 15:34:01.757468 GET took 1.309688ms, cache status false 
+2024/11/09 15:34:01.757698 File content saved successfully to local_b58_run1.txt
+2024/11/09 15:34:01.757703 File 'b58.txt': was cached
+2024/11/09 15:34:02.282477 I sent a GET message
+2024/11/09 15:34:02.283814 GET took 1.338437ms, cache status false 
+2024/11/09 15:34:02.283958 File content saved successfully to local_b59_run1.txt
+2024/11/09 15:34:02.283963 File 'b59.txt': was cached
+2024/11/09 15:34:02.650419 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188042 (size: 29 bytes)
+2024/11/09 15:34:02.650923 Received TCP message from 172.22.158.181:48666: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:34:02.650977 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:34:02.765202 Received TCP message from 172.22.158.180:48010: PING,172.22.158.180,1731188042 (size: 30 bytes)
+2024/11/09 15:34:02.765554 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:02.765611 Received TCP message from 172.22.156.181:35238: PING,172.22.156.181,1731188042 (size: 30 bytes)
+2024/11/09 15:34:02.765866 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:02.795795 I sent a GET message
+2024/11/09 15:34:02.797565 GET took 1.771415ms, cache status false 
+2024/11/09 15:34:02.797698 File content saved successfully to local_b60_run1.txt
+2024/11/09 15:34:02.797702 File 'b60.txt': was cached
+2024/11/09 15:34:03.342119 I sent a GET message
+2024/11/09 15:34:03.343670 GET took 1.553379ms, cache status false 
+2024/11/09 15:34:03.343809 File content saved successfully to local_b61_run1.txt
+2024/11/09 15:34:03.343823 File 'b61.txt': was cached
+2024/11/09 15:34:03.651302 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188043 (size: 29 bytes)
+2024/11/09 15:34:03.651832 Received TCP message from 172.22.158.181:58268: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:34:03.651843 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:34:03.766092 Received TCP message from 172.22.94.179:53202: PING,172.22.94.179,1731188043 (size: 29 bytes)
+2024/11/09 15:34:03.766303 Received TCP message from 172.22.156.179:58208: PING,172.22.156.179,1731188043 (size: 30 bytes)
+2024/11/09 15:34:03.766433 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:03.766546 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:03.862234 I sent a GET message
+2024/11/09 15:34:03.863776 GET took 1.543032ms, cache status false 
+2024/11/09 15:34:03.863940 File content saved successfully to local_b62_run1.txt
+2024/11/09 15:34:03.863945 File 'b62.txt': was cached
+2024/11/09 15:34:03.966804 Received TCP message from 172.22.94.181:47726: PING,172.22.94.181,1731188043 (size: 29 bytes)
+2024/11/09 15:34:03.967104 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:04.407926 I sent a GET message
+2024/11/09 15:34:04.409065 GET took 1.140651ms, cache status false 
+2024/11/09 15:34:04.409211 File content saved successfully to local_b63_run1.txt
+2024/11/09 15:34:04.409220 File 'b63.txt': was cached
+2024/11/09 15:34:04.652498 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188044 (size: 29 bytes)
+2024/11/09 15:34:04.653118 Received TCP message from 172.22.156.181:35252: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:34:04.653133 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:34:04.767735 Received TCP message from 172.22.156.180:34338: PING,172.22.156.180,1731188044 (size: 30 bytes)
+2024/11/09 15:34:04.768079 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:04.943800 I sent a GET message
+2024/11/09 15:34:04.945441 GET took 1.642059ms, cache status false 
+2024/11/09 15:34:04.945569 File content saved successfully to local_b64_run1.txt
+2024/11/09 15:34:04.945573 File 'b64.txt': was cached
+2024/11/09 15:34:05.469037 I sent a GET message
+2024/11/09 15:34:05.470767 GET took 1.731857ms, cache status false 
+2024/11/09 15:34:05.470895 File content saved successfully to local_b65_run1.txt
+2024/11/09 15:34:05.470901 File 'b65.txt': was cached
+2024/11/09 15:34:05.653120 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188045 (size: 29 bytes)
+2024/11/09 15:34:05.653730 Received TCP message from 172.22.158.181:58274: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:34:05.653758 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:34:05.768641 Received TCP message from 172.22.156.179:58216: PING,172.22.156.179,1731188045 (size: 30 bytes)
+2024/11/09 15:34:05.768982 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:06.241239 I sent a GET message
+2024/11/09 15:34:06.242496 GET took 1.258946ms, cache status false 
+2024/11/09 15:34:06.242692 File content saved successfully to local_b66_run1.txt
+2024/11/09 15:34:06.242699 File 'b66.txt': was cached
+2024/11/09 15:34:06.654083 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188046 (size: 29 bytes)
+2024/11/09 15:34:06.654874 Received TCP message from 172.22.158.179:48720: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:34:06.654890 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:34:06.763049 I sent a GET message
+2024/11/09 15:34:06.764244 GET took 1.196669ms, cache status false 
+2024/11/09 15:34:06.764395 File content saved successfully to local_b67_run1.txt
+2024/11/09 15:34:06.764400 File 'b67.txt': was cached
+2024/11/09 15:34:06.769261 Received TCP message from 172.22.158.180:33512: PING,172.22.158.180,1731188046 (size: 30 bytes)
+2024/11/09 15:34:06.769529 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:07.286203 I sent a GET message
+2024/11/09 15:34:07.287706 GET took 1.504392ms, cache status false 
+2024/11/09 15:34:07.287844 File content saved successfully to local_b68_run1.txt
+2024/11/09 15:34:07.287849 File 'b68.txt': was cached
+2024/11/09 15:34:07.655217 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188047 (size: 29 bytes)
+2024/11/09 15:34:07.655907 Received TCP message from 172.22.158.180:33522: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:34:07.655918 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:34:07.771461 Received TCP message from 172.22.156.181:35258: PING,172.22.156.181,1731188047 (size: 30 bytes)
+2024/11/09 15:34:07.771765 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:07.810477 I sent a GET message
+2024/11/09 15:34:07.811851 GET took 1.374708ms, cache status false 
+2024/11/09 15:34:07.811989 File content saved successfully to local_b69_run1.txt
+2024/11/09 15:34:07.811994 File 'b69.txt': was cached
+2024/11/09 15:34:08.269709 I sent a GET message
+2024/11/09 15:34:08.271110 GET took 1.40329ms, cache status false 
+2024/11/09 15:34:08.271252 File content saved successfully to local_b70_run1.txt
+2024/11/09 15:34:08.271258 File 'b70.txt': was cached
+2024/11/09 15:34:08.656707 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188048 (size: 29 bytes)
+2024/11/09 15:34:08.657309 Received TCP message from 172.22.156.180:34340: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:34:08.657380 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:34:08.771001 Received TCP message from 172.22.158.180:33524: PING,172.22.158.180,1731188048 (size: 30 bytes)
+2024/11/09 15:34:08.771334 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:08.793445 I sent a GET message
+2024/11/09 15:34:08.794819 GET took 1.374537ms, cache status false 
+2024/11/09 15:34:08.794982 File content saved successfully to local_b71_run1.txt
+2024/11/09 15:34:08.794987 File 'b71.txt': was cached
+2024/11/09 15:34:09.317718 I sent a GET message
+2024/11/09 15:34:09.319419 GET took 1.703352ms, cache status false 
+2024/11/09 15:34:09.319573 File content saved successfully to local_b72_run1.txt
+2024/11/09 15:34:09.319578 File 'b72.txt': was cached
+2024/11/09 15:34:09.658002 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188049 (size: 29 bytes)
+2024/11/09 15:34:09.658578 Received TCP message from 172.22.158.181:58278: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:34:09.658602 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:34:09.771682 Received TCP message from 172.22.158.180:33536: PING,172.22.158.180,1731188049 (size: 30 bytes)
+2024/11/09 15:34:09.771962 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:09.772842 Received TCP message from 172.22.156.180:48196: PING,172.22.156.180,1731188049 (size: 30 bytes)
+2024/11/09 15:34:09.773041 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:09.843929 I sent a GET message
+2024/11/09 15:34:09.845165 GET took 1.237604ms, cache status false 
+2024/11/09 15:34:09.845300 File content saved successfully to local_b73_run1.txt
+2024/11/09 15:34:09.845306 File 'b73.txt': was cached
+2024/11/09 15:34:10.370062 I sent a GET message
+2024/11/09 15:34:10.371410 GET took 1.350253ms, cache status false 
+2024/11/09 15:34:10.371605 File content saved successfully to local_b74_run1.txt
+2024/11/09 15:34:10.371612 File 'b74.txt': was cached
+2024/11/09 15:34:10.658648 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188050 (size: 29 bytes)
+2024/11/09 15:34:10.659235 Received TCP message from 172.22.158.179:48724: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:34:10.659279 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:34:10.894304 I sent a GET message
+2024/11/09 15:34:10.896049 GET took 1.747269ms, cache status false 
+2024/11/09 15:34:10.896226 File content saved successfully to local_b75_run1.txt
+2024/11/09 15:34:10.896232 File 'b75.txt': was cached
+2024/11/09 15:34:11.303997 I sent a GET message
+2024/11/09 15:34:11.305166 GET took 1.170243ms, cache status false 
+2024/11/09 15:34:11.305944 File content saved successfully to local_b76_run1.txt
+2024/11/09 15:34:11.305952 File 'b76.txt': was cached
+2024/11/09 15:34:11.659661 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188051 (size: 29 bytes)
+2024/11/09 15:34:11.660276 Received TCP message from 172.22.158.180:33552: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:34:11.660303 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:34:11.774221 Received TCP message from 172.22.94.179:55080: PING,172.22.94.179,1731188051 (size: 29 bytes)
+2024/11/09 15:34:11.774350 Received TCP message from 172.22.156.180:48208: PING,172.22.156.180,1731188051 (size: 30 bytes)
+2024/11/09 15:34:11.774479 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:11.774567 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:11.775138 Received TCP message from 172.22.158.181:58292: PING,172.22.158.181,1731188051 (size: 30 bytes)
+2024/11/09 15:34:11.775358 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:11.941036 I sent a GET message
+2024/11/09 15:34:11.942215 GET took 1.180115ms, cache status false 
+2024/11/09 15:34:11.942452 File content saved successfully to local_b77_run1.txt
+2024/11/09 15:34:11.942457 File 'b77.txt': was cached
+2024/11/09 15:34:12.373535 I sent a GET message
+2024/11/09 15:34:12.374264 GET took 730.158µs, cache status false 
+2024/11/09 15:34:12.374481 File content saved successfully to local_b78_run1.txt
+2024/11/09 15:34:12.374486 File 'b78.txt': was cached
+2024/11/09 15:34:12.660748 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188052 (size: 29 bytes)
+2024/11/09 15:34:12.661440 Received TCP message from 172.22.158.179:38398: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:34:12.661494 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:34:12.987591 I sent a GET message
+2024/11/09 15:34:12.988721 GET took 1.132199ms, cache status false 
+2024/11/09 15:34:12.988841 File content saved successfully to local_b79_run1.txt
+2024/11/09 15:34:12.988845 File 'b79.txt': was cached
+2024/11/09 15:34:13.513165 I sent a GET message
+2024/11/09 15:34:13.514679 GET took 1.515903ms, cache status false 
+2024/11/09 15:34:13.514801 File content saved successfully to local_b80_run1.txt
+2024/11/09 15:34:13.514805 File 'b80.txt': was cached
+2024/11/09 15:34:13.662020 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188053 (size: 29 bytes)
+2024/11/09 15:34:13.662630 Received TCP message from 172.22.158.180:33566: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:34:13.662681 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:34:13.776655 Received TCP message from 172.22.158.180:33582: PING,172.22.158.180,1731188053 (size: 30 bytes)
+2024/11/09 15:34:13.777011 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:13.777551 Received TCP message from 172.22.156.181:52238: PING,172.22.156.181,1731188053 (size: 30 bytes)
+2024/11/09 15:34:13.777851 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:13.953087 Received TCP message from 172.22.158.179:38406: PING,172.22.158.179,1731188053 (size: 30 bytes)
+2024/11/09 15:34:13.953459 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:14.036377 I sent a GET message
+2024/11/09 15:34:14.037587 GET took 1.21125ms, cache status false 
+2024/11/09 15:34:14.037723 File content saved successfully to local_b81_run1.txt
+2024/11/09 15:34:14.037727 File 'b81.txt': was cached
+2024/11/09 15:34:14.561053 I sent a GET message
+2024/11/09 15:34:14.562377 GET took 1.325272ms, cache status false 
+2024/11/09 15:34:14.562514 File content saved successfully to local_b82_run1.txt
+2024/11/09 15:34:14.562518 File 'b82.txt': was cached
+2024/11/09 15:34:14.662550 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188054 (size: 29 bytes)
+2024/11/09 15:34:14.663113 Received TCP message from 172.22.94.180:41976: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:34:14.663145 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:34:14.776992 Received TCP message from 172.22.94.180:41982: PING,172.22.94.180,1731188054 (size: 29 bytes)
+2024/11/09 15:34:14.777387 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:14.979396 Received TCP message from 172.22.94.181:36328: PING,172.22.94.181,1731188054 (size: 29 bytes)
+2024/11/09 15:34:14.979891 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:15.085527 I sent a GET message
+2024/11/09 15:34:15.086640 GET took 1.115135ms, cache status false 
+2024/11/09 15:34:15.086787 File content saved successfully to local_b83_run1.txt
+2024/11/09 15:34:15.086791 File 'b83.txt': was cached
+2024/11/09 15:34:15.609345 I sent a GET message
+2024/11/09 15:34:15.610715 GET took 1.371327ms, cache status false 
+2024/11/09 15:34:15.610853 File content saved successfully to local_b84_run1.txt
+2024/11/09 15:34:15.610857 File 'b84.txt': was cached
+2024/11/09 15:34:15.663647 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188055 (size: 29 bytes)
+2024/11/09 15:34:15.664184 Received TCP message from 172.22.156.179:38754: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:34:15.664231 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:34:15.954908 Received TCP message from 172.22.158.179:38416: PING,172.22.158.179,1731188055 (size: 30 bytes)
+2024/11/09 15:34:15.955282 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:16.134209 I sent a GET message
+2024/11/09 15:34:16.135670 GET took 1.462833ms, cache status false 
+2024/11/09 15:34:16.135806 File content saved successfully to local_b85_run1.txt
+2024/11/09 15:34:16.135811 File 'b85.txt': was cached
+2024/11/09 15:34:16.658364 I sent a GET message
+2024/11/09 15:34:16.659047 GET took 685.65µs, cache status false 
+2024/11/09 15:34:16.659171 File content saved successfully to local_b86_run1.txt
+2024/11/09 15:34:16.659176 File 'b86.txt': was cached
+2024/11/09 15:34:16.664860 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188056 (size: 29 bytes)
+2024/11/09 15:34:16.665470 Received TCP message from 172.22.156.180:48224: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:34:16.665484 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:34:17.252275 I sent a GET message
+2024/11/09 15:34:17.253613 GET took 1.339271ms, cache status false 
+2024/11/09 15:34:17.253724 File content saved successfully to local_b87_run1.txt
+2024/11/09 15:34:17.253728 File 'b87.txt': was cached
+2024/11/09 15:34:17.666416 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188057 (size: 29 bytes)
+2024/11/09 15:34:17.666956 Received TCP message from 172.22.156.180:48228: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:34:17.666976 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:34:17.708649 I sent a GET message
+2024/11/09 15:34:17.710264 GET took 1.616411ms, cache status false 
+2024/11/09 15:34:17.710395 File content saved successfully to local_b88_run1.txt
+2024/11/09 15:34:17.710399 File 'b88.txt': was cached
+2024/11/09 15:34:17.957575 Received TCP message from 172.22.158.179:38432: PING,172.22.158.179,1731188057 (size: 30 bytes)
+2024/11/09 15:34:17.957917 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:18.232701 I sent a GET message
+2024/11/09 15:34:18.234026 GET took 1.347416ms, cache status false 
+2024/11/09 15:34:18.234165 File content saved successfully to local_b89_run1.txt
+2024/11/09 15:34:18.234169 File 'b89.txt': was cached
+2024/11/09 15:34:18.666976 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188058 (size: 29 bytes)
+2024/11/09 15:34:18.667648 Received TCP message from 172.22.156.179:38762: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:34:18.667661 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:34:18.757235 I sent a GET message
+2024/11/09 15:34:18.758091 GET took 858.106µs, cache status false 
+2024/11/09 15:34:18.758222 File content saved successfully to local_b90_run1.txt
+2024/11/09 15:34:18.758228 File 'b90.txt': was cached
+2024/11/09 15:34:18.782397 Received TCP message from 172.22.156.181:52246: PING,172.22.156.181,1731188058 (size: 30 bytes)
+2024/11/09 15:34:18.782667 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:18.984588 Received TCP message from 172.22.94.181:36336: PING,172.22.94.181,1731188058 (size: 29 bytes)
+2024/11/09 15:34:18.984894 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:19.282476 I sent a GET message
+2024/11/09 15:34:19.283893 GET took 1.418ms, cache status false 
+2024/11/09 15:34:19.284055 File content saved successfully to local_b91_run1.txt
+2024/11/09 15:34:19.284061 File 'b91.txt': was cached
+2024/11/09 15:34:19.668428 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188059 (size: 29 bytes)
+2024/11/09 15:34:19.668884 Received TCP message from 172.22.94.181:36344: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:34:19.668909 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:34:19.782636 Received TCP message from 172.22.158.180:41084: PING,172.22.158.180,1731188059 (size: 30 bytes)
+2024/11/09 15:34:19.782783 Received TCP message from 172.22.158.181:35640: PING,172.22.158.181,1731188059 (size: 30 bytes)
+2024/11/09 15:34:19.782921 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:19.783029 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:19.805975 I sent a GET message
+2024/11/09 15:34:19.807258 GET took 1.284354ms, cache status false 
+2024/11/09 15:34:19.807410 File content saved successfully to local_b92_run1.txt
+2024/11/09 15:34:19.807415 File 'b92.txt': was cached
+2024/11/09 15:34:20.340844 I sent a GET message
+2024/11/09 15:34:20.342128 GET took 1.286957ms, cache status false 
+2024/11/09 15:34:20.342256 File content saved successfully to local_b93_run1.txt
+2024/11/09 15:34:20.342262 File 'b93.txt': was cached
+2024/11/09 15:34:20.669445 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188060 (size: 29 bytes)
+2024/11/09 15:34:20.669977 Received TCP message from 172.22.158.180:41088: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:34:20.670010 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:34:20.783455 Received TCP message from 172.22.156.179:56400: PING,172.22.156.179,1731188060 (size: 30 bytes)
+2024/11/09 15:34:20.783689 Received TCP message from 172.22.158.181:35646: PING,172.22.158.181,1731188060 (size: 30 bytes)
+2024/11/09 15:34:20.783827 Received TCP message from 172.22.156.181:52260: PING,172.22.156.181,1731188060 (size: 30 bytes)
+2024/11/09 15:34:20.783942 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:20.784014 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:20.784103 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:20.864281 I sent a GET message
+2024/11/09 15:34:20.865664 GET took 1.384189ms, cache status false 
+2024/11/09 15:34:20.865799 File content saved successfully to local_b94_run1.txt
+2024/11/09 15:34:20.865804 File 'b94.txt': was cached
+2024/11/09 15:34:21.390023 I sent a GET message
+2024/11/09 15:34:21.390698 GET took 676.421µs, cache status false 
+2024/11/09 15:34:21.390814 File content saved successfully to local_b95_run1.txt
+2024/11/09 15:34:21.390818 File 'b95.txt': was cached
+2024/11/09 15:34:21.670161 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188061 (size: 29 bytes)
+2024/11/09 15:34:21.670720 Received TCP message from 172.22.156.180:39250: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:34:21.670735 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:34:21.784820 Received TCP message from 172.22.158.181:35654: PING,172.22.158.181,1731188061 (size: 30 bytes)
+2024/11/09 15:34:21.784957 Received TCP message from 172.22.94.179:54008: PING,172.22.94.179,1731188061 (size: 29 bytes)
+2024/11/09 15:34:21.785135 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:21.785215 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:21.924125 I sent a GET message
+2024/11/09 15:34:21.925798 GET took 1.673829ms, cache status false 
+2024/11/09 15:34:21.925976 File content saved successfully to local_b96_run1.txt
+2024/11/09 15:34:21.925981 File 'b96.txt': was cached
+2024/11/09 15:34:21.987765 Received TCP message from 172.22.94.181:36360: PING,172.22.94.181,1731188061 (size: 29 bytes)
+2024/11/09 15:34:21.988077 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:22.459233 I sent a GET message
+2024/11/09 15:34:22.460803 GET took 1.571531ms, cache status false 
+2024/11/09 15:34:22.460970 File content saved successfully to local_b97_run1.txt
+2024/11/09 15:34:22.460975 File 'b97.txt': was cached
+2024/11/09 15:34:22.671257 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188062 (size: 29 bytes)
+2024/11/09 15:34:22.671771 Received TCP message from 172.22.94.180:39092: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:34:22.671788 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:34:22.785948 Received TCP message from 172.22.156.180:39258: PING,172.22.156.180,1731188062 (size: 30 bytes)
+2024/11/09 15:34:22.786308 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:22.989571 I sent a GET message
+2024/11/09 15:34:22.990906 GET took 1.336255ms, cache status false 
+2024/11/09 15:34:22.991065 File content saved successfully to local_b98_run1.txt
+2024/11/09 15:34:22.991070 File 'b98.txt': was cached
+2024/11/09 15:34:23.537340 I sent a GET message
+2024/11/09 15:34:23.538726 GET took 1.388419ms, cache status false 
+2024/11/09 15:34:23.538875 File content saved successfully to local_b99_run1.txt
+2024/11/09 15:34:23.538880 File 'b99.txt': was cached
+2024/11/09 15:34:23.672001 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188063 (size: 29 bytes)
+2024/11/09 15:34:23.672608 Received TCP message from 172.22.158.181:41218: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:34:23.672634 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:34:24.051714 I sent a GET message
+2024/11/09 15:34:24.053048 GET took 1.3355ms, cache status false 
+2024/11/09 15:34:24.053228 File content saved successfully to local_b100_run1.txt
+2024/11/09 15:34:24.053235 File 'b100.txt': was cached
+2024/11/09 15:34:24.593834 I sent a GET message
+2024/11/09 15:34:24.595223 GET took 1.390102ms, cache status false 
+2024/11/09 15:34:24.595379 File content saved successfully to local_b1_run2.txt
+2024/11/09 15:34:24.595385 File 'b1.txt': was cached
+2024/11/09 15:34:24.673490 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188064 (size: 29 bytes)
+2024/11/09 15:34:24.674090 Received TCP message from 172.22.156.179:56408: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:34:24.674130 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:34:25.112351 I sent a GET message
+2024/11/09 15:34:25.113789 GET took 1.440764ms, cache status false 
+2024/11/09 15:34:25.113930 File content saved successfully to local_b2_run2.txt
+2024/11/09 15:34:25.113934 File 'b2.txt': was cached
+2024/11/09 15:34:25.641960 I sent a GET message
+2024/11/09 15:34:25.644223 GET took 2.26397ms, cache status false 
+2024/11/09 15:34:25.644413 File content saved successfully to local_b3_run2.txt
+2024/11/09 15:34:25.644418 File 'b3.txt': was cached
+2024/11/09 15:34:25.674024 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188065 (size: 29 bytes)
+2024/11/09 15:34:25.674624 Received TCP message from 172.22.94.180:39100: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:34:25.674658 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:34:26.177847 I sent a GET message
+2024/11/09 15:34:26.179294 GET took 1.448543ms, cache status false 
+2024/11/09 15:34:26.179502 File content saved successfully to local_b4_run2.txt
+2024/11/09 15:34:26.179509 File 'b4.txt': was cached
+2024/11/09 15:34:26.675033 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188066 (size: 29 bytes)
+2024/11/09 15:34:26.675696 Received TCP message from 172.22.156.181:37822: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:34:26.675762 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:34:26.698326 I sent a GET message
+2024/11/09 15:34:26.699549 GET took 1.225345ms, cache status false 
+2024/11/09 15:34:26.699762 File content saved successfully to local_b5_run2.txt
+2024/11/09 15:34:26.699767 File 'b5.txt': was cached
+2024/11/09 15:34:27.240152 I sent a GET message
+2024/11/09 15:34:27.241672 GET took 1.521118ms, cache status false 
+2024/11/09 15:34:27.241814 File content saved successfully to local_b6_run2.txt
+2024/11/09 15:34:27.241819 File 'b6.txt': was cached
+2024/11/09 15:34:27.676331 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188067 (size: 29 bytes)
+2024/11/09 15:34:27.676857 Received TCP message from 172.22.94.180:39114: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:34:27.676878 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:34:27.758917 I sent a GET message
+2024/11/09 15:34:27.760171 GET took 1.255237ms, cache status false 
+2024/11/09 15:34:27.760296 File content saved successfully to local_b7_run2.txt
+2024/11/09 15:34:27.760301 File 'b7.txt': was cached
+2024/11/09 15:34:27.790965 Received TCP message from 172.22.156.180:39268: PING,172.22.156.180,1731188067 (size: 30 bytes)
+2024/11/09 15:34:27.791431 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:28.305244 I sent a GET message
+2024/11/09 15:34:28.306655 GET took 1.412998ms, cache status false 
+2024/11/09 15:34:28.307629 File content saved successfully to local_b8_run2.txt
+2024/11/09 15:34:28.307651 File 'b8.txt': was cached
+2024/11/09 15:34:28.677065 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188068 (size: 29 bytes)
+2024/11/09 15:34:28.677665 Received TCP message from 172.22.94.180:39126: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:34:28.677687 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:34:28.792465 Received TCP message from 172.22.156.180:39282: PING,172.22.156.180,1731188068 (size: 30 bytes)
+2024/11/09 15:34:28.792747 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:28.829001 I sent a GET message
+2024/11/09 15:34:28.830681 GET took 1.681119ms, cache status false 
+2024/11/09 15:34:28.830852 File content saved successfully to local_b9_run2.txt
+2024/11/09 15:34:28.830857 File 'b9.txt': was cached
+2024/11/09 15:34:29.372913 I sent a GET message
+2024/11/09 15:34:29.374384 GET took 1.472199ms, cache status false 
+2024/11/09 15:34:29.374543 File content saved successfully to local_b10_run2.txt
+2024/11/09 15:34:29.374548 File 'b10.txt': was cached
+2024/11/09 15:34:29.677844 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188069 (size: 29 bytes)
+2024/11/09 15:34:29.678404 Received TCP message from 172.22.156.180:60532: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:34:29.678427 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:34:29.792398 Received TCP message from 172.22.158.181:41228: PING,172.22.158.181,1731188069 (size: 30 bytes)
+2024/11/09 15:34:29.792752 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:29.899875 I sent a GET message
+2024/11/09 15:34:29.900838 GET took 963.745µs, cache status false 
+2024/11/09 15:34:29.900971 File content saved successfully to local_b11_run2.txt
+2024/11/09 15:34:29.900976 File 'b11.txt': was cached
+2024/11/09 15:34:30.434823 I sent a GET message
+2024/11/09 15:34:30.436134 GET took 1.31257ms, cache status false 
+2024/11/09 15:34:30.436286 File content saved successfully to local_b12_run2.txt
+2024/11/09 15:34:30.436293 File 'b12.txt': was cached
+2024/11/09 15:34:30.678422 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188070 (size: 29 bytes)
+2024/11/09 15:34:30.679073 Received TCP message from 172.22.156.181:37832: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:34:30.679098 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:34:30.793844 Received TCP message from 172.22.158.180:54084: PING,172.22.158.180,1731188070 (size: 30 bytes)
+2024/11/09 15:34:30.794142 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:30.968656 I sent a GET message
+2024/11/09 15:34:30.969322 GET took 667.479µs, cache status false 
+2024/11/09 15:34:30.969440 File content saved successfully to local_b13_run2.txt
+2024/11/09 15:34:30.969444 File 'b13.txt': was cached
+2024/11/09 15:34:31.504260 I sent a GET message
+2024/11/09 15:34:31.505560 GET took 1.302276ms, cache status false 
+2024/11/09 15:34:31.505684 File content saved successfully to local_b14_run2.txt
+2024/11/09 15:34:31.505688 File 'b14.txt': was cached
+2024/11/09 15:34:31.679816 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188071 (size: 29 bytes)
+2024/11/09 15:34:31.680367 Received TCP message from 172.22.156.181:55632: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:34:31.680406 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:34:31.794604 Received TCP message from 172.22.156.179:48722: PING,172.22.156.179,1731188071 (size: 30 bytes)
+2024/11/09 15:34:31.794972 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:32.015091 I sent a GET message
+2024/11/09 15:34:32.016757 GET took 1.668491ms, cache status false 
+2024/11/09 15:34:32.016893 File content saved successfully to local_b15_run2.txt
+2024/11/09 15:34:32.016907 File 'b15.txt': was cached
+2024/11/09 15:34:32.546656 I sent a GET message
+2024/11/09 15:34:32.547810 GET took 1.156296ms, cache status false 
+2024/11/09 15:34:32.547939 File content saved successfully to local_b16_run2.txt
+2024/11/09 15:34:32.547944 File 'b16.txt': was cached
+2024/11/09 15:34:32.680870 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188072 (size: 29 bytes)
+2024/11/09 15:34:32.681567 Received TCP message from 172.22.156.181:55636: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:34:32.681584 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:34:32.795271 Received TCP message from 172.22.158.181:41234: PING,172.22.158.181,1731188072 (size: 30 bytes)
+2024/11/09 15:34:32.795567 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:33.096626 I sent a GET message
+2024/11/09 15:34:33.097968 GET took 1.342721ms, cache status false 
+2024/11/09 15:34:33.098082 File content saved successfully to local_b17_run2.txt
+2024/11/09 15:34:33.098087 File 'b17.txt': was cached
+2024/11/09 15:34:33.629817 I sent a GET message
+2024/11/09 15:34:33.630487 GET took 671.267µs, cache status false 
+2024/11/09 15:34:33.630629 File content saved successfully to local_b18_run2.txt
+2024/11/09 15:34:33.630633 File 'b18.txt': was cached
+2024/11/09 15:34:33.682447 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188073 (size: 29 bytes)
+2024/11/09 15:34:33.683042 Received TCP message from 172.22.156.180:60548: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:34:33.683057 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:34:34.178694 I sent a GET message
+2024/11/09 15:34:34.180030 GET took 1.337708ms, cache status false 
+2024/11/09 15:34:34.180169 File content saved successfully to local_b19_run2.txt
+2024/11/09 15:34:34.180174 File 'b19.txt': was cached
+2024/11/09 15:34:34.683843 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188074 (size: 29 bytes)
+2024/11/09 15:34:34.684338 Received TCP message from 172.22.94.179:43426: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:34:34.684365 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:34:34.699617 I sent a GET message
+2024/11/09 15:34:34.701047 GET took 1.432225ms, cache status false 
+2024/11/09 15:34:34.701199 File content saved successfully to local_b20_run2.txt
+2024/11/09 15:34:34.701205 File 'b20.txt': was cached
+2024/11/09 15:34:34.797327 Received TCP message from 172.22.156.179:48738: PING,172.22.156.179,1731188074 (size: 30 bytes)
+2024/11/09 15:34:34.797634 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:35.229958 I sent a GET message
+2024/11/09 15:34:35.231309 GET took 1.352048ms, cache status false 
+2024/11/09 15:34:35.231427 File content saved successfully to local_b21_run2.txt
+2024/11/09 15:34:35.231431 File 'b21.txt': was cached
+2024/11/09 15:34:35.684952 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188075 (size: 29 bytes)
+2024/11/09 15:34:35.685587 Received TCP message from 172.22.156.181:55644: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:34:35.685613 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:34:35.790985 I sent a GET message
+2024/11/09 15:34:35.792385 GET took 1.402787ms, cache status false 
+2024/11/09 15:34:35.792562 File content saved successfully to local_b22_run2.txt
+2024/11/09 15:34:35.792567 File 'b22.txt': was cached
+2024/11/09 15:34:36.311643 I sent a GET message
+2024/11/09 15:34:36.313115 GET took 1.473269ms, cache status false 
+2024/11/09 15:34:36.313247 File content saved successfully to local_b23_run2.txt
+2024/11/09 15:34:36.313252 File 'b23.txt': was cached
+2024/11/09 15:34:36.685871 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188076 (size: 29 bytes)
+2024/11/09 15:34:36.686507 Received TCP message from 172.22.156.179:48754: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:34:36.686688 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:34:36.845121 I sent a GET message
+2024/11/09 15:34:36.847022 GET took 1.902074ms, cache status false 
+2024/11/09 15:34:36.847154 File content saved successfully to local_b24_run2.txt
+2024/11/09 15:34:36.847162 File 'b24.txt': was cached
+2024/11/09 15:34:37.379207 I sent a GET message
+2024/11/09 15:34:37.380400 GET took 1.194669ms, cache status false 
+2024/11/09 15:34:37.380516 File content saved successfully to local_b25_run2.txt
+2024/11/09 15:34:37.380520 File 'b25.txt': was cached
+2024/11/09 15:34:37.687099 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188077 (size: 29 bytes)
+2024/11/09 15:34:37.687692 Received TCP message from 172.22.158.179:60730: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:34:37.687752 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:34:37.911365 I sent a GET message
+2024/11/09 15:34:37.912885 GET took 1.521802ms, cache status false 
+2024/11/09 15:34:37.913061 File content saved successfully to local_b26_run2.txt
+2024/11/09 15:34:37.913066 File 'b26.txt': was cached
+2024/11/09 15:34:38.459322 I sent a GET message
+2024/11/09 15:34:38.460454 GET took 1.133242ms, cache status false 
+2024/11/09 15:34:38.460595 File content saved successfully to local_b27_run2.txt
+2024/11/09 15:34:38.460600 File 'b27.txt': was cached
+2024/11/09 15:34:38.687834 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188078 (size: 29 bytes)
+2024/11/09 15:34:38.688545 Received TCP message from 172.22.156.179:48764: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:34:38.688589 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:34:38.981864 I sent a GET message
+2024/11/09 15:34:38.983308 GET took 1.445118ms, cache status false 
+2024/11/09 15:34:38.983482 File content saved successfully to local_b28_run2.txt
+2024/11/09 15:34:38.983499 File 'b28.txt': was cached
+2024/11/09 15:34:39.006106 Received TCP message from 172.22.94.181:41434: PING,172.22.94.181,1731188079 (size: 29 bytes)
+2024/11/09 15:34:39.006431 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:39.531915 I sent a GET message
+2024/11/09 15:34:39.533279 GET took 1.365106ms, cache status false 
+2024/11/09 15:34:39.533438 File content saved successfully to local_b29_run2.txt
+2024/11/09 15:34:39.533444 File 'b29.txt': was cached
+2024/11/09 15:34:39.688684 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188079 (size: 29 bytes)
+2024/11/09 15:34:39.689493 Received TCP message from 172.22.156.180:49462: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:34:39.689526 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:34:39.803868 Received TCP message from 172.22.156.181:55648: PING,172.22.156.181,1731188079 (size: 30 bytes)
+2024/11/09 15:34:39.804183 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:40.060314 I sent a GET message
+2024/11/09 15:34:40.061657 GET took 1.344972ms, cache status false 
+2024/11/09 15:34:40.061796 File content saved successfully to local_b30_run2.txt
+2024/11/09 15:34:40.061800 File 'b30.txt': was cached
+2024/11/09 15:34:40.584434 I sent a GET message
+2024/11/09 15:34:40.585694 GET took 1.261813ms, cache status false 
+2024/11/09 15:34:40.585830 File content saved successfully to local_b31_run2.txt
+2024/11/09 15:34:40.585835 File 'b31.txt': was cached
+2024/11/09 15:34:40.691059 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188080 (size: 29 bytes)
+2024/11/09 15:34:40.691533 Received TCP message from 172.22.94.179:43438: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:34:40.691557 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:34:41.115684 I sent a GET message
+2024/11/09 15:34:41.117134 GET took 1.451561ms, cache status false 
+2024/11/09 15:34:41.117285 File content saved successfully to local_b32_run2.txt
+2024/11/09 15:34:41.117290 File 'b32.txt': was cached
+2024/11/09 15:34:41.657533 I sent a GET message
+2024/11/09 15:34:41.658703 GET took 1.17188ms, cache status false 
+2024/11/09 15:34:41.658849 File content saved successfully to local_b33_run2.txt
+2024/11/09 15:34:41.658855 File 'b33.txt': was cached
+2024/11/09 15:34:41.692404 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188081 (size: 29 bytes)
+2024/11/09 15:34:41.692929 Received TCP message from 172.22.94.180:39416: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:34:41.693006 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:34:41.804712 Received TCP message from 172.22.156.181:39380: PING,172.22.156.181,1731188081 (size: 30 bytes)
+2024/11/09 15:34:41.805041 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:42.181928 I sent a GET message
+2024/11/09 15:34:42.183396 GET took 1.469474ms, cache status false 
+2024/11/09 15:34:42.183577 File content saved successfully to local_b34_run2.txt
+2024/11/09 15:34:42.183583 File 'b34.txt': was cached
+2024/11/09 15:34:42.693161 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188082 (size: 29 bytes)
+2024/11/09 15:34:42.696336 Received TCP message from 172.22.156.179:36170: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:34:42.696357 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:34:42.722435 I sent a GET message
+2024/11/09 15:34:42.723933 GET took 1.499843ms, cache status false 
+2024/11/09 15:34:42.724082 File content saved successfully to local_b35_run2.txt
+2024/11/09 15:34:42.724087 File 'b35.txt': was cached
+2024/11/09 15:34:42.985914 Received TCP message from 172.22.158.179:52958: PING,172.22.158.179,1731188082 (size: 30 bytes)
+2024/11/09 15:34:42.986340 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:43.011569 Received TCP message from 172.22.94.181:41438: PING,172.22.94.181,1731188083 (size: 29 bytes)
+2024/11/09 15:34:43.011863 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:43.258533 I sent a GET message
+2024/11/09 15:34:43.259735 GET took 1.20383ms, cache status false 
+2024/11/09 15:34:43.259884 File content saved successfully to local_b36_run2.txt
+2024/11/09 15:34:43.259888 File 'b36.txt': was cached
+2024/11/09 15:34:43.694023 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188083 (size: 29 bytes)
+2024/11/09 15:34:43.694530 Received TCP message from 172.22.158.180:37170: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:34:43.694543 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:34:43.787713 I sent a GET message
+2024/11/09 15:34:43.788921 GET took 1.209337ms, cache status false 
+2024/11/09 15:34:43.789032 File content saved successfully to local_b37_run2.txt
+2024/11/09 15:34:43.789037 File 'b37.txt': was cached
+2024/11/09 15:34:43.806289 Received TCP message from 172.22.156.179:36186: PING,172.22.156.179,1731188083 (size: 30 bytes)
+2024/11/09 15:34:43.806682 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:44.313963 I sent a GET message
+2024/11/09 15:34:44.315122 GET took 1.160607ms, cache status false 
+2024/11/09 15:34:44.315255 File content saved successfully to local_b38_run2.txt
+2024/11/09 15:34:44.315261 File 'b38.txt': was cached
+2024/11/09 15:34:44.695056 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188084 (size: 29 bytes)
+2024/11/09 15:34:44.696040 Received TCP message from 172.22.94.179:34272: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:34:44.696068 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:34:44.807139 Received TCP message from 172.22.156.181:39394: PING,172.22.156.181,1731188084 (size: 30 bytes)
+2024/11/09 15:34:44.807324 Received TCP message from 172.22.156.180:49466: PING,172.22.156.180,1731188084 (size: 30 bytes)
+2024/11/09 15:34:44.807555 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:44.807646 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:44.847087 I sent a GET message
+2024/11/09 15:34:44.848461 GET took 1.375182ms, cache status false 
+2024/11/09 15:34:44.848625 File content saved successfully to local_b39_run2.txt
+2024/11/09 15:34:44.848630 File 'b39.txt': was cached
+2024/11/09 15:34:45.390696 I sent a GET message
+2024/11/09 15:34:45.391947 GET took 1.252489ms, cache status false 
+2024/11/09 15:34:45.392839 File content saved successfully to local_b40_run2.txt
+2024/11/09 15:34:45.392845 File 'b40.txt': was cached
+2024/11/09 15:34:45.696314 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188085 (size: 29 bytes)
+2024/11/09 15:34:45.696830 Received TCP message from 172.22.158.181:58972: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:34:45.696840 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:34:45.808222 Received TCP message from 172.22.156.181:39398: PING,172.22.156.181,1731188085 (size: 30 bytes)
+2024/11/09 15:34:45.808517 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:45.809739 Received TCP message from 172.22.156.180:49478: PING,172.22.156.180,1731188085 (size: 30 bytes)
+2024/11/09 15:34:45.809980 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:45.933402 I sent a GET message
+2024/11/09 15:34:45.934637 GET took 1.235996ms, cache status false 
+2024/11/09 15:34:45.934759 File content saved successfully to local_b41_run2.txt
+2024/11/09 15:34:45.934764 File 'b41.txt': was cached
+2024/11/09 15:34:46.454999 I sent a GET message
+2024/11/09 15:34:46.456275 GET took 1.277343ms, cache status false 
+2024/11/09 15:34:46.456409 File content saved successfully to local_b42_run2.txt
+2024/11/09 15:34:46.456413 File 'b42.txt': was cached
+2024/11/09 15:34:46.696872 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188086 (size: 29 bytes)
+2024/11/09 15:34:46.697487 Received TCP message from 172.22.158.181:58976: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:34:46.697511 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:34:46.987480 I sent a GET message
+2024/11/09 15:34:46.988698 GET took 1.220224ms, cache status false 
+2024/11/09 15:34:46.988836 File content saved successfully to local_b43_run2.txt
+2024/11/09 15:34:46.988840 File 'b43.txt': was cached
+2024/11/09 15:34:47.524665 I sent a GET message
+2024/11/09 15:34:47.526384 GET took 1.719925ms, cache status false 
+2024/11/09 15:34:47.526536 File content saved successfully to local_b44_run2.txt
+2024/11/09 15:34:47.526540 File 'b44.txt': was cached
+2024/11/09 15:34:47.697646 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188087 (size: 29 bytes)
+2024/11/09 15:34:47.698270 Received TCP message from 172.22.94.181:32920: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:34:47.698315 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:34:48.077157 I sent a GET message
+2024/11/09 15:34:48.077862 GET took 706.789µs, cache status false 
+2024/11/09 15:34:48.077983 File content saved successfully to local_b45_run2.txt
+2024/11/09 15:34:48.077988 File 'b45.txt': was cached
+2024/11/09 15:34:48.585235 I sent a GET message
+2024/11/09 15:34:48.586555 GET took 1.3216ms, cache status false 
+2024/11/09 15:34:48.586712 File content saved successfully to local_b46_run2.txt
+2024/11/09 15:34:48.586717 File 'b46.txt': was cached
+2024/11/09 15:34:48.698974 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188088 (size: 29 bytes)
+2024/11/09 15:34:48.699611 Received TCP message from 172.22.156.180:49486: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:34:48.699651 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:34:48.810647 Received TCP message from 172.22.94.179:34276: PING,172.22.94.179,1731188088 (size: 29 bytes)
+2024/11/09 15:34:48.810899 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:49.124021 I sent a GET message
+2024/11/09 15:34:49.125408 GET took 1.388407ms, cache status false 
+2024/11/09 15:34:49.125558 File content saved successfully to local_b47_run2.txt
+2024/11/09 15:34:49.125563 File 'b47.txt': was cached
+2024/11/09 15:34:49.673519 I sent a GET message
+2024/11/09 15:34:49.674871 GET took 1.353047ms, cache status false 
+2024/11/09 15:34:49.675011 File content saved successfully to local_b48_run2.txt
+2024/11/09 15:34:49.675015 File 'b48.txt': was cached
+2024/11/09 15:34:49.699832 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188089 (size: 29 bytes)
+2024/11/09 15:34:49.700381 Received TCP message from 172.22.156.179:36194: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:34:49.700445 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:34:50.207211 I sent a GET message
+2024/11/09 15:34:50.208557 GET took 1.347193ms, cache status false 
+2024/11/09 15:34:50.208711 File content saved successfully to local_b49_run2.txt
+2024/11/09 15:34:50.208716 File 'b49.txt': was cached
+2024/11/09 15:34:50.700454 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188090 (size: 29 bytes)
+2024/11/09 15:34:50.700961 Received TCP message from 172.22.94.180:36264: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:34:50.700982 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:34:50.744123 I sent a GET message
+2024/11/09 15:34:50.745762 GET took 1.639956ms, cache status false 
+2024/11/09 15:34:50.745932 File content saved successfully to local_b50_run2.txt
+2024/11/09 15:34:50.745937 File 'b50.txt': was cached
+2024/11/09 15:34:51.266905 I sent a GET message
+2024/11/09 15:34:51.267664 GET took 761.369µs, cache status false 
+2024/11/09 15:34:51.267782 File content saved successfully to local_b51_run2.txt
+2024/11/09 15:34:51.267787 File 'b51.txt': was cached
+2024/11/09 15:34:51.701277 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188091 (size: 29 bytes)
+2024/11/09 15:34:51.701823 Received TCP message from 172.22.158.179:52972: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:34:51.701868 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:34:51.800069 I sent a GET message
+2024/11/09 15:34:51.801372 GET took 1.305353ms, cache status false 
+2024/11/09 15:34:51.801514 File content saved successfully to local_b52_run2.txt
+2024/11/09 15:34:51.801518 File 'b52.txt': was cached
+2024/11/09 15:34:51.813526 Received TCP message from 172.22.156.179:38086: PING,172.22.156.179,1731188091 (size: 30 bytes)
+2024/11/09 15:34:51.813816 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:52.345475 I sent a GET message
+2024/11/09 15:34:52.346856 GET took 1.38284ms, cache status false 
+2024/11/09 15:34:52.347035 File content saved successfully to local_b53_run2.txt
+2024/11/09 15:34:52.347041 File 'b53.txt': was cached
+2024/11/09 15:34:52.702199 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188092 (size: 29 bytes)
+2024/11/09 15:34:52.702819 Received TCP message from 172.22.156.179:38088: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:34:52.702832 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:34:52.874836 I sent a GET message
+2024/11/09 15:34:52.876391 GET took 1.556401ms, cache status false 
+2024/11/09 15:34:52.876576 File content saved successfully to local_b54_run2.txt
+2024/11/09 15:34:52.876582 File 'b54.txt': was cached
+2024/11/09 15:34:53.402631 I sent a GET message
+2024/11/09 15:34:53.404180 GET took 1.550805ms, cache status false 
+2024/11/09 15:34:53.404329 File content saved successfully to local_b55_run2.txt
+2024/11/09 15:34:53.404334 File 'b55.txt': was cached
+2024/11/09 15:34:53.703676 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188093 (size: 29 bytes)
+2024/11/09 15:34:53.704237 Received TCP message from 172.22.156.180:48642: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:34:53.704291 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:34:53.950733 I sent a GET message
+2024/11/09 15:34:53.952048 GET took 1.316518ms, cache status false 
+2024/11/09 15:34:53.952234 File content saved successfully to local_b56_run2.txt
+2024/11/09 15:34:53.952242 File 'b56.txt': was cached
+2024/11/09 15:34:54.488685 I sent a GET message
+2024/11/09 15:34:54.489972 GET took 1.289547ms, cache status false 
+2024/11/09 15:34:54.490106 File content saved successfully to local_b57_run2.txt
+2024/11/09 15:34:54.490110 File 'b57.txt': was cached
+2024/11/09 15:34:54.704340 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188094 (size: 29 bytes)
+2024/11/09 15:34:54.704893 Received TCP message from 172.22.94.180:36266: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:34:54.704918 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:34:54.816682 Received TCP message from 172.22.94.179:41006: PING,172.22.94.179,1731188094 (size: 29 bytes)
+2024/11/09 15:34:54.816998 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:54.818362 Received TCP message from 172.22.156.180:48644: PING,172.22.156.180,1731188094 (size: 30 bytes)
+2024/11/09 15:34:54.818612 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:55.008691 I sent a GET message
+2024/11/09 15:34:55.009804 GET took 1.113869ms, cache status false 
+2024/11/09 15:34:55.009942 File content saved successfully to local_b58_run2.txt
+2024/11/09 15:34:55.009947 File 'b58.txt': was cached
+2024/11/09 15:34:55.559058 I sent a GET message
+2024/11/09 15:34:55.560276 GET took 1.210564ms, cache status false 
+2024/11/09 15:34:55.560402 File content saved successfully to local_b59_run2.txt
+2024/11/09 15:34:55.560406 File 'b59.txt': was cached
+2024/11/09 15:34:55.705565 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188095 (size: 29 bytes)
+2024/11/09 15:34:55.706200 Received TCP message from 172.22.158.180:47522: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:34:55.706226 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:34:56.104674 I sent a GET message
+2024/11/09 15:34:56.105953 GET took 1.280914ms, cache status false 
+2024/11/09 15:34:56.106087 File content saved successfully to local_b60_run2.txt
+2024/11/09 15:34:56.106091 File 'b60.txt': was cached
+2024/11/09 15:34:56.615252 I sent a GET message
+2024/11/09 15:34:56.616725 GET took 1.475561ms, cache status false 
+2024/11/09 15:34:56.616861 File content saved successfully to local_b61_run2.txt
+2024/11/09 15:34:56.616865 File 'b61.txt': was cached
+2024/11/09 15:34:56.706881 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188096 (size: 29 bytes)
+2024/11/09 15:34:56.707509 Received TCP message from 172.22.156.179:38096: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:34:56.707535 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:34:56.818206 Received TCP message from 172.22.158.180:47532: PING,172.22.158.180,1731188096 (size: 30 bytes)
+2024/11/09 15:34:56.818408 Received TCP message from 172.22.156.179:38100: PING,172.22.156.179,1731188096 (size: 30 bytes)
+2024/11/09 15:34:56.818578 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:56.818685 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:57.146184 I sent a GET message
+2024/11/09 15:34:57.147516 GET took 1.333741ms, cache status false 
+2024/11/09 15:34:57.147668 File content saved successfully to local_b62_run2.txt
+2024/11/09 15:34:57.147673 File 'b62.txt': was cached
+2024/11/09 15:34:57.697480 I sent a GET message
+2024/11/09 15:34:57.698832 GET took 1.353892ms, cache status false 
+2024/11/09 15:34:57.698944 File content saved successfully to local_b63_run2.txt
+2024/11/09 15:34:57.698948 File 'b63.txt': was cached
+2024/11/09 15:34:57.707677 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188097 (size: 29 bytes)
+2024/11/09 15:34:57.708406 Received TCP message from 172.22.94.179:41020: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:34:57.708432 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:34:58.003975 Received TCP message from 172.22.158.179:43538: PING,172.22.158.179,1731188098 (size: 30 bytes)
+2024/11/09 15:34:58.004269 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:58.232154 I sent a GET message
+2024/11/09 15:34:58.233560 GET took 1.40876ms, cache status false 
+2024/11/09 15:34:58.233700 File content saved successfully to local_b64_run2.txt
+2024/11/09 15:34:58.233704 File 'b64.txt': was cached
+2024/11/09 15:34:58.708507 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188098 (size: 29 bytes)
+2024/11/09 15:34:58.709126 Received TCP message from 172.22.158.180:47548: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:34:58.709150 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:34:58.772757 I sent a GET message
+2024/11/09 15:34:58.773973 GET took 1.217157ms, cache status false 
+2024/11/09 15:34:58.774099 File content saved successfully to local_b65_run2.txt
+2024/11/09 15:34:58.774103 File 'b65.txt': was cached
+2024/11/09 15:34:59.288560 I sent a GET message
+2024/11/09 15:34:59.289883 GET took 1.324178ms, cache status false 
+2024/11/09 15:34:59.290024 File content saved successfully to local_b66_run2.txt
+2024/11/09 15:34:59.290029 File 'b66.txt': was cached
+2024/11/09 15:34:59.709380 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188099 (size: 29 bytes)
+2024/11/09 15:34:59.709926 Received TCP message from 172.22.158.181:46276: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:34:59.709953 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:34:59.821907 Received TCP message from 172.22.158.181:46280: PING,172.22.158.181,1731188099 (size: 30 bytes)
+2024/11/09 15:34:59.822233 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:34:59.834998 I sent a GET message
+2024/11/09 15:34:59.836434 GET took 1.43811ms, cache status false 
+2024/11/09 15:34:59.836610 File content saved successfully to local_b67_run2.txt
+2024/11/09 15:34:59.836616 File 'b67.txt': was cached
+2024/11/09 15:35:00.370364 I sent a GET message
+2024/11/09 15:35:00.371701 GET took 1.338433ms, cache status false 
+2024/11/09 15:35:00.372696 File content saved successfully to local_b68_run2.txt
+2024/11/09 15:35:00.372705 File 'b68.txt': was cached
+2024/11/09 15:35:00.710087 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188100 (size: 29 bytes)
+2024/11/09 15:35:00.710672 Received TCP message from 172.22.94.179:41028: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:35:00.710710 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:35:00.912676 I sent a GET message
+2024/11/09 15:35:00.913912 GET took 1.237339ms, cache status false 
+2024/11/09 15:35:00.914048 File content saved successfully to local_b69_run2.txt
+2024/11/09 15:35:00.914052 File 'b69.txt': was cached
+2024/11/09 15:35:01.007437 Received TCP message from 172.22.158.179:43540: PING,172.22.158.179,1731188101 (size: 30 bytes)
+2024/11/09 15:35:01.007791 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:01.439818 I sent a GET message
+2024/11/09 15:35:01.441060 GET took 1.243175ms, cache status false 
+2024/11/09 15:35:01.441200 File content saved successfully to local_b70_run2.txt
+2024/11/09 15:35:01.441207 File 'b70.txt': was cached
+2024/11/09 15:35:01.711523 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188101 (size: 29 bytes)
+2024/11/09 15:35:01.711922 Received TCP message from 172.22.94.179:41038: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:35:01.711961 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:35:01.823393 Received TCP message from 172.22.94.180:56732: PING,172.22.94.180,1731188101 (size: 29 bytes)
+2024/11/09 15:35:01.823713 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:01.970634 I sent a GET message
+2024/11/09 15:35:01.971904 GET took 1.271444ms, cache status false 
+2024/11/09 15:35:01.972029 File content saved successfully to local_b71_run2.txt
+2024/11/09 15:35:01.972033 File 'b71.txt': was cached
+2024/11/09 15:35:02.497076 I sent a GET message
+2024/11/09 15:35:02.498684 GET took 1.609756ms, cache status false 
+2024/11/09 15:35:02.498800 File content saved successfully to local_b72_run2.txt
+2024/11/09 15:35:02.498804 File 'b72.txt': was cached
+2024/11/09 15:35:02.713048 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188102 (size: 29 bytes)
+2024/11/09 15:35:02.713608 Received TCP message from 172.22.94.180:56748: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:35:02.713631 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:35:03.051198 I sent a GET message
+2024/11/09 15:35:03.052615 GET took 1.41838ms, cache status false 
+2024/11/09 15:35:03.052754 File content saved successfully to local_b73_run2.txt
+2024/11/09 15:35:03.052759 File 'b73.txt': was cached
+2024/11/09 15:35:03.567876 I sent a GET message
+2024/11/09 15:35:03.569377 GET took 1.502464ms, cache status false 
+2024/11/09 15:35:03.569499 File content saved successfully to local_b74_run2.txt
+2024/11/09 15:35:03.569506 File 'b74.txt': was cached
+2024/11/09 15:35:03.714693 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188103 (size: 29 bytes)
+2024/11/09 15:35:03.715285 Received TCP message from 172.22.156.179:34316: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:35:03.715313 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:35:03.826236 Received TCP message from 172.22.156.179:34332: PING,172.22.156.179,1731188103 (size: 30 bytes)
+2024/11/09 15:35:03.826564 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:04.102740 I sent a GET message
+2024/11/09 15:35:04.104985 GET took 2.247182ms, cache status false 
+2024/11/09 15:35:04.105156 File content saved successfully to local_b75_run2.txt
+2024/11/09 15:35:04.105170 File 'b75.txt': was cached
+2024/11/09 15:35:04.637602 I sent a GET message
+2024/11/09 15:35:04.639032 GET took 1.431008ms, cache status false 
+2024/11/09 15:35:04.639152 File content saved successfully to local_b76_run2.txt
+2024/11/09 15:35:04.639157 File 'b76.txt': was cached
+2024/11/09 15:35:04.716281 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188104 (size: 29 bytes)
+2024/11/09 15:35:04.716786 Received TCP message from 172.22.158.179:50482: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:35:04.716850 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:35:04.826112 Received TCP message from 172.22.158.181:45334: PING,172.22.158.181,1731188104 (size: 30 bytes)
+2024/11/09 15:35:04.826479 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:05.175442 I sent a GET message
+2024/11/09 15:35:05.177327 GET took 1.886863ms, cache status false 
+2024/11/09 15:35:05.177471 File content saved successfully to local_b77_run2.txt
+2024/11/09 15:35:05.177475 File 'b77.txt': was cached
+2024/11/09 15:35:05.717193 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188105 (size: 29 bytes)
+2024/11/09 15:35:05.717803 Received TCP message from 172.22.158.180:56062: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:35:05.717842 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:35:05.745586 I sent a GET message
+2024/11/09 15:35:05.746648 GET took 1.063581ms, cache status false 
+2024/11/09 15:35:05.746794 File content saved successfully to local_b78_run2.txt
+2024/11/09 15:35:05.746799 File 'b78.txt': was cached
+2024/11/09 15:35:06.259868 I sent a GET message
+2024/11/09 15:35:06.261155 GET took 1.288171ms, cache status false 
+2024/11/09 15:35:06.261277 File content saved successfully to local_b79_run2.txt
+2024/11/09 15:35:06.261282 File 'b79.txt': was cached
+2024/11/09 15:35:06.717902 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188106 (size: 29 bytes)
+2024/11/09 15:35:06.718527 Received TCP message from 172.22.94.181:35532: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:35:06.718564 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:35:06.801745 I sent a GET message
+2024/11/09 15:35:06.803382 GET took 1.636865ms, cache status false 
+2024/11/09 15:35:06.803523 File content saved successfully to local_b80_run2.txt
+2024/11/09 15:35:06.803528 File 'b80.txt': was cached
+2024/11/09 15:35:06.827986 Received TCP message from 172.22.94.179:44554: PING,172.22.94.179,1731188106 (size: 29 bytes)
+2024/11/09 15:35:06.828146 Received TCP message from 172.22.156.181:53020: PING,172.22.156.181,1731188106 (size: 30 bytes)
+2024/11/09 15:35:06.828277 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:06.828439 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:07.341874 I sent a GET message
+2024/11/09 15:35:07.343208 GET took 1.335919ms, cache status false 
+2024/11/09 15:35:07.343338 File content saved successfully to local_b81_run2.txt
+2024/11/09 15:35:07.343352 File 'b81.txt': was cached
+2024/11/09 15:35:07.718858 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188107 (size: 29 bytes)
+2024/11/09 15:35:07.719456 Received TCP message from 172.22.156.181:53026: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:35:07.719478 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:35:07.829395 Received TCP message from 172.22.156.181:53042: PING,172.22.156.181,1731188107 (size: 30 bytes)
+2024/11/09 15:35:07.829698 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:08.124152 I sent a GET message
+2024/11/09 15:35:08.125497 GET took 1.346254ms, cache status false 
+2024/11/09 15:35:08.125641 File content saved successfully to local_b82_run2.txt
+2024/11/09 15:35:08.125647 File 'b82.txt': was cached
+2024/11/09 15:35:08.405417 I sent a GET message
+2024/11/09 15:35:08.406615 GET took 1.199419ms, cache status false 
+2024/11/09 15:35:08.406815 File content saved successfully to local_b83_run2.txt
+2024/11/09 15:35:08.406820 File 'b83.txt': was cached
+2024/11/09 15:35:08.720073 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188108 (size: 29 bytes)
+2024/11/09 15:35:08.720621 Received TCP message from 172.22.94.180:56764: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:35:08.720635 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:35:08.829544 Received TCP message from 172.22.158.181:45342: PING,172.22.158.181,1731188108 (size: 30 bytes)
+2024/11/09 15:35:08.829737 Received TCP message from 172.22.158.180:56064: PING,172.22.158.180,1731188108 (size: 30 bytes)
+2024/11/09 15:35:08.829872 Received TCP message from 172.22.156.180:56270: PING,172.22.156.180,1731188108 (size: 30 bytes)
+2024/11/09 15:35:08.829980 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:08.830059 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:08.830168 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:09.038502 Received TCP message from 172.22.94.181:35534: PING,172.22.94.181,1731188109 (size: 29 bytes)
+2024/11/09 15:35:09.038789 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:09.172294 I sent a GET message
+2024/11/09 15:35:09.173616 GET took 1.322141ms, cache status false 
+2024/11/09 15:35:09.173751 File content saved successfully to local_b84_run2.txt
+2024/11/09 15:35:09.173755 File 'b84.txt': was cached
+2024/11/09 15:35:09.696730 I sent a GET message
+2024/11/09 15:35:09.698538 GET took 1.809607ms, cache status false 
+2024/11/09 15:35:09.698704 File content saved successfully to local_b85_run2.txt
+2024/11/09 15:35:09.698709 File 'b85.txt': was cached
+2024/11/09 15:35:09.720681 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188109 (size: 29 bytes)
+2024/11/09 15:35:09.721116 Received TCP message from 172.22.94.179:44570: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:35:09.721158 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:35:10.156272 I sent a GET message
+2024/11/09 15:35:10.156958 GET took 687.831µs, cache status false 
+2024/11/09 15:35:10.157071 File content saved successfully to local_b86_run2.txt
+2024/11/09 15:35:10.157075 File 'b86.txt': was cached
+2024/11/09 15:35:10.680245 I sent a GET message
+2024/11/09 15:35:10.681693 GET took 1.449517ms, cache status false 
+2024/11/09 15:35:10.681858 File content saved successfully to local_b87_run2.txt
+2024/11/09 15:35:10.681863 File 'b87.txt': was cached
+2024/11/09 15:35:10.721834 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188110 (size: 29 bytes)
+2024/11/09 15:35:10.722284 Received TCP message from 172.22.94.179:44576: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:35:10.722391 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:35:10.831728 Received TCP message from 172.22.156.179:56968: PING,172.22.156.179,1731188110 (size: 30 bytes)
+2024/11/09 15:35:10.832011 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:11.204037 I sent a GET message
+2024/11/09 15:35:11.205314 GET took 1.27898ms, cache status false 
+2024/11/09 15:35:11.205425 File content saved successfully to local_b88_run2.txt
+2024/11/09 15:35:11.205429 File 'b88.txt': was cached
+2024/11/09 15:35:11.722966 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188111 (size: 29 bytes)
+2024/11/09 15:35:11.723670 Received TCP message from 172.22.156.180:41906: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:35:11.723690 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:35:11.728295 I sent a GET message
+2024/11/09 15:35:11.729495 GET took 1.200737ms, cache status false 
+2024/11/09 15:35:11.729618 File content saved successfully to local_b89_run2.txt
+2024/11/09 15:35:11.729622 File 'b89.txt': was cached
+2024/11/09 15:35:12.253026 I sent a GET message
+2024/11/09 15:35:12.253932 GET took 907.611µs, cache status false 
+2024/11/09 15:35:12.254164 File content saved successfully to local_b90_run2.txt
+2024/11/09 15:35:12.254171 File 'b90.txt': was cached
+2024/11/09 15:35:12.724520 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188112 (size: 29 bytes)
+2024/11/09 15:35:12.725022 Received TCP message from 172.22.156.181:39204: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:35:12.725032 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:35:12.777983 I sent a GET message
+2024/11/09 15:35:12.779104 GET took 1.122075ms, cache status false 
+2024/11/09 15:35:12.779230 File content saved successfully to local_b91_run2.txt
+2024/11/09 15:35:12.779235 File 'b91.txt': was cached
+2024/11/09 15:35:12.833182 Received TCP message from 172.22.156.180:41918: PING,172.22.156.180,1731188112 (size: 30 bytes)
+2024/11/09 15:35:12.833505 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:13.043799 Received TCP message from 172.22.94.181:35536: PING,172.22.94.181,1731188113 (size: 29 bytes)
+2024/11/09 15:35:13.044058 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:13.301068 I sent a GET message
+2024/11/09 15:35:13.302335 GET took 1.268529ms, cache status false 
+2024/11/09 15:35:13.302466 File content saved successfully to local_b92_run2.txt
+2024/11/09 15:35:13.302471 File 'b92.txt': was cached
+2024/11/09 15:35:13.725986 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188113 (size: 29 bytes)
+2024/11/09 15:35:13.726651 Received TCP message from 172.22.158.181:59614: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:35:13.726671 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:35:13.825740 I sent a GET message
+2024/11/09 15:35:13.827266 GET took 1.527767ms, cache status false 
+2024/11/09 15:35:13.827379 File content saved successfully to local_b93_run2.txt
+2024/11/09 15:35:13.827383 File 'b93.txt': was cached
+2024/11/09 15:35:14.350211 I sent a GET message
+2024/11/09 15:35:14.351631 GET took 1.421079ms, cache status false 
+2024/11/09 15:35:14.351789 File content saved successfully to local_b94_run2.txt
+2024/11/09 15:35:14.351794 File 'b94.txt': was cached
+2024/11/09 15:35:14.727205 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188114 (size: 29 bytes)
+2024/11/09 15:35:14.727727 Received TCP message from 172.22.158.180:56078: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:35:14.727769 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:35:14.834812 Received TCP message from 172.22.156.179:56978: PING,172.22.156.179,1731188114 (size: 30 bytes)
+2024/11/09 15:35:14.835264 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:14.835516 Received TCP message from 172.22.156.181:39220: PING,172.22.156.181,1731188114 (size: 30 bytes)
+2024/11/09 15:35:14.835607 Received TCP message from 172.22.156.180:41930: PING,172.22.156.180,1731188114 (size: 30 bytes)
+2024/11/09 15:35:14.835769 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:14.835869 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:14.874819 I sent a GET message
+2024/11/09 15:35:14.875698 GET took 880.84µs, cache status false 
+2024/11/09 15:35:14.875822 File content saved successfully to local_b95_run2.txt
+2024/11/09 15:35:14.875827 File 'b95.txt': was cached
+2024/11/09 15:35:15.411743 I sent a GET message
+2024/11/09 15:35:15.413267 GET took 1.525111ms, cache status false 
+2024/11/09 15:35:15.413407 File content saved successfully to local_b96_run2.txt
+2024/11/09 15:35:15.413412 File 'b96.txt': was cached
+2024/11/09 15:35:15.728685 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188115 (size: 29 bytes)
+2024/11/09 15:35:15.729388 Received TCP message from 172.22.156.181:39222: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:35:15.729413 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:35:15.836363 Received TCP message from 172.22.156.181:39230: PING,172.22.156.181,1731188115 (size: 30 bytes)
+2024/11/09 15:35:15.836703 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:15.955637 I sent a GET message
+2024/11/09 15:35:15.956919 GET took 1.282881ms, cache status false 
+2024/11/09 15:35:15.957042 File content saved successfully to local_b97_run2.txt
+2024/11/09 15:35:15.957047 File 'b97.txt': was cached
+2024/11/09 15:35:16.465319 I sent a GET message
+2024/11/09 15:35:16.466348 GET took 1.031621ms, cache status false 
+2024/11/09 15:35:16.466497 File content saved successfully to local_b98_run2.txt
+2024/11/09 15:35:16.466501 File 'b98.txt': was cached
+2024/11/09 15:35:16.729448 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188116 (size: 29 bytes)
+2024/11/09 15:35:16.729983 Received TCP message from 172.22.158.181:59620: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:35:16.730002 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:35:17.021159 I sent a GET message
+2024/11/09 15:35:17.022318 GET took 1.160756ms, cache status false 
+2024/11/09 15:35:17.022448 File content saved successfully to local_b99_run2.txt
+2024/11/09 15:35:17.022452 File 'b99.txt': was cached
+2024/11/09 15:35:17.544868 I sent a GET message
+2024/11/09 15:35:17.546209 GET took 1.34174ms, cache status false 
+2024/11/09 15:35:17.547046 File content saved successfully to local_b100_run2.txt
+2024/11/09 15:35:17.547052 File 'b100.txt': was cached
+2024/11/09 15:35:17.730147 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188117 (size: 29 bytes)
+2024/11/09 15:35:17.730692 Received TCP message from 172.22.94.181:38774: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:35:17.730727 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:35:18.100709 I sent a GET message
+2024/11/09 15:35:18.102107 GET took 1.398772ms, cache status false 
+2024/11/09 15:35:18.102252 File content saved successfully to local_b1_run3.txt
+2024/11/09 15:35:18.102258 File 'b1.txt': was cached
+2024/11/09 15:35:18.615426 I sent a GET message
+2024/11/09 15:35:18.616900 GET took 1.476893ms, cache status false 
+2024/11/09 15:35:18.617090 File content saved successfully to local_b2_run3.txt
+2024/11/09 15:35:18.617096 File 'b2.txt': was cached
+2024/11/09 15:35:18.731027 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188118 (size: 29 bytes)
+2024/11/09 15:35:18.731807 Received TCP message from 172.22.94.181:38778: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:35:18.731857 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:35:19.049390 Received TCP message from 172.22.94.181:38782: PING,172.22.94.181,1731188119 (size: 29 bytes)
+2024/11/09 15:35:19.049830 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:19.145579 I sent a GET message
+2024/11/09 15:35:19.147010 GET took 1.432573ms, cache status false 
+2024/11/09 15:35:19.147130 File content saved successfully to local_b3_run3.txt
+2024/11/09 15:35:19.147134 File 'b3.txt': was cached
+2024/11/09 15:35:19.681360 I sent a GET message
+2024/11/09 15:35:19.682599 GET took 1.241435ms, cache status false 
+2024/11/09 15:35:19.682774 File content saved successfully to local_b4_run3.txt
+2024/11/09 15:35:19.682780 File 'b4.txt': was cached
+2024/11/09 15:35:19.732571 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188119 (size: 29 bytes)
+2024/11/09 15:35:19.733236 Received TCP message from 172.22.158.179:36880: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:35:19.733272 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:35:20.539769 I sent a GET message
+2024/11/09 15:35:20.540881 GET took 1.11312ms, cache status false 
+2024/11/09 15:35:20.541018 File content saved successfully to local_b5_run3.txt
+2024/11/09 15:35:20.541022 File 'b5.txt': was cached
+2024/11/09 15:35:20.733101 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188120 (size: 29 bytes)
+2024/11/09 15:35:20.733689 Received TCP message from 172.22.156.180:54384: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:35:20.733722 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:35:20.745122 I sent a GET message
+2024/11/09 15:35:20.746590 GET took 1.46919ms, cache status false 
+2024/11/09 15:35:20.746721 File content saved successfully to local_b6_run3.txt
+2024/11/09 15:35:20.746725 File 'b6.txt': was cached
+2024/11/09 15:35:20.840992 Received TCP message from 172.22.158.180:56026: PING,172.22.158.180,1731188120 (size: 30 bytes)
+2024/11/09 15:35:20.841161 Received TCP message from 172.22.94.179:44382: PING,172.22.94.179,1731188120 (size: 29 bytes)
+2024/11/09 15:35:20.841312 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:20.841410 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:21.303693 I sent a GET message
+2024/11/09 15:35:21.305401 GET took 1.70935ms, cache status false 
+2024/11/09 15:35:21.305555 File content saved successfully to local_b7_run3.txt
+2024/11/09 15:35:21.305560 File 'b7.txt': was cached
+2024/11/09 15:35:21.733977 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188121 (size: 29 bytes)
+2024/11/09 15:35:21.734530 Received TCP message from 172.22.156.180:54398: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:35:21.734559 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:35:21.823946 I sent a GET message
+2024/11/09 15:35:21.825078 GET took 1.133897ms, cache status false 
+2024/11/09 15:35:21.825215 File content saved successfully to local_b8_run3.txt
+2024/11/09 15:35:21.825220 File 'b8.txt': was cached
+2024/11/09 15:35:22.052483 Received TCP message from 172.22.94.181:38788: PING,172.22.94.181,1731188122 (size: 29 bytes)
+2024/11/09 15:35:22.052746 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:22.352251 I sent a GET message
+2024/11/09 15:35:22.353619 GET took 1.368612ms, cache status false 
+2024/11/09 15:35:22.353833 File content saved successfully to local_b9_run3.txt
+2024/11/09 15:35:22.353839 File 'b9.txt': was cached
+2024/11/09 15:35:22.735154 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188122 (size: 29 bytes)
+2024/11/09 15:35:22.735741 Received TCP message from 172.22.158.181:59636: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:35:22.735755 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:35:22.842699 Received TCP message from 172.22.158.180:56030: PING,172.22.158.180,1731188122 (size: 30 bytes)
+2024/11/09 15:35:22.843005 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:22.909871 I sent a GET message
+2024/11/09 15:35:22.911749 GET took 1.879784ms, cache status false 
+2024/11/09 15:35:22.911900 File content saved successfully to local_b10_run3.txt
+2024/11/09 15:35:22.911905 File 'b10.txt': was cached
+2024/11/09 15:35:23.418874 I sent a GET message
+2024/11/09 15:35:23.419657 GET took 784.869µs, cache status false 
+2024/11/09 15:35:23.419776 File content saved successfully to local_b11_run3.txt
+2024/11/09 15:35:23.419781 File 'b11.txt': was cached
+2024/11/09 15:35:23.735944 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188123 (size: 29 bytes)
+2024/11/09 15:35:23.736796 Received TCP message from 172.22.156.179:37996: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:35:23.736812 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:35:23.978655 I sent a GET message
+2024/11/09 15:35:23.979920 GET took 1.26674ms, cache status false 
+2024/11/09 15:35:23.980038 File content saved successfully to local_b12_run3.txt
+2024/11/09 15:35:23.980042 File 'b12.txt': was cached
+2024/11/09 15:35:24.517925 I sent a GET message
+2024/11/09 15:35:24.518602 GET took 679.008µs, cache status false 
+2024/11/09 15:35:24.518708 File content saved successfully to local_b13_run3.txt
+2024/11/09 15:35:24.518712 File 'b13.txt': was cached
+2024/11/09 15:35:24.736707 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188124 (size: 29 bytes)
+2024/11/09 15:35:24.737254 Received TCP message from 172.22.156.180:54404: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:35:24.737289 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:35:24.844631 Received TCP message from 172.22.94.179:55700: PING,172.22.94.179,1731188124 (size: 29 bytes)
+2024/11/09 15:35:24.844908 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:25.026896 I sent a GET message
+2024/11/09 15:35:25.028267 GET took 1.373625ms, cache status false 
+2024/11/09 15:35:25.028408 File content saved successfully to local_b14_run3.txt
+2024/11/09 15:35:25.028412 File 'b14.txt': was cached
+2024/11/09 15:35:25.560666 I sent a GET message
+2024/11/09 15:35:25.561939 GET took 1.275129ms, cache status false 
+2024/11/09 15:35:25.562072 File content saved successfully to local_b15_run3.txt
+2024/11/09 15:35:25.562076 File 'b15.txt': was cached
+2024/11/09 15:35:25.738061 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188125 (size: 29 bytes)
+2024/11/09 15:35:25.738633 Received TCP message from 172.22.156.179:38000: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:35:25.738657 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:35:25.846100 Received TCP message from 172.22.156.181:46380: PING,172.22.156.181,1731188125 (size: 30 bytes)
+2024/11/09 15:35:25.846399 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:26.101232 I sent a GET message
+2024/11/09 15:35:26.101923 GET took 693.085µs, cache status false 
+2024/11/09 15:35:26.102040 File content saved successfully to local_b16_run3.txt
+2024/11/09 15:35:26.102045 File 'b16.txt': was cached
+2024/11/09 15:35:26.648649 I sent a GET message
+2024/11/09 15:35:26.650036 GET took 1.388012ms, cache status false 
+2024/11/09 15:35:26.650157 File content saved successfully to local_b17_run3.txt
+2024/11/09 15:35:26.650161 File 'b17.txt': was cached
+2024/11/09 15:35:26.738905 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188126 (size: 29 bytes)
+2024/11/09 15:35:26.739446 Received TCP message from 172.22.156.180:54406: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:35:26.739497 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:35:27.190537 I sent a GET message
+2024/11/09 15:35:27.191107 GET took 571.348µs, cache status false 
+2024/11/09 15:35:27.191229 File content saved successfully to local_b18_run3.txt
+2024/11/09 15:35:27.191235 File 'b18.txt': was cached
+2024/11/09 15:35:27.714849 I sent a GET message
+2024/11/09 15:35:27.715986 GET took 1.138875ms, cache status false 
+2024/11/09 15:35:27.716183 File content saved successfully to local_b19_run3.txt
+2024/11/09 15:35:27.716200 File 'b19.txt': was cached
+2024/11/09 15:35:27.739710 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188127 (size: 29 bytes)
+2024/11/09 15:35:27.740292 Received TCP message from 172.22.158.179:59068: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:35:27.740348 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:35:28.246736 I sent a GET message
+2024/11/09 15:35:28.248376 GET took 1.641593ms, cache status false 
+2024/11/09 15:35:28.248549 File content saved successfully to local_b20_run3.txt
+2024/11/09 15:35:28.248555 File 'b20.txt': was cached
+2024/11/09 15:35:28.741106 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188128 (size: 29 bytes)
+2024/11/09 15:35:28.741730 Received TCP message from 172.22.158.180:58660: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:35:28.741800 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:35:28.787288 I sent a GET message
+2024/11/09 15:35:28.788717 GET took 1.430121ms, cache status false 
+2024/11/09 15:35:28.788851 File content saved successfully to local_b21_run3.txt
+2024/11/09 15:35:28.788858 File 'b21.txt': was cached
+2024/11/09 15:35:29.319464 I sent a GET message
+2024/11/09 15:35:29.320705 GET took 1.242309ms, cache status false 
+2024/11/09 15:35:29.320851 File content saved successfully to local_b22_run3.txt
+2024/11/09 15:35:29.320855 File 'b22.txt': was cached
+2024/11/09 15:35:29.742333 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188129 (size: 29 bytes)
+2024/11/09 15:35:29.743178 Received TCP message from 172.22.156.181:46382: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:35:29.743222 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:35:29.847071 I sent a GET message
+2024/11/09 15:35:29.848983 GET took 1.913014ms, cache status false 
+2024/11/09 15:35:29.849158 File content saved successfully to local_b23_run3.txt
+2024/11/09 15:35:29.849174 File 'b23.txt': was cached
+2024/11/09 15:35:29.849920 Received TCP message from 172.22.156.180:43270: PING,172.22.156.180,1731188129 (size: 30 bytes)
+2024/11/09 15:35:29.850129 Received TCP message from 172.22.156.179:38006: PING,172.22.156.179,1731188129 (size: 30 bytes)
+2024/11/09 15:35:29.850386 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:29.850599 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:30.396523 I sent a GET message
+2024/11/09 15:35:30.397737 GET took 1.215802ms, cache status false 
+2024/11/09 15:35:30.397869 File content saved successfully to local_b24_run3.txt
+2024/11/09 15:35:30.397873 File 'b24.txt': was cached
+2024/11/09 15:35:30.743396 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188130 (size: 29 bytes)
+2024/11/09 15:35:30.744011 Received TCP message from 172.22.156.179:47122: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:35:30.744023 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:35:30.850884 Received TCP message from 172.22.94.180:41830: PING,172.22.94.180,1731188130 (size: 29 bytes)
+2024/11/09 15:35:30.851157 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:30.937150 I sent a GET message
+2024/11/09 15:35:30.938462 GET took 1.313613ms, cache status false 
+2024/11/09 15:35:30.938601 File content saved successfully to local_b25_run3.txt
+2024/11/09 15:35:30.938606 File 'b25.txt': was cached
+2024/11/09 15:35:31.445661 I sent a GET message
+2024/11/09 15:35:31.447129 GET took 1.474353ms, cache status false 
+2024/11/09 15:35:31.447268 File content saved successfully to local_b26_run3.txt
+2024/11/09 15:35:31.447275 File 'b26.txt': was cached
+2024/11/09 15:35:31.744668 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188131 (size: 29 bytes)
+2024/11/09 15:35:31.745314 Received TCP message from 172.22.158.179:59072: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:35:31.745331 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:35:31.986956 I sent a GET message
+2024/11/09 15:35:31.988001 GET took 1.047ms, cache status false 
+2024/11/09 15:35:31.988113 File content saved successfully to local_b27_run3.txt
+2024/11/09 15:35:31.988117 File 'b27.txt': was cached
+2024/11/09 15:35:32.530396 I sent a GET message
+2024/11/09 15:35:32.531843 GET took 1.449058ms, cache status false 
+2024/11/09 15:35:32.531979 File content saved successfully to local_b28_run3.txt
+2024/11/09 15:35:32.531984 File 'b28.txt': was cached
+2024/11/09 15:35:32.745171 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188132 (size: 29 bytes)
+2024/11/09 15:35:32.745860 Received TCP message from 172.22.156.179:47134: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:35:32.745887 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:35:32.852938 Received TCP message from 172.22.156.180:43282: PING,172.22.156.180,1731188132 (size: 30 bytes)
+2024/11/09 15:35:32.853122 Received TCP message from 172.22.158.180:58676: PING,172.22.158.180,1731188132 (size: 30 bytes)
+2024/11/09 15:35:32.853260 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:32.853352 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:33.047005 Received TCP message from 172.22.158.179:36602: PING,172.22.158.179,1731188133 (size: 30 bytes)
+2024/11/09 15:35:33.047310 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:33.051061 I sent a GET message
+2024/11/09 15:35:33.052642 GET took 1.581622ms, cache status false 
+2024/11/09 15:35:33.052766 File content saved successfully to local_b29_run3.txt
+2024/11/09 15:35:33.052770 File 'b29.txt': was cached
+2024/11/09 15:35:33.584422 I sent a GET message
+2024/11/09 15:35:33.586419 GET took 1.998062ms, cache status false 
+2024/11/09 15:35:33.586628 File content saved successfully to local_b30_run3.txt
+2024/11/09 15:35:33.586633 File 'b30.txt': was cached
+2024/11/09 15:35:33.746533 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188133 (size: 29 bytes)
+2024/11/09 15:35:33.747096 Received TCP message from 172.22.94.179:55704: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:35:33.747108 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:35:33.853051 Received TCP message from 172.22.94.179:55712: PING,172.22.94.179,1731188133 (size: 29 bytes)
+2024/11/09 15:35:33.853474 Received TCP message from 172.22.156.181:52430: PING,172.22.156.181,1731188133 (size: 30 bytes)
+2024/11/09 15:35:33.853618 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:33.853763 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:33.853863 Received TCP message from 172.22.158.180:58688: PING,172.22.158.180,1731188133 (size: 30 bytes)
+2024/11/09 15:35:33.854118 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:34.064542 Received TCP message from 172.22.94.181:42176: PING,172.22.94.181,1731188134 (size: 29 bytes)
+2024/11/09 15:35:34.064796 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:34.131864 I sent a GET message
+2024/11/09 15:35:34.133298 GET took 1.436581ms, cache status false 
+2024/11/09 15:35:34.134137 File content saved successfully to local_b31_run3.txt
+2024/11/09 15:35:34.134145 File 'b31.txt': was cached
+2024/11/09 15:35:34.678412 I sent a GET message
+2024/11/09 15:35:34.679753 GET took 1.342538ms, cache status false 
+2024/11/09 15:35:34.679880 File content saved successfully to local_b32_run3.txt
+2024/11/09 15:35:34.679885 File 'b32.txt': was cached
+2024/11/09 15:35:34.747986 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188134 (size: 29 bytes)
+2024/11/09 15:35:34.748578 Received TCP message from 172.22.156.179:47140: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:35:34.748606 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:35:34.854648 Received TCP message from 172.22.156.181:52434: PING,172.22.156.181,1731188134 (size: 30 bytes)
+2024/11/09 15:35:34.854980 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:35.214261 I sent a GET message
+2024/11/09 15:35:35.215624 GET took 1.364932ms, cache status false 
+2024/11/09 15:35:35.215760 File content saved successfully to local_b33_run3.txt
+2024/11/09 15:35:35.215764 File 'b33.txt': was cached
+2024/11/09 15:35:35.725334 I sent a GET message
+2024/11/09 15:35:35.726996 GET took 1.66288ms, cache status false 
+2024/11/09 15:35:35.727160 File content saved successfully to local_b34_run3.txt
+2024/11/09 15:35:35.727166 File 'b34.txt': was cached
+2024/11/09 15:35:35.748986 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188135 (size: 29 bytes)
+2024/11/09 15:35:35.749512 Received TCP message from 172.22.158.181:37072: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:35:35.749566 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:35:36.270455 I sent a GET message
+2024/11/09 15:35:36.271687 GET took 1.233879ms, cache status false 
+2024/11/09 15:35:36.271836 File content saved successfully to local_b35_run3.txt
+2024/11/09 15:35:36.271841 File 'b35.txt': was cached
+2024/11/09 15:35:36.750417 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188136 (size: 29 bytes)
+2024/11/09 15:35:36.750987 Received TCP message from 172.22.158.180:60494: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:35:36.751013 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:35:36.797616 I sent a GET message
+2024/11/09 15:35:36.798930 GET took 1.315761ms, cache status false 
+2024/11/09 15:35:36.799118 File content saved successfully to local_b36_run3.txt
+2024/11/09 15:35:36.799124 File 'b36.txt': was cached
+2024/11/09 15:35:36.855872 Received TCP message from 172.22.158.180:60502: PING,172.22.158.180,1731188136 (size: 30 bytes)
+2024/11/09 15:35:36.856300 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:37.052171 Received TCP message from 172.22.158.179:36604: PING,172.22.158.179,1731188137 (size: 30 bytes)
+2024/11/09 15:35:37.052545 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:37.357283 I sent a GET message
+2024/11/09 15:35:37.358902 GET took 1.621192ms, cache status false 
+2024/11/09 15:35:37.359049 File content saved successfully to local_b37_run3.txt
+2024/11/09 15:35:37.359054 File 'b37.txt': was cached
+2024/11/09 15:35:37.751296 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188137 (size: 29 bytes)
+2024/11/09 15:35:37.751740 Received TCP message from 172.22.94.179:51084: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:35:37.751751 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:35:37.890628 I sent a GET message
+2024/11/09 15:35:37.892168 GET took 1.542159ms, cache status false 
+2024/11/09 15:35:37.892304 File content saved successfully to local_b38_run3.txt
+2024/11/09 15:35:37.892309 File 'b38.txt': was cached
+2024/11/09 15:35:38.436133 I sent a GET message
+2024/11/09 15:35:38.437504 GET took 1.37222ms, cache status false 
+2024/11/09 15:35:38.437680 File content saved successfully to local_b39_run3.txt
+2024/11/09 15:35:38.437685 File 'b39.txt': was cached
+2024/11/09 15:35:38.751769 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188138 (size: 29 bytes)
+2024/11/09 15:35:38.752369 Received TCP message from 172.22.156.180:43288: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:35:38.752402 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:35:38.858510 Received TCP message from 172.22.94.179:51096: PING,172.22.94.179,1731188138 (size: 29 bytes)
+2024/11/09 15:35:38.858813 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:38.958599 I sent a GET message
+2024/11/09 15:35:38.959822 GET took 1.224838ms, cache status false 
+2024/11/09 15:35:38.959935 File content saved successfully to local_b40_run3.txt
+2024/11/09 15:35:38.959939 File 'b40.txt': was cached
+2024/11/09 15:35:39.514709 I sent a GET message
+2024/11/09 15:35:39.516029 GET took 1.321568ms, cache status false 
+2024/11/09 15:35:39.516209 File content saved successfully to local_b41_run3.txt
+2024/11/09 15:35:39.516216 File 'b41.txt': was cached
+2024/11/09 15:35:39.752288 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188139 (size: 29 bytes)
+2024/11/09 15:35:39.752864 Received TCP message from 172.22.158.181:37078: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:35:39.752876 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:35:39.859092 Received TCP message from 172.22.156.180:40302: PING,172.22.156.180,1731188139 (size: 30 bytes)
+2024/11/09 15:35:39.859468 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:40.051972 I sent a GET message
+2024/11/09 15:35:40.053403 GET took 1.433214ms, cache status false 
+2024/11/09 15:35:40.053538 File content saved successfully to local_b42_run3.txt
+2024/11/09 15:35:40.053543 File 'b42.txt': was cached
+2024/11/09 15:35:40.588532 I sent a GET message
+2024/11/09 15:35:40.589948 GET took 1.417257ms, cache status false 
+2024/11/09 15:35:40.590117 File content saved successfully to local_b43_run3.txt
+2024/11/09 15:35:40.590122 File 'b43.txt': was cached
+2024/11/09 15:35:40.752855 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188140 (size: 29 bytes)
+2024/11/09 15:35:40.753348 Received TCP message from 172.22.94.181:42192: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:35:40.753408 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:35:41.104009 I sent a GET message
+2024/11/09 15:35:41.105257 GET took 1.249057ms, cache status false 
+2024/11/09 15:35:41.105397 File content saved successfully to local_b44_run3.txt
+2024/11/09 15:35:41.105401 File 'b44.txt': was cached
+2024/11/09 15:35:41.630900 I sent a GET message
+2024/11/09 15:35:41.631595 GET took 696.906µs, cache status false 
+2024/11/09 15:35:41.631702 File content saved successfully to local_b45_run3.txt
+2024/11/09 15:35:41.631706 File 'b45.txt': was cached
+2024/11/09 15:35:41.753682 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188141 (size: 29 bytes)
+2024/11/09 15:35:41.754345 Received TCP message from 172.22.158.180:60516: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:35:41.754366 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:35:41.860599 Received TCP message from 172.22.156.179:48794: PING,172.22.156.179,1731188141 (size: 30 bytes)
+2024/11/09 15:35:41.860845 Received TCP message from 172.22.94.180:37700: PING,172.22.94.180,1731188141 (size: 29 bytes)
+2024/11/09 15:35:41.861044 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:41.861122 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:42.059536 Received TCP message from 172.22.158.179:52284: PING,172.22.158.179,1731188142 (size: 30 bytes)
+2024/11/09 15:35:42.059859 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:42.190363 I sent a GET message
+2024/11/09 15:35:42.191922 GET took 1.5613ms, cache status false 
+2024/11/09 15:35:42.192056 File content saved successfully to local_b46_run3.txt
+2024/11/09 15:35:42.192060 File 'b46.txt': was cached
+2024/11/09 15:35:42.714686 I sent a GET message
+2024/11/09 15:35:42.715911 GET took 1.22708ms, cache status false 
+2024/11/09 15:35:42.716065 File content saved successfully to local_b47_run3.txt
+2024/11/09 15:35:42.716070 File 'b47.txt': was cached
+2024/11/09 15:35:42.754730 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188142 (size: 29 bytes)
+2024/11/09 15:35:42.755334 Received TCP message from 172.22.156.180:40304: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:35:42.755356 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:35:42.860696 Received TCP message from 172.22.156.181:38058: PING,172.22.156.181,1731188142 (size: 30 bytes)
+2024/11/09 15:35:42.860823 Received TCP message from 172.22.158.180:60520: PING,172.22.158.180,1731188142 (size: 30 bytes)
+2024/11/09 15:35:42.861082 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:42.861349 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:42.861524 Received TCP message from 172.22.94.180:37706: PING,172.22.94.180,1731188142 (size: 29 bytes)
+2024/11/09 15:35:42.861729 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:43.061057 Received TCP message from 172.22.158.179:52290: PING,172.22.158.179,1731188143 (size: 30 bytes)
+2024/11/09 15:35:43.061335 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:43.242394 I sent a GET message
+2024/11/09 15:35:43.243576 GET took 1.183293ms, cache status false 
+2024/11/09 15:35:43.243707 File content saved successfully to local_b48_run3.txt
+2024/11/09 15:35:43.243711 File 'b48.txt': was cached
+2024/11/09 15:35:43.755484 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188143 (size: 29 bytes)
+2024/11/09 15:35:43.756081 Received TCP message from 172.22.94.180:37722: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:35:43.756091 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:35:43.790291 I sent a GET message
+2024/11/09 15:35:43.791581 GET took 1.291096ms, cache status false 
+2024/11/09 15:35:43.791780 File content saved successfully to local_b49_run3.txt
+2024/11/09 15:35:43.791785 File 'b49.txt': was cached
+2024/11/09 15:35:43.862002 Received TCP message from 172.22.156.181:38074: PING,172.22.156.181,1731188143 (size: 30 bytes)
+2024/11/09 15:35:43.862304 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:43.863069 Received TCP message from 172.22.156.180:40316: PING,172.22.156.180,1731188143 (size: 30 bytes)
+2024/11/09 15:35:43.863416 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:44.324842 I sent a GET message
+2024/11/09 15:35:44.326379 GET took 1.538764ms, cache status false 
+2024/11/09 15:35:44.326575 File content saved successfully to local_b50_run3.txt
+2024/11/09 15:35:44.326580 File 'b50.txt': was cached
+2024/11/09 15:35:44.756974 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188144 (size: 29 bytes)
+2024/11/09 15:35:44.757502 Received TCP message from 172.22.94.180:37732: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:35:44.757525 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:35:44.861176 I sent a GET message
+2024/11/09 15:35:44.861887 GET took 712.85µs, cache status false 
+2024/11/09 15:35:44.862072 File content saved successfully to local_b51_run3.txt
+2024/11/09 15:35:44.862076 File 'b51.txt': was cached
+2024/11/09 15:35:45.390163 I sent a GET message
+2024/11/09 15:35:45.391497 GET took 1.336192ms, cache status false 
+2024/11/09 15:35:45.391617 File content saved successfully to local_b52_run3.txt
+2024/11/09 15:35:45.391621 File 'b52.txt': was cached
+2024/11/09 15:35:45.757957 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188145 (size: 29 bytes)
+2024/11/09 15:35:45.758687 Received TCP message from 172.22.158.179:52294: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:35:45.758710 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:35:45.864088 Received TCP message from 172.22.156.180:40328: PING,172.22.156.180,1731188145 (size: 30 bytes)
+2024/11/09 15:35:45.864362 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:45.925825 I sent a GET message
+2024/11/09 15:35:45.927208 GET took 1.384043ms, cache status false 
+2024/11/09 15:35:45.927340 File content saved successfully to local_b53_run3.txt
+2024/11/09 15:35:45.927345 File 'b53.txt': was cached
+2024/11/09 15:35:46.447519 I sent a GET message
+2024/11/09 15:35:46.448729 GET took 1.211509ms, cache status false 
+2024/11/09 15:35:46.448845 File content saved successfully to local_b54_run3.txt
+2024/11/09 15:35:46.448849 File 'b54.txt': was cached
+2024/11/09 15:35:46.759440 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188146 (size: 29 bytes)
+2024/11/09 15:35:46.759964 Received TCP message from 172.22.158.180:44864: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:35:46.760014 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:35:46.864570 Received TCP message from 172.22.156.181:38084: PING,172.22.156.181,1731188146 (size: 30 bytes)
+2024/11/09 15:35:46.864893 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:46.982902 I sent a GET message
+2024/11/09 15:35:46.984153 GET took 1.252073ms, cache status false 
+2024/11/09 15:35:46.984288 File content saved successfully to local_b55_run3.txt
+2024/11/09 15:35:46.984294 File 'b55.txt': was cached
+2024/11/09 15:35:47.525539 I sent a GET message
+2024/11/09 15:35:47.526668 GET took 1.130748ms, cache status false 
+2024/11/09 15:35:47.526795 File content saved successfully to local_b56_run3.txt
+2024/11/09 15:35:47.526799 File 'b56.txt': was cached
+2024/11/09 15:35:47.760095 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188147 (size: 29 bytes)
+2024/11/09 15:35:47.760693 Received TCP message from 172.22.156.181:38090: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:35:47.760716 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:35:48.062464 I sent a GET message
+2024/11/09 15:35:48.063800 GET took 1.337582ms, cache status false 
+2024/11/09 15:35:48.063936 File content saved successfully to local_b57_run3.txt
+2024/11/09 15:35:48.063940 File 'b57.txt': was cached
+2024/11/09 15:35:48.603103 I sent a GET message
+2024/11/09 15:35:48.604310 GET took 1.208975ms, cache status false 
+2024/11/09 15:35:48.604453 File content saved successfully to local_b58_run3.txt
+2024/11/09 15:35:48.604457 File 'b58.txt': was cached
+2024/11/09 15:35:48.761678 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188148 (size: 29 bytes)
+2024/11/09 15:35:48.762183 Received TCP message from 172.22.156.179:48796: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:35:48.762221 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:35:48.866690 Received TCP message from 172.22.156.181:38098: PING,172.22.156.181,1731188148 (size: 30 bytes)
+2024/11/09 15:35:48.866996 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:49.138957 I sent a GET message
+2024/11/09 15:35:49.140365 GET took 1.409943ms, cache status false 
+2024/11/09 15:35:49.140510 File content saved successfully to local_b59_run3.txt
+2024/11/09 15:35:49.140515 File 'b59.txt': was cached
+2024/11/09 15:35:49.662875 I sent a GET message
+2024/11/09 15:35:49.664111 GET took 1.238409ms, cache status false 
+2024/11/09 15:35:49.664257 File content saved successfully to local_b60_run3.txt
+2024/11/09 15:35:49.664262 File 'b60.txt': was cached
+2024/11/09 15:35:49.762414 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188149 (size: 29 bytes)
+2024/11/09 15:35:49.763032 Received TCP message from 172.22.158.179:52304: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:35:49.763058 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:35:49.867904 Received TCP message from 172.22.158.181:59714: PING,172.22.158.181,1731188149 (size: 30 bytes)
+2024/11/09 15:35:49.868301 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:50.213832 I sent a GET message
+2024/11/09 15:35:50.215262 GET took 1.432016ms, cache status false 
+2024/11/09 15:35:50.215395 File content saved successfully to local_b61_run3.txt
+2024/11/09 15:35:50.215409 File 'b61.txt': was cached
+2024/11/09 15:35:50.733334 I sent a GET message
+2024/11/09 15:35:50.734699 GET took 1.366609ms, cache status false 
+2024/11/09 15:35:50.735581 File content saved successfully to local_b62_run3.txt
+2024/11/09 15:35:50.735588 File 'b62.txt': was cached
+2024/11/09 15:35:50.763683 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188150 (size: 29 bytes)
+2024/11/09 15:35:50.764281 Received TCP message from 172.22.158.181:59716: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:35:50.764313 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:35:50.868398 Received TCP message from 172.22.156.181:38108: PING,172.22.156.181,1731188150 (size: 30 bytes)
+2024/11/09 15:35:50.868658 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:51.071046 Received TCP message from 172.22.158.179:52316: PING,172.22.158.179,1731188151 (size: 30 bytes)
+2024/11/09 15:35:51.071364 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:51.273782 I sent a GET message
+2024/11/09 15:35:51.275003 GET took 1.222158ms, cache status false 
+2024/11/09 15:35:51.275130 File content saved successfully to local_b63_run3.txt
+2024/11/09 15:35:51.275134 File 'b63.txt': was cached
+2024/11/09 15:35:51.764624 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188151 (size: 29 bytes)
+2024/11/09 15:35:51.765163 Received TCP message from 172.22.156.179:38090: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:35:51.765207 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:35:51.821294 I sent a GET message
+2024/11/09 15:35:51.822748 GET took 1.455538ms, cache status false 
+2024/11/09 15:35:51.822879 File content saved successfully to local_b64_run3.txt
+2024/11/09 15:35:51.822883 File 'b64.txt': was cached
+2024/11/09 15:35:51.869211 Received TCP message from 172.22.156.181:54698: PING,172.22.156.181,1731188151 (size: 30 bytes)
+2024/11/09 15:35:51.869533 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:51.869822 Received TCP message from 172.22.94.180:34758: PING,172.22.94.180,1731188151 (size: 29 bytes)
+2024/11/09 15:35:51.870007 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:52.084682 Received TCP message from 172.22.94.181:48580: PING,172.22.94.181,1731188152 (size: 29 bytes)
+2024/11/09 15:35:52.084972 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:52.343719 I sent a GET message
+2024/11/09 15:35:52.345118 GET took 1.400115ms, cache status false 
+2024/11/09 15:35:52.345254 File content saved successfully to local_b65_run3.txt
+2024/11/09 15:35:52.345260 File 'b65.txt': was cached
+2024/11/09 15:35:52.765839 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188152 (size: 29 bytes)
+2024/11/09 15:35:52.766406 Received TCP message from 172.22.156.181:54702: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:35:52.766419 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:35:52.870353 Received TCP message from 172.22.156.181:54704: PING,172.22.156.181,1731188152 (size: 30 bytes)
+2024/11/09 15:35:52.870623 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:52.886093 I sent a GET message
+2024/11/09 15:35:52.887301 GET took 1.209152ms, cache status false 
+2024/11/09 15:35:52.887425 File content saved successfully to local_b66_run3.txt
+2024/11/09 15:35:52.887429 File 'b66.txt': was cached
+2024/11/09 15:35:53.410126 I sent a GET message
+2024/11/09 15:35:53.411200 GET took 1.075974ms, cache status false 
+2024/11/09 15:35:53.411331 File content saved successfully to local_b67_run3.txt
+2024/11/09 15:35:53.411336 File 'b67.txt': was cached
+2024/11/09 15:35:53.766792 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188153 (size: 29 bytes)
+2024/11/09 15:35:53.767337 Received TCP message from 172.22.158.181:60662: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:35:53.767382 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:35:53.871401 Received TCP message from 172.22.94.179:56958: PING,172.22.94.179,1731188153 (size: 29 bytes)
+2024/11/09 15:35:53.871714 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:53.961412 I sent a GET message
+2024/11/09 15:35:53.962690 GET took 1.279718ms, cache status false 
+2024/11/09 15:35:53.962824 File content saved successfully to local_b68_run3.txt
+2024/11/09 15:35:53.962828 File 'b68.txt': was cached
+2024/11/09 15:35:54.501735 I sent a GET message
+2024/11/09 15:35:54.503311 GET took 1.577522ms, cache status false 
+2024/11/09 15:35:54.503499 File content saved successfully to local_b69_run3.txt
+2024/11/09 15:35:54.503505 File 'b69.txt': was cached
+2024/11/09 15:35:54.767543 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188154 (size: 29 bytes)
+2024/11/09 15:35:54.768027 Received TCP message from 172.22.94.181:58078: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:35:54.768050 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:35:54.872262 Received TCP message from 172.22.94.179:52810: PING,172.22.94.179,1731188154 (size: 29 bytes)
+2024/11/09 15:35:54.872501 Received TCP message from 172.22.156.179:38092: PING,172.22.156.179,1731188154 (size: 30 bytes)
+2024/11/09 15:35:54.872620 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:54.872788 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:55.034920 I sent a GET message
+2024/11/09 15:35:55.036424 GET took 1.505676ms, cache status false 
+2024/11/09 15:35:55.036595 File content saved successfully to local_b70_run3.txt
+2024/11/09 15:35:55.036601 File 'b70.txt': was cached
+2024/11/09 15:35:55.552175 I sent a GET message
+2024/11/09 15:35:55.553537 GET took 1.363524ms, cache status false 
+2024/11/09 15:35:55.553678 File content saved successfully to local_b71_run3.txt
+2024/11/09 15:35:55.553683 File 'b71.txt': was cached
+2024/11/09 15:35:55.768808 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188155 (size: 29 bytes)
+2024/11/09 15:35:55.769279 Received TCP message from 172.22.94.180:34760: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:35:55.769353 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:35:55.873898 Received TCP message from 172.22.156.179:38094: PING,172.22.156.179,1731188155 (size: 30 bytes)
+2024/11/09 15:35:55.874201 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:56.075520 Received TCP message from 172.22.158.179:48894: PING,172.22.158.179,1731188156 (size: 30 bytes)
+2024/11/09 15:35:56.075850 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:35:56.103081 I sent a GET message
+2024/11/09 15:35:56.104699 GET took 1.618729ms, cache status false 
+2024/11/09 15:35:56.104839 File content saved successfully to local_b72_run3.txt
+2024/11/09 15:35:56.104844 File 'b72.txt': was cached
+2024/11/09 15:35:56.629048 I sent a GET message
+2024/11/09 15:35:56.630520 GET took 1.474473ms, cache status false 
+2024/11/09 15:35:56.630653 File content saved successfully to local_b73_run3.txt
+2024/11/09 15:35:56.630658 File 'b73.txt': was cached
+2024/11/09 15:35:56.769817 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188156 (size: 29 bytes)
+2024/11/09 15:35:56.770532 Received TCP message from 172.22.158.179:48900: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:35:56.770563 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:35:57.164336 I sent a GET message
+2024/11/09 15:35:57.165607 GET took 1.272928ms, cache status false 
+2024/11/09 15:35:57.165750 File content saved successfully to local_b74_run3.txt
+2024/11/09 15:35:57.165755 File 'b74.txt': was cached
+2024/11/09 15:35:57.711686 I sent a GET message
+2024/11/09 15:35:57.713326 GET took 1.641517ms, cache status false 
+2024/11/09 15:35:57.713470 File content saved successfully to local_b75_run3.txt
+2024/11/09 15:35:57.713474 File 'b75.txt': was cached
+2024/11/09 15:35:57.770472 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188157 (size: 29 bytes)
+2024/11/09 15:35:57.771087 Received TCP message from 172.22.156.179:38104: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:35:57.771145 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:35:58.251681 I sent a GET message
+2024/11/09 15:35:58.252910 GET took 1.230333ms, cache status false 
+2024/11/09 15:35:58.253048 File content saved successfully to local_b76_run3.txt
+2024/11/09 15:35:58.253053 File 'b76.txt': was cached
+2024/11/09 15:35:58.766580 I sent a GET message
+2024/11/09 15:35:58.767798 GET took 1.220199ms, cache status false 
+2024/11/09 15:35:58.767934 File content saved successfully to local_b77_run3.txt
+2024/11/09 15:35:58.767939 File 'b77.txt': was cached
+2024/11/09 15:35:58.771710 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188158 (size: 29 bytes)
+2024/11/09 15:35:58.772167 Received TCP message from 172.22.94.179:52812: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:35:58.772244 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:35:59.295797 I sent a GET message
+2024/11/09 15:35:59.296539 GET took 743.214µs, cache status false 
+2024/11/09 15:35:59.296649 File content saved successfully to local_b78_run3.txt
+2024/11/09 15:35:59.296653 File 'b78.txt': was cached
+2024/11/09 15:35:59.772370 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188159 (size: 29 bytes)
+2024/11/09 15:35:59.772830 Received TCP message from 172.22.158.180:57656: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:35:59.772841 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:35:59.840820 I sent a GET message
+2024/11/09 15:35:59.842253 GET took 1.434815ms, cache status false 
+2024/11/09 15:35:59.842409 File content saved successfully to local_b79_run3.txt
+2024/11/09 15:35:59.842415 File 'b79.txt': was cached
+2024/11/09 15:36:00.094825 Received TCP message from 172.22.94.181:58090: PING,172.22.94.181,1731188160 (size: 29 bytes)
+2024/11/09 15:36:00.095133 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:00.384777 I sent a GET message
+2024/11/09 15:36:00.386330 GET took 1.553999ms, cache status false 
+2024/11/09 15:36:00.386461 File content saved successfully to local_b80_run3.txt
+2024/11/09 15:36:00.386465 File 'b80.txt': was cached
+2024/11/09 15:36:00.772907 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188160 (size: 29 bytes)
+2024/11/09 15:36:00.773436 Received TCP message from 172.22.94.179:52818: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:36:00.773450 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:36:00.878850 Received TCP message from 172.22.158.180:57660: PING,172.22.158.180,1731188160 (size: 30 bytes)
+2024/11/09 15:36:00.879158 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:00.906454 I sent a GET message
+2024/11/09 15:36:00.907635 GET took 1.18179ms, cache status false 
+2024/11/09 15:36:00.907807 File content saved successfully to local_b81_run3.txt
+2024/11/09 15:36:00.907812 File 'b81.txt': was cached
+2024/11/09 15:36:01.439735 I sent a GET message
+2024/11/09 15:36:01.441125 GET took 1.391866ms, cache status false 
+2024/11/09 15:36:01.441259 File content saved successfully to local_b82_run3.txt
+2024/11/09 15:36:01.441264 File 'b82.txt': was cached
+2024/11/09 15:36:01.773513 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188161 (size: 29 bytes)
+2024/11/09 15:36:01.774217 Received TCP message from 172.22.156.179:34864: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:36:01.774245 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:36:01.878827 Received TCP message from 172.22.94.179:52830: PING,172.22.94.179,1731188161 (size: 29 bytes)
+2024/11/09 15:36:01.879092 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:01.982183 I sent a GET message
+2024/11/09 15:36:01.983517 GET took 1.335728ms, cache status false 
+2024/11/09 15:36:01.983654 File content saved successfully to local_b83_run3.txt
+2024/11/09 15:36:01.983659 File 'b83.txt': was cached
+2024/11/09 15:36:02.083348 Received TCP message from 172.22.158.179:52498: PING,172.22.158.179,1731188162 (size: 30 bytes)
+2024/11/09 15:36:02.083735 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:02.500223 I sent a GET message
+2024/11/09 15:36:02.501683 GET took 1.461536ms, cache status false 
+2024/11/09 15:36:02.501815 File content saved successfully to local_b84_run3.txt
+2024/11/09 15:36:02.501819 File 'b84.txt': was cached
+2024/11/09 15:36:02.774129 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188162 (size: 29 bytes)
+2024/11/09 15:36:02.774716 Received TCP message from 172.22.94.180:38232: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:02.774729 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:02.880677 Received TCP message from 172.22.158.180:57674: PING,172.22.158.180,1731188162 (size: 30 bytes)
+2024/11/09 15:36:02.880916 Received TCP message from 172.22.158.181:60668: PING,172.22.158.181,1731188162 (size: 30 bytes)
+2024/11/09 15:36:02.881077 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:02.881320 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:03.045606 I sent a GET message
+2024/11/09 15:36:03.046861 GET took 1.256613ms, cache status false 
+2024/11/09 15:36:03.047007 File content saved successfully to local_b85_run3.txt
+2024/11/09 15:36:03.047011 File 'b85.txt': was cached
+2024/11/09 15:36:03.596261 I sent a GET message
+2024/11/09 15:36:03.596922 GET took 661.917µs, cache status false 
+2024/11/09 15:36:03.597031 File content saved successfully to local_b86_run3.txt
+2024/11/09 15:36:03.597045 File 'b86.txt': was cached
+2024/11/09 15:36:03.775003 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188163 (size: 29 bytes)
+2024/11/09 15:36:03.775785 Received TCP message from 172.22.158.179:52500: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:36:03.775820 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:36:04.085914 Received TCP message from 172.22.158.179:52510: PING,172.22.158.179,1731188164 (size: 30 bytes)
+2024/11/09 15:36:04.086226 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:04.125825 I sent a GET message
+2024/11/09 15:36:04.127254 GET took 1.430124ms, cache status false 
+2024/11/09 15:36:04.127492 File content saved successfully to local_b87_run3.txt
+2024/11/09 15:36:04.127498 File 'b87.txt': was cached
+2024/11/09 15:36:04.659414 I sent a GET message
+2024/11/09 15:36:04.660848 GET took 1.437019ms, cache status false 
+2024/11/09 15:36:04.660983 File content saved successfully to local_b88_run3.txt
+2024/11/09 15:36:04.660988 File 'b88.txt': was cached
+2024/11/09 15:36:04.776146 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188164 (size: 29 bytes)
+2024/11/09 15:36:04.776697 Received TCP message from 172.22.158.179:52526: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:36:04.776720 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:36:04.883891 Received TCP message from 172.22.156.181:45312: PING,172.22.156.181,1731188164 (size: 30 bytes)
+2024/11/09 15:36:04.884210 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:05.192281 I sent a GET message
+2024/11/09 15:36:05.193717 GET took 1.437544ms, cache status false 
+2024/11/09 15:36:05.193834 File content saved successfully to local_b89_run3.txt
+2024/11/09 15:36:05.193839 File 'b89.txt': was cached
+2024/11/09 15:36:05.727560 I sent a GET message
+2024/11/09 15:36:05.728201 GET took 642.497µs, cache status false 
+2024/11/09 15:36:05.728369 File content saved successfully to local_b90_run3.txt
+2024/11/09 15:36:05.728374 File 'b90.txt': was cached
+2024/11/09 15:36:05.777175 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188165 (size: 29 bytes)
+2024/11/09 15:36:05.777722 Received TCP message from 172.22.156.181:45318: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:36:05.777788 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:36:05.882833 Received TCP message from 172.22.94.179:46716: PING,172.22.94.179,1731188165 (size: 29 bytes)
+2024/11/09 15:36:05.883087 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:05.883296 Received TCP message from 172.22.158.180:41804: PING,172.22.158.180,1731188165 (size: 30 bytes)
+2024/11/09 15:36:05.883523 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:06.088438 Received TCP message from 172.22.158.179:52532: PING,172.22.158.179,1731188166 (size: 30 bytes)
+2024/11/09 15:36:06.088847 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:06.267913 I sent a GET message
+2024/11/09 15:36:06.269412 GET took 1.500696ms, cache status false 
+2024/11/09 15:36:06.269550 File content saved successfully to local_b91_run3.txt
+2024/11/09 15:36:06.269557 File 'b91.txt': was cached
+2024/11/09 15:36:06.778380 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188166 (size: 29 bytes)
+2024/11/09 15:36:06.778921 Received TCP message from 172.22.156.180:45586: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:36:06.778933 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:36:06.803437 I sent a GET message
+2024/11/09 15:36:06.804742 GET took 1.306804ms, cache status false 
+2024/11/09 15:36:06.804886 File content saved successfully to local_b92_run3.txt
+2024/11/09 15:36:06.804891 File 'b92.txt': was cached
+2024/11/09 15:36:07.326931 I sent a GET message
+2024/11/09 15:36:07.328279 GET took 1.348961ms, cache status false 
+2024/11/09 15:36:07.329088 File content saved successfully to local_b93_run3.txt
+2024/11/09 15:36:07.329093 File 'b93.txt': was cached
+2024/11/09 15:36:07.779006 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188167 (size: 29 bytes)
+2024/11/09 15:36:07.779587 Received TCP message from 172.22.158.181:53810: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:36:07.779612 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:36:07.866850 I sent a GET message
+2024/11/09 15:36:07.868618 GET took 1.769281ms, cache status false 
+2024/11/09 15:36:07.868758 File content saved successfully to local_b94_run3.txt
+2024/11/09 15:36:07.868762 File 'b94.txt': was cached
+2024/11/09 15:36:07.885304 Received TCP message from 172.22.158.180:41818: PING,172.22.158.180,1731188167 (size: 30 bytes)
+2024/11/09 15:36:07.885663 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:08.415413 I sent a GET message
+2024/11/09 15:36:08.416220 GET took 808.431µs, cache status false 
+2024/11/09 15:36:08.416329 File content saved successfully to local_b95_run3.txt
+2024/11/09 15:36:08.416333 File 'b95.txt': was cached
+2024/11/09 15:36:08.779765 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188168 (size: 29 bytes)
+2024/11/09 15:36:08.780520 Received TCP message from 172.22.94.181:51352: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:36:08.780536 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:36:08.886298 Received TCP message from 172.22.156.180:45592: PING,172.22.156.180,1731188168 (size: 30 bytes)
+2024/11/09 15:36:08.886477 Received TCP message from 172.22.158.180:41828: PING,172.22.158.180,1731188168 (size: 30 bytes)
+2024/11/09 15:36:08.886705 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:08.886849 Received TCP message from 172.22.94.180:38242: PING,172.22.94.180,1731188168 (size: 29 bytes)
+2024/11/09 15:36:08.886961 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:08.887067 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:08.937835 I sent a GET message
+2024/11/09 15:36:08.939376 GET took 1.542577ms, cache status false 
+2024/11/09 15:36:08.939506 File content saved successfully to local_b96_run3.txt
+2024/11/09 15:36:08.939511 File 'b96.txt': was cached
+2024/11/09 15:36:09.104135 Received TCP message from 172.22.94.181:51354: PING,172.22.94.181,1731188169 (size: 29 bytes)
+2024/11/09 15:36:09.104439 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:09.468153 I sent a GET message
+2024/11/09 15:36:09.469396 GET took 1.244221ms, cache status false 
+2024/11/09 15:36:09.469529 File content saved successfully to local_b97_run3.txt
+2024/11/09 15:36:09.469533 File 'b97.txt': was cached
+2024/11/09 15:36:09.780774 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188169 (size: 29 bytes)
+2024/11/09 15:36:09.781342 Received TCP message from 172.22.94.179:46720: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:36:09.781365 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:36:09.887215 Received TCP message from 172.22.94.179:46726: PING,172.22.94.179,1731188169 (size: 29 bytes)
+2024/11/09 15:36:09.887528 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:10.009717 I sent a GET message
+2024/11/09 15:36:10.011837 GET took 2.121573ms, cache status false 
+2024/11/09 15:36:10.011995 File content saved successfully to local_b98_run3.txt
+2024/11/09 15:36:10.012000 File 'b98.txt': was cached
+2024/11/09 15:36:10.531273 I sent a GET message
+2024/11/09 15:36:10.532455 GET took 1.183528ms, cache status false 
+2024/11/09 15:36:10.532591 File content saved successfully to local_b99_run3.txt
+2024/11/09 15:36:10.532596 File 'b99.txt': was cached
+2024/11/09 15:36:10.781895 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188170 (size: 29 bytes)
+2024/11/09 15:36:10.782579 Received TCP message from 172.22.156.181:45322: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:36:10.782611 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:36:11.118792 I sent a GET message
+2024/11/09 15:36:11.120501 GET took 1.710891ms, cache status false 
+2024/11/09 15:36:11.120667 File content saved successfully to local_b100_run3.txt
+2024/11/09 15:36:11.120672 File 'b100.txt': was cached
+2024/11/09 15:36:11.782505 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188171 (size: 29 bytes)
+2024/11/09 15:36:11.782991 Received TCP message from 172.22.94.180:57292: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:11.783035 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:11.888764 Received TCP message from 172.22.158.181:53814: PING,172.22.158.181,1731188171 (size: 30 bytes)
+2024/11/09 15:36:11.889071 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:12.783083 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188172 (size: 29 bytes)
+2024/11/09 15:36:12.783716 Received TCP message from 172.22.158.179:52398: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:36:12.783733 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:36:13.783858 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188173 (size: 29 bytes)
+2024/11/09 15:36:13.784373 Received TCP message from 172.22.94.180:57298: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:13.784418 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:13.891099 Received TCP message from 172.22.156.179:38596: PING,172.22.156.179,1731188173 (size: 30 bytes)
+2024/11/09 15:36:13.891439 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:14.108326 Received TCP message from 172.22.94.181:53170: PING,172.22.94.181,1731188174 (size: 29 bytes)
+2024/11/09 15:36:14.108617 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:14.785278 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188174 (size: 29 bytes)
+2024/11/09 15:36:14.785826 Received TCP message from 172.22.156.181:48702: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:36:14.785886 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:36:15.109119 Received TCP message from 172.22.94.181:53178: PING,172.22.94.181,1731188175 (size: 29 bytes)
+2024/11/09 15:36:15.109400 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:15.786765 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188175 (size: 29 bytes)
+2024/11/09 15:36:15.787419 Received TCP message from 172.22.156.181:48704: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:36:15.787435 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:36:15.893345 Received TCP message from 172.22.94.179:43924: PING,172.22.94.179,1731188175 (size: 29 bytes)
+2024/11/09 15:36:15.893575 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:16.787552 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188176 (size: 29 bytes)
+2024/11/09 15:36:16.788032 Received TCP message from 172.22.94.179:43926: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:36:16.788048 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:36:16.894055 Received TCP message from 172.22.94.180:57308: PING,172.22.94.180,1731188176 (size: 29 bytes)
+2024/11/09 15:36:16.894306 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:17.788657 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188177 (size: 29 bytes)
+2024/11/09 15:36:17.789280 Received TCP message from 172.22.158.180:44010: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:36:17.789294 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:36:18.789587 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188178 (size: 29 bytes)
+2024/11/09 15:36:18.790212 Received TCP message from 172.22.158.179:52402: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:36:18.790227 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:36:18.896239 Received TCP message from 172.22.94.179:43932: PING,172.22.94.179,1731188178 (size: 29 bytes)
+2024/11/09 15:36:18.896546 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:19.790482 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188179 (size: 29 bytes)
+2024/11/09 15:36:19.790962 Received TCP message from 172.22.94.180:57000: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:19.790983 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:20.791471 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188180 (size: 29 bytes)
+2024/11/09 15:36:20.792008 Received TCP message from 172.22.94.180:57014: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:20.792020 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:20.897799 Received TCP message from 172.22.94.180:57024: PING,172.22.94.180,1731188180 (size: 29 bytes)
+2024/11/09 15:36:20.898166 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:21.792229 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188181 (size: 29 bytes)
+2024/11/09 15:36:21.792793 Received TCP message from 172.22.158.179:52408: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:36:21.792804 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:36:21.898934 Received TCP message from 172.22.156.180:51154: PING,172.22.156.180,1731188181 (size: 30 bytes)
+2024/11/09 15:36:21.899319 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:22.793421 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188182 (size: 29 bytes)
+2024/11/09 15:36:22.793986 Received TCP message from 172.22.158.180:44020: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:36:22.793997 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:36:22.899750 Received TCP message from 172.22.156.181:40990: PING,172.22.156.181,1731188182 (size: 30 bytes)
+2024/11/09 15:36:22.900083 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:23.794144 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188183 (size: 29 bytes)
+2024/11/09 15:36:23.794705 Received TCP message from 172.22.156.181:40992: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:36:23.794721 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:36:23.900738 Received TCP message from 172.22.156.181:40996: PING,172.22.156.181,1731188183 (size: 30 bytes)
+2024/11/09 15:36:23.901181 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:24.795419 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188184 (size: 29 bytes)
+2024/11/09 15:36:24.796033 Received TCP message from 172.22.94.180:57034: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:24.796046 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:25.796520 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188185 (size: 29 bytes)
+2024/11/09 15:36:25.797028 Received TCP message from 172.22.158.181:34344: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:36:25.797039 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:36:26.110835 Received TCP message from 172.22.158.179:53208: PING,172.22.158.179,1731188186 (size: 30 bytes)
+2024/11/09 15:36:26.111146 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:26.798084 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188186 (size: 29 bytes)
+2024/11/09 15:36:26.798699 Received TCP message from 172.22.94.181:42020: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:36:26.798732 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:36:26.904691 Received TCP message from 172.22.156.179:46548: PING,172.22.156.179,1731188186 (size: 30 bytes)
+2024/11/09 15:36:26.905133 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:27.799349 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188187 (size: 29 bytes)
+2024/11/09 15:36:27.799830 Received TCP message from 172.22.94.179:34174: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:36:27.799843 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:36:27.903638 Received TCP message from 172.22.94.179:34188: PING,172.22.94.179,1731188187 (size: 29 bytes)
+2024/11/09 15:36:27.903933 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:28.800161 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188188 (size: 29 bytes)
+2024/11/09 15:36:28.800644 Received TCP message from 172.22.94.179:34198: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:36:28.800678 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:36:29.801002 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188189 (size: 29 bytes)
+2024/11/09 15:36:29.801409 Received TCP message from 172.22.94.180:40986: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:29.801445 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:29.906640 Received TCP message from 172.22.156.181:40998: PING,172.22.156.181,1731188189 (size: 30 bytes)
+2024/11/09 15:36:29.907658 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:30.801785 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188190 (size: 29 bytes)
+2024/11/09 15:36:30.802377 Received TCP message from 172.22.94.179:34214: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:36:30.802400 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:36:31.802725 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188191 (size: 29 bytes)
+2024/11/09 15:36:31.803298 Received TCP message from 172.22.94.179:34220: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:36:31.803311 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:36:32.803673 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188192 (size: 29 bytes)
+2024/11/09 15:36:32.804150 Received TCP message from 172.22.94.180:40988: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:32.804160 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:32.909789 Received TCP message from 172.22.158.180:47086: PING,172.22.158.180,1731188192 (size: 30 bytes)
+2024/11/09 15:36:32.910103 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:33.804163 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188193 (size: 29 bytes)
+2024/11/09 15:36:33.804757 Received TCP message from 172.22.156.179:52826: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:36:33.804772 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:36:33.910662 Received TCP message from 172.22.156.181:41494: PING,172.22.156.181,1731188193 (size: 30 bytes)
+2024/11/09 15:36:33.910970 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:34.121212 Received TCP message from 172.22.158.179:37880: PING,172.22.158.179,1731188194 (size: 30 bytes)
+2024/11/09 15:36:34.121512 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:34.805322 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188194 (size: 29 bytes)
+2024/11/09 15:36:34.805999 Received TCP message from 172.22.158.179:37882: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:36:34.806012 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:36:34.910889 Received TCP message from 172.22.158.181:40352: PING,172.22.158.181,1731188194 (size: 30 bytes)
+2024/11/09 15:36:34.911218 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:35.806396 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188195 (size: 29 bytes)
+2024/11/09 15:36:35.806984 Received TCP message from 172.22.158.180:51258: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:36:35.807022 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:36:35.912235 Received TCP message from 172.22.94.180:40992: PING,172.22.94.180,1731188195 (size: 29 bytes)
+2024/11/09 15:36:35.912545 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:36.807523 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188196 (size: 29 bytes)
+2024/11/09 15:36:36.808033 Received TCP message from 172.22.94.179:48866: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:36:36.808048 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:36:37.808228 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188197 (size: 29 bytes)
+2024/11/09 15:36:37.808767 Received TCP message from 172.22.156.179:52840: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:36:37.808789 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:36:38.808760 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188198 (size: 29 bytes)
+2024/11/09 15:36:38.809441 Received TCP message from 172.22.94.180:41008: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:38.809480 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:38.914047 Received TCP message from 172.22.158.181:40358: PING,172.22.158.181,1731188198 (size: 30 bytes)
+2024/11/09 15:36:38.914472 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:39.127066 Received TCP message from 172.22.158.179:37898: PING,172.22.158.179,1731188199 (size: 30 bytes)
+2024/11/09 15:36:39.127401 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:39.810137 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188199 (size: 29 bytes)
+2024/11/09 15:36:39.810724 Received TCP message from 172.22.156.180:49126: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:36:39.810741 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:36:40.810831 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188200 (size: 29 bytes)
+2024/11/09 15:36:40.811475 Received TCP message from 172.22.94.180:49884: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:40.811497 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:40.916681 Received TCP message from 172.22.156.180:49128: PING,172.22.156.180,1731188200 (size: 30 bytes)
+2024/11/09 15:36:40.916885 Received TCP message from 172.22.158.180:51272: PING,172.22.158.180,1731188200 (size: 30 bytes)
+2024/11/09 15:36:40.917017 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:40.917140 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:40.917282 Received TCP message from 172.22.94.180:49886: PING,172.22.94.180,1731188200 (size: 29 bytes)
+2024/11/09 15:36:40.917478 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:41.811616 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188201 (size: 29 bytes)
+2024/11/09 15:36:41.812297 Received TCP message from 172.22.156.181:58214: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:36:41.812358 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:36:41.917693 Received TCP message from 172.22.94.179:48878: PING,172.22.94.179,1731188201 (size: 29 bytes)
+2024/11/09 15:36:41.917966 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:42.137592 Received TCP message from 172.22.94.181:57154: PING,172.22.94.181,1731188202 (size: 29 bytes)
+2024/11/09 15:36:42.137881 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:42.812741 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188202 (size: 29 bytes)
+2024/11/09 15:36:42.813265 Received TCP message from 172.22.156.179:46806: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:36:42.813279 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:36:43.138491 Received TCP message from 172.22.94.181:57164: PING,172.22.94.181,1731188203 (size: 29 bytes)
+2024/11/09 15:36:43.138948 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:43.813839 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188203 (size: 29 bytes)
+2024/11/09 15:36:43.814382 Received TCP message from 172.22.158.179:32832: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:36:43.814397 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:36:43.918837 Received TCP message from 172.22.94.179:48892: PING,172.22.94.179,1731188203 (size: 29 bytes)
+2024/11/09 15:36:43.919170 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:44.815049 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188204 (size: 29 bytes)
+2024/11/09 15:36:44.815538 Received TCP message from 172.22.158.180:51276: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:36:44.815557 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:36:45.815786 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188205 (size: 29 bytes)
+2024/11/09 15:36:45.816298 Received TCP message from 172.22.156.180:49134: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:36:45.816314 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:36:45.921054 Received TCP message from 172.22.158.180:56710: PING,172.22.158.180,1731188205 (size: 30 bytes)
+2024/11/09 15:36:45.921384 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:45.921542 Received TCP message from 172.22.158.181:49874: PING,172.22.158.181,1731188205 (size: 30 bytes)
+2024/11/09 15:36:45.921828 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:46.134347 Received TCP message from 172.22.158.179:32846: PING,172.22.158.179,1731188206 (size: 30 bytes)
+2024/11/09 15:36:46.134688 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:46.817259 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188206 (size: 29 bytes)
+2024/11/09 15:36:46.817717 Received TCP message from 172.22.94.180:49894: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:46.817737 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:46.924694 Received TCP message from 172.22.156.181:58218: PING,172.22.156.181,1731188206 (size: 30 bytes)
+2024/11/09 15:36:46.925113 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:47.818074 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188207 (size: 29 bytes)
+2024/11/09 15:36:47.818710 Received TCP message from 172.22.158.181:49886: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:36:47.818727 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:36:47.923567 Received TCP message from 172.22.158.181:49902: PING,172.22.158.181,1731188207 (size: 30 bytes)
+2024/11/09 15:36:47.923918 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:48.144824 Received TCP message from 172.22.94.181:44870: PING,172.22.94.181,1731188208 (size: 29 bytes)
+2024/11/09 15:36:48.145114 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:48.818958 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188208 (size: 29 bytes)
+2024/11/09 15:36:48.819471 Received TCP message from 172.22.158.179:32856: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:36:48.819533 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:36:48.924025 Received TCP message from 172.22.156.179:46810: PING,172.22.156.179,1731188208 (size: 30 bytes)
+2024/11/09 15:36:48.924380 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:48.925477 Received TCP message from 172.22.156.181:58228: PING,172.22.156.181,1731188208 (size: 30 bytes)
+2024/11/09 15:36:48.925693 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:49.819745 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188209 (size: 29 bytes)
+2024/11/09 15:36:49.820386 Received TCP message from 172.22.94.181:44886: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:36:49.820466 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:36:50.820825 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188210 (size: 29 bytes)
+2024/11/09 15:36:50.821316 Received TCP message from 172.22.94.180:57974: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:50.821335 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:51.821706 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188211 (size: 29 bytes)
+2024/11/09 15:36:51.822306 Received TCP message from 172.22.94.180:57980: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:36:51.822324 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:36:51.929050 Received TCP message from 172.22.156.181:60490: PING,172.22.156.181,1731188211 (size: 30 bytes)
+2024/11/09 15:36:51.929493 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:52.822778 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188212 (size: 29 bytes)
+2024/11/09 15:36:52.823540 Received TCP message from 172.22.158.179:36138: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:36:52.823593 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:36:52.928836 Received TCP message from 172.22.158.181:49918: PING,172.22.158.181,1731188212 (size: 30 bytes)
+2024/11/09 15:36:52.929166 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:52.929356 Received TCP message from 172.22.156.181:60502: PING,172.22.156.181,1731188212 (size: 30 bytes)
+2024/11/09 15:36:52.929662 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:53.823869 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188213 (size: 29 bytes)
+2024/11/09 15:36:53.824645 Received TCP message from 172.22.94.181:44888: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:36:53.824664 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:36:53.929507 Received TCP message from 172.22.94.180:57996: PING,172.22.94.180,1731188213 (size: 29 bytes)
+2024/11/09 15:36:53.929796 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:54.824895 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188214 (size: 29 bytes)
+2024/11/09 15:36:54.825439 Received TCP message from 172.22.156.180:43722: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:36:54.825487 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:36:54.930855 Received TCP message from 172.22.158.180:56726: PING,172.22.158.180,1731188214 (size: 30 bytes)
+2024/11/09 15:36:54.931141 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:55.826439 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188215 (size: 29 bytes)
+2024/11/09 15:36:55.827254 Received TCP message from 172.22.156.181:60512: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:36:55.827278 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:36:55.932267 Received TCP message from 172.22.94.179:45456: PING,172.22.94.179,1731188215 (size: 29 bytes)
+2024/11/09 15:36:55.932575 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:56.143900 Received TCP message from 172.22.158.179:36140: PING,172.22.158.179,1731188216 (size: 30 bytes)
+2024/11/09 15:36:56.144287 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:56.827101 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188216 (size: 29 bytes)
+2024/11/09 15:36:56.827665 Received TCP message from 172.22.156.179:46088: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:36:56.827688 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:36:57.828162 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188217 (size: 29 bytes)
+2024/11/09 15:36:57.828900 Received TCP message from 172.22.158.179:36156: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:36:57.828918 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:36:57.933657 Received TCP message from 172.22.94.180:57998: PING,172.22.94.180,1731188217 (size: 29 bytes)
+2024/11/09 15:36:57.933929 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:58.829449 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188218 (size: 29 bytes)
+2024/11/09 15:36:58.830083 Received TCP message from 172.22.156.181:60520: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:36:58.830102 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:36:58.934728 Received TCP message from 172.22.156.179:46090: PING,172.22.156.179,1731188218 (size: 30 bytes)
+2024/11/09 15:36:58.934896 Received TCP message from 172.22.158.181:33870: PING,172.22.158.181,1731188218 (size: 30 bytes)
+2024/11/09 15:36:58.935085 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:58.935213 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:36:59.830444 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188219 (size: 29 bytes)
+2024/11/09 15:36:59.831143 Received TCP message from 172.22.156.181:60534: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:36:59.831163 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:36:59.935313 Received TCP message from 172.22.94.179:45458: PING,172.22.94.179,1731188219 (size: 29 bytes)
+2024/11/09 15:36:59.935721 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:00.831946 Sent TCP message to 172.22.156.179: PING,172.22.94.178,1731188220 (size: 29 bytes)
+2024/11/09 15:37:00.832626 Received TCP message from 172.22.156.179:39310: ACK,172.22.156.179 (size: 18 bytes)
+2024/11/09 15:37:00.832646 Node 172.22.156.179 removed from suspected list
+2024/11/09 15:37:01.149054 Received TCP message from 172.22.158.179:36172: PING,172.22.158.179,1731188221 (size: 30 bytes)
+2024/11/09 15:37:01.149372 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:01.833119 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188221 (size: 29 bytes)
+2024/11/09 15:37:01.833666 Received TCP message from 172.22.158.179:36186: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:37:01.833713 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:37:02.159592 Received TCP message from 172.22.94.181:58380: PING,172.22.94.181,1731188222 (size: 29 bytes)
+2024/11/09 15:37:02.159871 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:02.833580 Sent TCP message to 172.22.94.181: PING,172.22.94.178,1731188222 (size: 29 bytes)
+2024/11/09 15:37:02.834131 Received TCP message from 172.22.94.181:58396: ACK,172.22.94.181 (size: 17 bytes)
+2024/11/09 15:37:02.834142 Node 172.22.94.181 removed from suspected list
+2024/11/09 15:37:02.938161 Received TCP message from 172.22.94.180:45276: PING,172.22.94.180,1731188222 (size: 29 bytes)
+2024/11/09 15:37:02.938537 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:02.938610 Received TCP message from 172.22.156.179:39326: PING,172.22.156.179,1731188222 (size: 30 bytes)
+2024/11/09 15:37:02.938856 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:03.160336 Received TCP message from 172.22.94.181:58410: PING,172.22.94.181,1731188223 (size: 29 bytes)
+2024/11/09 15:37:03.160646 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:03.834332 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188223 (size: 29 bytes)
+2024/11/09 15:37:03.834891 Received TCP message from 172.22.94.179:45472: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:37:03.834911 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:37:03.939069 Received TCP message from 172.22.158.180:41750: PING,172.22.158.180,1731188223 (size: 30 bytes)
+2024/11/09 15:37:03.939378 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:04.835492 Sent TCP message to 172.22.156.181: PING,172.22.94.178,1731188224 (size: 29 bytes)
+2024/11/09 15:37:04.836126 Received TCP message from 172.22.156.181:35596: ACK,172.22.156.181 (size: 18 bytes)
+2024/11/09 15:37:04.836138 Node 172.22.156.181 removed from suspected list
+2024/11/09 15:37:05.836290 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188225 (size: 29 bytes)
+2024/11/09 15:37:05.836845 Received TCP message from 172.22.158.181:42958: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:37:05.836871 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:37:05.940799 Received TCP message from 172.22.158.181:42966: PING,172.22.158.181,1731188225 (size: 30 bytes)
+2024/11/09 15:37:05.941218 Sent TCP message to 172.22.158.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:06.164268 Received TCP message from 172.22.94.181:39988: PING,172.22.94.181,1731188226 (size: 29 bytes)
+2024/11/09 15:37:06.164593 Sent TCP message to 172.22.94.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:06.837473 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188226 (size: 29 bytes)
+2024/11/09 15:37:06.838359 Received TCP message from 172.22.158.179:37606: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:37:06.838372 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:37:07.838488 Sent TCP message to 172.22.94.179: PING,172.22.94.178,1731188227 (size: 29 bytes)
+2024/11/09 15:37:07.838954 Received TCP message from 172.22.94.179:42446: ACK,172.22.94.179 (size: 17 bytes)
+2024/11/09 15:37:07.838995 Node 172.22.94.179 removed from suspected list
+2024/11/09 15:37:08.839165 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188228 (size: 29 bytes)
+2024/11/09 15:37:08.839696 Received TCP message from 172.22.158.181:42968: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:37:08.839739 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:37:09.839844 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188229 (size: 29 bytes)
+2024/11/09 15:37:09.840422 Received TCP message from 172.22.94.180:45202: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:37:09.840435 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:37:10.840575 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188230 (size: 29 bytes)
+2024/11/09 15:37:10.841148 Received TCP message from 172.22.158.180:42706: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:37:10.841158 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:37:10.946133 Received TCP message from 172.22.158.180:42718: PING,172.22.158.180,1731188230 (size: 30 bytes)
+2024/11/09 15:37:10.946461 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:11.841714 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188231 (size: 29 bytes)
+2024/11/09 15:37:11.842248 Received TCP message from 172.22.158.180:42730: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:37:11.842260 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:37:12.161225 Received TCP message from 172.22.158.179:45948: PING,172.22.158.179,1731188232 (size: 30 bytes)
+2024/11/09 15:37:12.161608 Sent TCP message to 172.22.158.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:12.842472 Sent TCP message to 172.22.156.180: PING,172.22.94.178,1731188232 (size: 29 bytes)
+2024/11/09 15:37:12.843017 Received TCP message from 172.22.156.180:51216: ACK,172.22.156.180 (size: 18 bytes)
+2024/11/09 15:37:12.843048 Node 172.22.156.180 removed from suspected list
+2024/11/09 15:37:12.950098 Received TCP message from 172.22.156.180:51230: PING,172.22.156.180,1731188232 (size: 30 bytes)
+2024/11/09 15:37:12.950258 Received TCP message from 172.22.158.180:42738: PING,172.22.158.180,1731188232 (size: 30 bytes)
+2024/11/09 15:37:12.950334 Received TCP message from 172.22.94.179:42456: PING,172.22.94.179,1731188232 (size: 29 bytes)
+2024/11/09 15:37:12.950483 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:12.950589 Sent TCP message to 172.22.94.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:12.950682 Sent TCP message to 172.22.158.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:13.843141 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188233 (size: 29 bytes)
+2024/11/09 15:37:13.843913 Received TCP message from 172.22.158.181:51452: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:37:13.843932 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:37:14.844216 Sent TCP message to 172.22.158.179: PING,172.22.94.178,1731188234 (size: 29 bytes)
+2024/11/09 15:37:14.845259 Received TCP message from 172.22.158.179:45964: ACK,172.22.158.179 (size: 18 bytes)
+2024/11/09 15:37:14.845279 Node 172.22.158.179 removed from suspected list
+2024/11/09 15:37:15.845430 Sent TCP message to 172.22.158.181: PING,172.22.94.178,1731188235 (size: 29 bytes)
+2024/11/09 15:37:15.846106 Received TCP message from 172.22.158.181:51460: ACK,172.22.158.181 (size: 18 bytes)
+2024/11/09 15:37:15.846122 Node 172.22.158.181 removed from suspected list
+2024/11/09 15:37:15.952314 Received TCP message from 172.22.156.180:51232: PING,172.22.156.180,1731188235 (size: 30 bytes)
+2024/11/09 15:37:15.952612 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:16.846637 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188236 (size: 29 bytes)
+2024/11/09 15:37:16.847127 Received TCP message from 172.22.94.180:45204: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:37:16.847139 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:37:16.953129 Received TCP message from 172.22.94.180:45216: PING,172.22.94.180,1731188236 (size: 29 bytes)
+2024/11/09 15:37:16.953426 Sent TCP message to 172.22.94.180: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:17.847513 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188237 (size: 29 bytes)
+2024/11/09 15:37:17.848078 Received TCP message from 172.22.158.180:45286: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:37:17.848089 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:37:17.954670 Received TCP message from 172.22.156.179:50108: PING,172.22.156.179,1731188237 (size: 30 bytes)
+2024/11/09 15:37:17.954965 Sent TCP message to 172.22.156.179: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:18.848811 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188238 (size: 29 bytes)
+2024/11/09 15:37:18.849272 Received TCP message from 172.22.94.180:45230: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:37:18.849320 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:37:18.954702 Received TCP message from 172.22.156.181:51764: PING,172.22.156.181,1731188238 (size: 30 bytes)
+2024/11/09 15:37:18.955012 Sent TCP message to 172.22.156.181: ACK,172.22.94.178 (size: 17 bytes)
+2024/11/09 15:37:19.849680 Sent TCP message to 172.22.94.180: PING,172.22.94.178,1731188239 (size: 29 bytes)
+2024/11/09 15:37:19.850127 Received TCP message from 172.22.94.180:56772: ACK,172.22.94.180 (size: 17 bytes)
+2024/11/09 15:37:19.850141 Node 172.22.94.180 removed from suspected list
+2024/11/09 15:37:20.850238 Sent TCP message to 172.22.158.180: PING,172.22.94.178,1731188240 (size: 29 bytes)
+2024/11/09 15:37:20.850769 Received TCP message from 172.22.158.180:45292: ACK,172.22.158.180 (size: 18 bytes)
+2024/11/09 15:37:20.850800 Node 172.22.158.180 removed from suspected list
+2024/11/09 15:37:20.957315 Received TCP message from 172.22.156.180:38700: PING,172.22.156.180,1731188240 (size: 30 bytes)
+2024/11/09 15:37:20.957597 Sent TCP message to 172.22.156.180: ACK,172.22.94.178 (size: 17 bytes)
