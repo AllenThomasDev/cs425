@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/golang-lru/v2/expirable"
 )
 
 func sendAppend(args AppendArgs, ip string) error {
@@ -321,6 +323,25 @@ func commandListener() {
 					break
 				}
 			}
+		case "cache_size":
+			if len(args) < 1 {
+				fmt.Println("Error: Insufficient arguments. Usage: cache_size <number_of_entries>")
+				continue
+			}
+			size, err := strconv.Atoi(args[0])
+			if err != nil {
+				fmt.Printf("Error: Invalid cache size. Please provide a valid number: %v\n", err)
+				continue
+			}
+			if size < 0 {
+				fmt.Println("Error: Cache size cannot be negative")
+				continue
+			}
+			// Clear existing cache
+			cache.Purge()
+			// Create new cache with new size
+			cache = expirable.NewLRU[string, string](size, nil, 15*time.Second)
+			fmt.Printf("Cache cleared and size updated to %d entries\n", size)
 		case "list_successors":
 			printSuccessors()
 		case "routing_table":
