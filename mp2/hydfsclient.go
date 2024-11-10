@@ -8,8 +8,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/hashicorp/golang-lru/v2/expirable"
 )
 
 func sendAppend(args AppendArgs, ip string) error {
@@ -266,15 +264,15 @@ func commandListener() {
 			localFilename := args[1]
 			if cachedContent, ok := readFileFromCache(hyDFSFilename); ok {
 				fmt.Println("Serving from cache")
+        fmt.Println("GET (from cache) completed")
+        duration := time.Since(startTime)
+        servedFromCache = true
+        logger.Printf("GET took %s, cache status %v \n", duration, servedFromCache)
 				err := writeFile(localFilename, cachedContent, "client")
 				if err != nil {
 					fmt.Printf("Error on file receipt: %v\n", err)
 				} else {
 					logger.Printf("File content saved successfully to %s from cache\n", localFilename)
-					fmt.Println("GET (from cache) completed")
-					duration := time.Since(startTime)
-					servedFromCache = true
-					logger.Printf("GET took %s, cache status %v \n", duration, servedFromCache)
 				}
 				continue
 			}
@@ -340,8 +338,10 @@ func commandListener() {
 			// Clear existing cache
 			cache.Purge()
 			// Create new cache with new size
-			cache = expirable.NewLRU[string, string](size, nil, 15*time.Second)
+      cache.Resize(size)
 			fmt.Printf("Cache cleared and size updated to %d entries\n", size)
+    case "cache_len":
+      fmt.Printf("lensize of cache is %d entries\n", cache.Len())
 		case "list_successors":
 			printSuccessors()
 		case "routing_table":
