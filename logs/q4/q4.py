@@ -82,7 +82,7 @@ autolabel(zipfian_bars)
 # Customize plot
 plt.xlabel('Cache Size', fontsize=12)
 plt.ylabel('Latency (ms)', fontsize=12)
-plt.title('Latency Comparison: Random vs Zipfian Distribution with Different Cache Sizes', fontsize=14, pad=20)
+plt.title('Latency Comparison With 90/10 Get Append Split: Random vs Zipfian Distribution with Different Cache Sizes', fontsize=14, pad=20)
 plt.xticks(x, cache_sizes, fontsize=10)
 plt.legend(fontsize=10)
 
