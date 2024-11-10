@@ -1,20 +1,26 @@
 import random
 import time
 import subprocess
+import numpy as np
 
 # Define parameters
-total_operations = 300
+total_operations = 300 
 file_count = 100  # Total number of files (b1.txt to b100.txt)
-target_pane = "0:1.2"
+target_pane = "0:1.1"
+zipf_param = 1.5  # Zipfian distribution parameter; adjust to control skew
+
+# Generate Zipfian-distributed file indices, limited to file_count range
+zipf_indices = np.random.zipf(zipf_param, total_operations)
+zipf_indices = [min(i, file_count) for i in zipf_indices]
 
 # Function to run a tmux command
 def run_tmux_command(command):
     subprocess.run(["tmux", "send-keys", "-t", target_pane, command, "Enter"])
 
 # Perform operations
-for _ in range(total_operations):
-    # Uniformly select a file index between 1 and file_count
-    file_index = random.randint(1, file_count)
+for i in range(total_operations):
+    # Select file index based on Zipfian distribution
+    file_index = zipf_indices[i]
     hydfs_file = f"b{file_index}.txt"
     local_get_file = f"local_append_get_{file_index}.txt"
     local_append_file = f"business_{file_index}.txt"
