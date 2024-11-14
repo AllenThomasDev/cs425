@@ -2,8 +2,10 @@ package main
 
 import (
 	"time"
+
 	"github.com/hashicorp/golang-lru/v2/expirable"
 )
+
 // note this is hashable, so we can use it as a key in a map
 type Append_id_t struct {
 	Vm int
@@ -59,4 +61,8 @@ var (
 
 	// list of all nodes in network clockwise from current node INCLUDING CURRENT NODE
 	successors = []int {currentVM}
+)
+
+var (
+	LEADER_ID	= 0
 )

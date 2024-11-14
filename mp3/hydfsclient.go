@@ -218,7 +218,7 @@ func commandListener() {
 			}
 			ts := time.Now()
 			for {
-				err := sendAppendToQuorum(AppendArgs{modifiedFilename, fileContent, ts.String(), currentVM}, routingTable[hash(modifiedFilename)])
+				err := sendAppendToQuorum(AppendArgs{modifiedFilename, fileContent, ts.String(), currentVM}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
 				if err == nil {
 					break
 				}
@@ -242,7 +242,7 @@ func commandListener() {
 				return
 			}
 			for {
-				err := sendCreateToQuorum(CreateArgs{modifiedFilename, fileContent}, routingTable[hash(modifiedFilename)])
+				err := sendCreateToQuorum(CreateArgs{modifiedFilename, fileContent}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
 				if err == nil {
 					break
 				}
@@ -281,7 +281,7 @@ func commandListener() {
 			var fileContent string
 			var err error
 			for {
-				fileContent, err = sendGetToQuorum(GetArgs{modifiedFilename}, routingTable[hash(modifiedFilename)])
+				fileContent, err = sendGetToQuorum(GetArgs{modifiedFilename}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
 				// if we get an error that isn't the file not existing, keep trying, otherwise give up
 				if err != nil {
 					if err.Error() == "NO EXIST\n" {
@@ -315,7 +315,7 @@ func commandListener() {
 			hyDFSFilename := args[0]
 			modifiedFilename := slashesToBackticks(hyDFSFilename)
 			for {
-				err := sendMerge(MergeArgs{modifiedFilename}, hash(modifiedFilename))
+				err := sendMerge(MergeArgs{modifiedFilename}, hash(modifiedFilename, MACHINES_IN_NETWORK))
 				if err == nil {
 					break
 				}
@@ -395,7 +395,7 @@ func commandListener() {
 			}
 			hyDFSFilename := args[0]
 			modifiedFilename := slashesToBackticks(hyDFSFilename)
-			fileHash := hash(modifiedFilename)
+			fileHash := hash(modifiedFilename, MACHINES_IN_NETWORK)
 
 			fmt.Printf("File %s is stored on the following machines:\n", hyDFSFilename)
 
@@ -420,7 +420,7 @@ func commandListener() {
 			fmt.Printf("I have the hash %d\n", ipToVM(selfIP))
 			fmt.Println("Server Files:")
 			for k := range fileLogs {
-				fmt.Printf("File name %s has the hash of %d \n", backticksToSlashes(k), hash(k))
+				fmt.Printf("File name %s has the hash of %d \n", backticksToSlashes(k), hash(k, MACHINES_IN_NETWORK))
 			}
 		case "merge_perf":
 			if len(args) < 3 {

@@ -1,3 +1,3 @@
-module mp3
+module mp4
 
 go 1.23.1

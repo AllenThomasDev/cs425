@@ -68,7 +68,7 @@ func addToHyDFS(ip string, memType member_type_t) {
 	if (len(successors) > 3) {
 		var repossessedFiles []string
 		for i := 0; i < len(ownedFiles); i++ {
-			if (routingTable[hash(ownedFiles[i])] != currentVM) {
+			if (routingTable[hash(ownedFiles[i], MACHINES_IN_NETWORK)] != currentVM) {
 				repossessedFiles = append(repossessedFiles, ownedFiles[i])
 			}
 		}
@@ -151,7 +151,7 @@ func findOwnedFiles() []string {
 	// DO NOT LOCK: called from functions which already lock
 	fileList := make([]string, 0)
 	for k := range(fileLogs) {
-		if routingTable[hash(k)] == currentVM {
+		if routingTable[hash(k, MACHINES_IN_NETWORK)] == currentVM {
 			fileList = append(fileList, k)
 		}
 	}
