@@ -12,6 +12,11 @@ type Append_id_t struct {
 	Timestamp string
 }
 
+type source_data_t struct {
+	line string
+	lineNum int
+}
+
 type member_type_t int
 const (
 	NEW_MEMBER member_type_t = iota
@@ -30,6 +35,7 @@ const (
 var (
 	MACHINES_IN_NETWORK = 10
 	PANIC_ON_ERROR		= 0
+	RAINSTORM_LAYERS	= 3		// source, op1, op2 -> we will always have 3 layers for rainstorm operation
 	RPC_PORT			= "2233"
 	introducerIP        = "172.22.94.178"
 	ipList              = []string {

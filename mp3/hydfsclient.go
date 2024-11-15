@@ -415,7 +415,6 @@ func commandListener() {
 
 			routingTableMutex.RUnlock()
 			successorsMutex.RUnlock()
-			//@TODO: this returns only the first owner of the file
 		case "store":
 			fmt.Printf("I have the hash %d\n", ipToVM(selfIP))
 			fmt.Println("Server Files:")
@@ -431,6 +430,17 @@ func commandListener() {
 			append_size, _ := strconv.Atoi(args[1])
 			conc_appends, _ := strconv.Atoi(args[2])
 			gen_merge_files(filename, append_size, conc_appends)
+		case "RainStorm":
+			if len(args) < 5 {
+				fmt.Println("Error: Insufficient arguments. Usage: <op1_exe> <op2_exe> <hydfs_src_file> <hydfs_dest_filename> <num_tasks>")
+				continue
+			}
+			op1_exe := args[0]
+			op2_exe := args[1]
+			hydfs_src_file := args[2]
+			hydfs_dest_file := args[3]
+			num_tasks, _ := strconv.Atoi(args[4]) 
+			initRainstorm(op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks)
 		default:
 			fmt.Println("Unknown command")
 		}

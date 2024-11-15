@@ -41,6 +41,14 @@ type RemoveArgs struct {
 	RemFiles []string
 }
 
+type StartRainstormRemoteArgs struct {
+	Op1_exe string
+	Op2_exe string
+	Hydfs_src_file string
+	Hydfs_dest_file string
+	Num_tasks int
+}
+
 func startRPCListener() {
 	hydfsreq := new(HyDFSReq)
 	rpc.Register(hydfsreq)
@@ -150,4 +158,9 @@ func (h *HyDFSReq) ForwardedMerge(args *ForwardedMergeArgs, reply *string) error
 
 func (h *HyDFSReq) Remove(args *RemoveArgs, reply *string) error {
 	return removeFiles(args.RemFiles)
+}
+
+func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *string) error {
+	go rainstormMain(args.Op1_exe, args.Op2_exe, args.Hydfs_src_file, args.Hydfs_dest_file, args.Num_tasks)
+	return nil
 }
