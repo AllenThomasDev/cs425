@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/rpc"
+	"os"
 )
 
 var (
@@ -12,6 +14,25 @@ var (
 func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
 	fmt.Println("Starting Rainstorm")
 	genTopology(num_tasks)
+	sourceArgs, err := createFileChunks(len(topologyArray[0]), hydfs_src_file)
+	if err != nil {
+		fmt.Printf("Error breaking file into chunks: %v\n", err)
+		return
+	}
+
+	for i := 0; i < len(sourceArgs[0]); i++ {
+		client, err := rpc.DialHTTP("tcp", vmToIP(topologyArray[0][i])+":"+RPC_PORT)
+		if err != nil {
+			fmt.Printf("Failed to dial source: %v\n", err)
+			return
+		}
+
+		var reply string
+		err = client.Call("HyDFSReq.Source", SourceArgs{sourceArgs[0][i], sourceArgs[1][i], hydfs_src_file}, &reply)
+		if err != nil {
+			fmt.Printf("Failed to initiate Rainstorm: %v\n", err)
+		}
+	}
 }
 
 func genTopology(num_tasks int) {
@@ -60,6 +81,67 @@ func genTopology(num_tasks int) {
 	}
 }
 
+func createFileChunks(num_sources int, hydfs_src_file string) ([][]int, error) {
+	if num_sources == 0 {
+		return nil, fmt.Errorf("No sources to pass chunks to\n")
+	} else {
+		err := backgroundCommand(fmt.Sprintf("merge %s", hydfs_src_file))
+		if err != nil {
+			return nil, err
+		}
+
+		err = backgroundCommand(fmt.Sprintf("get %s %s", hydfs_src_file, hydfs_src_file))
+		if err != nil {
+			return nil, err
+		}
+
+		src_file, err := os.OpenFile("client/" + hydfs_src_file, os.O_RDONLY, 0644)
+		if err != nil {
+			return nil, err
+		}
+
+		// total number of lines in file
+		lineCount := 0
+		// cumulative sum of characters in file at end of each line
+		charsAtLine := []int {0}
+		b := make([]byte, 1)
+		for {
+			n1, err := src_file.Read(b)
+			if n1 == 0 {
+				if err != nil && err != io.EOF {
+					return nil, err
+				}
+				break
+			}
+
+			charsAtLine[lineCount]++
+
+			if string(b) == "\n" {
+				charsAtLine = append(charsAtLine, charsAtLine[lineCount])
+				lineCount++
+			}
+		}
+		
+		sourceTotalLines := make([]int, num_sources, num_sources)
+		linesPerSource := lineCount/num_sources
+		for i := 0; i < num_sources; i++ {
+			sourceTotalLines[i] = linesPerSource
+		}
+		remaining_lines := lineCount - (linesPerSource * num_sources)
+		for i := 0; i < remaining_lines; i++ {
+			sourceTotalLines[i]++
+		}
+
+		sourceStartLines := make([]int, num_sources, num_sources)
+		sourceStartLines[0] = 0
+		for i := 1; i < num_sources; i++ {
+			sourceStartLines[i] = sourceStartLines[i - 1] + sourceTotalLines[i - 1]
+		}
+
+		return [][]int{sourceStartLines, sourceTotalLines}, nil
+	}
+}
+
 func initRainstorm(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
 	if selfIP == introducerIP {
 		rainstormMain(op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks)
@@ -67,6 +149,7 @@ func initRainstorm(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_
 		client, err := rpc.DialHTTP("tcp", introducerIP+":"+RPC_PORT)
 		if err != nil {
 			fmt.Printf("Failed to dial introducer: %v\n", err)
+			return
 		}
 
 		var reply string

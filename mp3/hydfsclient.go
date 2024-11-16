@@ -263,10 +263,10 @@ func commandListener() {
 			localFilename := args[1]
 			if cachedContent, ok := readFileFromCache(hyDFSFilename); ok {
 				fmt.Println("Serving from cache")
-        fmt.Println("GET (from cache) completed")
-        duration := time.Since(startTime)
-        servedFromCache = true
-        logger.Printf("GET took %s, cache status %v \n", duration, servedFromCache)
+				fmt.Println("GET (from cache) completed")
+				duration := time.Since(startTime)
+				servedFromCache = true
+				logger.Printf("GET took %s, cache status %v \n", duration, servedFromCache)
 				err := writeFile(localFilename, cachedContent, "client")
 				if err != nil {
 					fmt.Printf("Error on file receipt: %v\n", err)
@@ -445,4 +445,103 @@ func commandListener() {
 			fmt.Println("Unknown command")
 		}
 	}
+}
+
+func backgroundCommand(input string) error {
+	args := strings.Fields(input)
+	if len(args) < 1 {
+		return fmt.Errorf("Error: need at least one command\n")
+	}
+	command := args[0]
+	args = args[1:] // Extract the arguments after the command
+	switch command {
+	case "append":
+		if len(args) < 2 {
+			return fmt.Errorf("Error: Insufficient arguments. Usage: append localfilename HyDFSfilename")
+		}
+		localFilename := args[0]
+		hyDFSFilename := args[1]
+		modifiedFilename := slashesToBackticks(hyDFSFilename)
+		fileContent, err := readFileToMessageBuffer(localFilename, "client")
+		if err != nil {
+			return fmt.Errorf("Error reading file: %v\n", err)
+		}
+		ts := time.Now()
+		for {
+			err := sendAppendToQuorum(AppendArgs{modifiedFilename, fileContent, ts.String(), currentVM}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
+			if err == nil {
+				break
+			}
+			removeFileFromCache(hyDFSFilename)
+		}
+		removeFileFromCache(hyDFSFilename)
+	case "create":
+		if len(args) != 2 {
+			return fmt.Errorf("Error: Incorrect arguments. Usage: create localfilename HyDFSfilename")
+		}
+		localFilename := args[0]
+		hyDFSFilename := args[1]
+		modifiedFilename := slashesToBackticks(hyDFSFilename)
+		fileContent, err := readFileToMessageBuffer(localFilename, "client")
+		if err != nil {
+			return fmt.Errorf("Error reading file: %v\n", err)
+		}
+		for {
+			err := sendCreateToQuorum(CreateArgs{modifiedFilename, fileContent}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
+			if err == nil {
+				break
+			}
+			removeFileFromCache(hyDFSFilename)
+		}
+		removeFileFromCache(hyDFSFilename)
+	case "get":
+		if len(args) < 2 {
+			return fmt.Errorf("Error: Insufficient arguments. Usage: get HyDFSfilename localfilename")
+		}
+		hyDFSFilename := args[0]
+		localFilename := args[1]
+		if cachedContent, ok := readFileFromCache(hyDFSFilename); ok {
+			err := writeFile(localFilename, cachedContent, "client")
+			if err != nil {
+				return fmt.Errorf("Error on file receipt: %v\n", err)
+			}
+			return nil
+		}
+
+		modifiedFilename := slashesToBackticks(hyDFSFilename)
+		var fileContent string
+		var err error
+		for {
+			fileContent, err = sendGetToQuorum(GetArgs{modifiedFilename}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
+			// if we get an error that isn't the file not existing, keep trying, otherwise give up
+			if err != nil {
+				return err
+			} else {
+				break
+			}
+		}
+
+		err = writeFile(localFilename, fileContent, "client")
+		if err != nil {
+			return fmt.Errorf("Error on file write: %v\n", err)
+		} else {
+			addFileToCache(hyDFSFilename, fileContent)
+		}
+	case "merge":
+		if len(args) < 1 {
+			return fmt.Errorf("Error: Insufficient arguments. Usage: merge HyDFSfilename")
+		}
+		hyDFSFilename := args[0]
+		modifiedFilename := slashesToBackticks(hyDFSFilename)
+		for {
+			err := sendMerge(MergeArgs{modifiedFilename}, hash(modifiedFilename, MACHINES_IN_NETWORK))
+			if err == nil {
+				break
+			}
+		}
+	default:
+		return fmt.Errorf("Unknown command")
+	}
+
+	return nil
 }

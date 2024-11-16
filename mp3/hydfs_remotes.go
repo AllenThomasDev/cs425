@@ -49,6 +49,12 @@ type StartRainstormRemoteArgs struct {
 	Num_tasks int
 }
 
+type SourceArgs struct {
+	Startline int
+	LinesToRead int
+	Filename string
+}
+
 func startRPCListener() {
 	hydfsreq := new(HyDFSReq)
 	rpc.Register(hydfsreq)
@@ -162,5 +168,10 @@ func (h *HyDFSReq) Remove(args *RemoveArgs, reply *string) error {
 
 func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *string) error {
 	go rainstormMain(args.Op1_exe, args.Op2_exe, args.Hydfs_src_file, args.Hydfs_dest_file, args.Num_tasks)
+	return nil
+}
+
+func (h *HyDFSReq) Source(args *SourceArgs, reply *string) error {
+	fmt.Printf("Processing %d lines of %s starting at line %d\n", args.LinesToRead, args.Filename, args.Startline)
 	return nil
 }
