@@ -20,6 +20,7 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 		return
 	}
 
+	backgroundCommand("createemptyfile source.log")
 	for i := 0; i < len(sourceArgs[0]); i++ {
 		client, err := rpc.DialHTTP("tcp", vmToIP(topologyArray[0][i])+":"+RPC_PORT)
 		if err != nil {
@@ -28,7 +29,7 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 		}
 
 		var reply string
-		err = client.Call("HyDFSReq.Source", SourceArgs{sourceArgs[0][i], sourceArgs[1][i], hydfs_src_file}, &reply)
+		err = client.Call("HyDFSReq.Source", SourceArgs{hydfs_src_file, "source.log", sourceArgs[0][i], sourceArgs[1][i], sourceArgs[2][i]}, &reply)
 		if err != nil {
 			fmt.Printf("Failed to initiate Rainstorm: %v\n", err)
 		}
@@ -133,12 +134,15 @@ func createFileChunks(num_sources int, hydfs_src_file string) ([][]int, error) {
 		}
 
 		sourceStartLines := make([]int, num_sources, num_sources)
+		sourceStartCharacters := make([]int, num_sources, num_sources)
 		sourceStartLines[0] = 0
+		sourceStartCharacters[0] = 0
 		for i := 1; i < num_sources; i++ {
 			sourceStartLines[i] = sourceStartLines[i - 1] + sourceTotalLines[i - 1]
+			sourceStartCharacters[i] = charsAtLine[i - 1];
 		}
 
-		return [][]int{sourceStartLines, sourceTotalLines}, nil
+		return [][]int{sourceStartLines, sourceStartCharacters, sourceTotalLines}, nil
 	}
 }
 

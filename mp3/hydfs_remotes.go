@@ -50,9 +50,11 @@ type StartRainstormRemoteArgs struct {
 }
 
 type SourceArgs struct {
-	Startline int
+	SrcFilename string
+	LogFilename string
+	StartLine int
+	StartCharacter int
 	LinesToRead int
-	Filename string
 }
 
 func startRPCListener() {
@@ -172,6 +174,7 @@ func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *s
 }
 
 func (h *HyDFSReq) Source(args *SourceArgs, reply *string) error {
-	fmt.Printf("Processing %d lines of %s starting at line %d\n", args.LinesToRead, args.Filename, args.Startline)
+	fmt.Printf("Processing %d lines of %s starting at line %d\n", args.LinesToRead, args.SrcFilename, args.StartLine)
+	source_wrapper(args.SrcFilename, args.LogFilename, args.StartLine, args.StartCharacter, args.LinesToRead)
 	return nil
 }

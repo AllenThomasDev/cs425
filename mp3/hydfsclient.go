@@ -475,6 +475,23 @@ func backgroundCommand(input string) error {
 			removeFileFromCache(hyDFSFilename)
 		}
 		removeFileFromCache(hyDFSFilename)
+	// swap content of file we want to append with string
+	case "appendstring" :
+		if len(args) < 2 {
+			return fmt.Errorf("Error: Insufficient arguments. Usage: appendstring writeString HyDFSfilename")
+		}
+		fileContent := args[0]
+		hyDFSFilename := args[1]
+		modifiedFilename := slashesToBackticks(hyDFSFilename)
+		ts := time.Now()
+		for {
+			err := sendAppendToQuorum(AppendArgs{modifiedFilename, fileContent, ts.String(), currentVM}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
+			if err == nil {
+				break
+			}
+			removeFileFromCache(hyDFSFilename)
+		}
+		removeFileFromCache(hyDFSFilename)
 	case "create":
 		if len(args) != 2 {
 			return fmt.Errorf("Error: Incorrect arguments. Usage: create localfilename HyDFSfilename")
@@ -488,6 +505,36 @@ func backgroundCommand(input string) error {
 		}
 		for {
 			err := sendCreateToQuorum(CreateArgs{modifiedFilename, fileContent}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
+			if err == nil {
+				break
+			}
+			removeFileFromCache(hyDFSFilename)
+		}
+		removeFileFromCache(hyDFSFilename)
+	// swap content of file we want to create with string 
+	case "createstring":
+		if len(args) != 2 {
+			return fmt.Errorf("Error: Incorrect arguments. Usage: create localfilename HyDFSfilename")
+		}
+		fileContent := args[0]
+		hyDFSFilename := args[1]
+		modifiedFilename := slashesToBackticks(hyDFSFilename)
+		for {
+			err := sendCreateToQuorum(CreateArgs{modifiedFilename, fileContent}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
+			if err == nil {
+				break
+			}
+			removeFileFromCache(hyDFSFilename)
+		}
+		removeFileFromCache(hyDFSFilename)
+	case "createemptyfile":
+		if len(args) != 1 {
+			return fmt.Errorf("Error: Incorrect arguments. Usage: create HyDFSfilename")
+		}
+		hyDFSFilename := args[0]
+		modifiedFilename := slashesToBackticks(hyDFSFilename)
+		for {
+			err := sendCreateToQuorum(CreateArgs{modifiedFilename, ""}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
 			if err == nil {
 				break
 			}
