@@ -20,7 +20,7 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 		return
 	}
 
-	backgroundCommand("createemptyfile source.log")
+	// backgroundCommand("createemptyfile source.log")
 	for i := 0; i < len(sourceArgs[0]); i++ {
 		client, err := rpc.DialHTTP("tcp", vmToIP(topologyArray[0][i])+":"+RPC_PORT)
 		if err != nil {
@@ -34,6 +34,8 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 			fmt.Printf("Failed to initiate Rainstorm: %v\n", err)
 		}
 	}
+
+	// remove log files after operation completes (not doing now for debugging purposes)
 }
 
 func genTopology(num_tasks int) {
@@ -91,12 +93,13 @@ func createFileChunks(num_sources int, hydfs_src_file string) ([][]int, error) {
 			return nil, err
 		}
 
-		err = backgroundCommand(fmt.Sprintf("get %s %s", hydfs_src_file, hydfs_src_file))
+		randomFileName := genRandomFileName()
+		err = backgroundCommand(fmt.Sprintf("get %s %s", hydfs_src_file, randomFileName))
 		if err != nil {
 			return nil, err
 		}
 
-		src_file, err := os.OpenFile("client/" + hydfs_src_file, os.O_RDONLY, 0644)
+		src_file, err := os.OpenFile("client/" + randomFileName, os.O_RDONLY, 0644)
 		if err != nil {
 			return nil, err
 		}
@@ -143,6 +146,7 @@ func createFileChunks(num_sources int, hydfs_src_file string) ([][]int, error) {
 			sourceStartCharacters[i] = charsAtLine[sourceStartLines[i]];
 		}
 
+		os.Remove("client/" + randomFileName)
 		return [][]int{sourceStartLines, sourceStartCharacters, sourceTotalLines}, nil
 	}
 }

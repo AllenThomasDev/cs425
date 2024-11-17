@@ -4,17 +4,27 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
 )
 
 func source_wrapper(hydfs_src_file string, log_file string, startLine int, startCharacter int, numLines int) {
-	err := backgroundCommand(fmt.Sprintf("get %s %s", hydfs_src_file, hydfs_src_file))
+	
+	randomSrcFileName := genRandomFileName()
+	err := backgroundCommand(fmt.Sprintf("get %s %s", hydfs_src_file, randomSrcFileName))
 	if err != nil {
 		fmt.Printf("Error getting source file: %v\n", err)
 		return
 	}
 	
+	randomLogFileName := genRandomFileName()
+	err = backgroundCommand(fmt.Sprintf("get %s %s", log_file, randomLogFileName))
+	if err != nil {
+		fmt.Printf("Error getting log file: %v\n", err)
+		return
+	}
+	
 	remainingLines := numLines
-	src_file, err := os.OpenFile("client/" + hydfs_src_file, os.O_RDONLY, 0644)
+	src_file, err := os.OpenFile("client/" + randomSrcFileName, os.O_RDONLY, 0644)
 	if err != nil {
 		fmt.Printf("Error opening file: %v\n", err)
 	}
@@ -35,14 +45,28 @@ func source_wrapper(hydfs_src_file string, log_file string, startLine int, start
 			break
 		}
 
-		remainingLines--
-		
-		fmt.Printf("Sending line %s\n", line)
-		fmt.Printf("ACK received!\n")
-		
 		uniqueID := startLine + numLines - remainingLines
-		backgroundCommand(fmt.Sprintf("appendstring %d %s", uniqueID, log_file))
+		idInLog, err := searchLog(randomLogFileName, strconv.Itoa(uniqueID))
+		if err != nil {
+			fmt.Printf("Error on log search: %v\n")
+			return
+		}
+
+		// if we haven't already processed this line, go ahead and process it
+		if idInLog == false {
+			fmt.Printf("Sending line %s\n", line)
+			fmt.Printf("ACK received!\n")
+			backgroundCommand(fmt.Sprintf("appendstring %d %s", uniqueID, log_file))
+		} else {
+			fmt.Printf("Unique ID %d already in log, continuing...\n", uniqueID)
+		}
+
+		remainingLines--
 	}
+
+	// remove background files
+	os.Remove("client/" + randomSrcFileName)
+	os.Remove("client/" + randomLogFileName)
 }
 
 func readLineFromFile(f *os.File) (string, error) {
@@ -59,5 +83,27 @@ func readLineFromFile(f *os.File) (string, error) {
 		}
 
 		line += string(b)
+	}
+}
+
+func searchLog(log_file string, uniqueID string) (bool, error) {
+	lf, err := os.OpenFile("client/" + log_file, os.O_RDONLY, 0644)
+	if err != nil {
+		return false, err
+	}
+
+	for {
+		line, err := readLineFromFile(lf)
+		if err != nil {
+			if err == io.EOF {
+				return false, nil
+			} else {
+				return false, err
+			}
+		}
+
+		if uniqueID == line {
+			return true, nil
+		}
 	}
 }
