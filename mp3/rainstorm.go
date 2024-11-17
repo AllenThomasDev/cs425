@@ -103,7 +103,8 @@ func createFileChunks(num_sources int, hydfs_src_file string) ([][]int, error) {
 
 		// total number of lines in file
 		lineCount := 0
-		// cumulative sum of characters in file at end of each line
+		// cumulative sum of characters in file at start of each line
+		totalChars := 0
 		charsAtLine := []int {0}
 		b := make([]byte, 1)
 		for {
@@ -115,10 +116,10 @@ func createFileChunks(num_sources int, hydfs_src_file string) ([][]int, error) {
 				break
 			}
 
-			charsAtLine[lineCount]++
+			totalChars++
 
 			if string(b) == "\n" {
-				charsAtLine = append(charsAtLine, charsAtLine[lineCount])
+				charsAtLine = append(charsAtLine, totalChars)
 				lineCount++
 			}
 		}
@@ -139,7 +140,7 @@ func createFileChunks(num_sources int, hydfs_src_file string) ([][]int, error) {
 		sourceStartCharacters[0] = 0
 		for i := 1; i < num_sources; i++ {
 			sourceStartLines[i] = sourceStartLines[i - 1] + sourceTotalLines[i - 1]
-			sourceStartCharacters[i] = charsAtLine[i - 1];
+			sourceStartCharacters[i] = charsAtLine[sourceStartLines[i]];
 		}
 
 		return [][]int{sourceStartLines, sourceStartCharacters, sourceTotalLines}, nil
