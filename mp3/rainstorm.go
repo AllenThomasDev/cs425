@@ -137,6 +137,7 @@ type fileAnalysis struct {
 }
 
 // analyzeFile counts lines and characters in the file
+// maybe this can be faster idk
 func analyzeFile(fileName string) (*fileAnalysis, error) {
 	src, err := os.OpenFile("client/"+fileName, os.O_RDONLY, 0644)
 	if err != nil {

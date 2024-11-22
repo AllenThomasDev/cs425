@@ -7,67 +7,121 @@ import (
 	"strconv"
 )
 
-func source_wrapper(hydfs_src_file string, log_file string, startLine int, startCharacter int, numLines int) {
-	
-	randomSrcFileName := genRandomFileName()
-	err := backgroundCommand(fmt.Sprintf("get %s %s", hydfs_src_file, randomSrcFileName))
+// SourceWrapper processes the file chunk line by line and sends to the next stage
+func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines int) {
+	// Fetch and open the file chunk
+	tempFileName := genRandomFileName()
+	err := backgroundCommand(fmt.Sprintf("get %s %s", hydfsSrcFile, tempFileName))
 	if err != nil {
-		fmt.Printf("Error getting source file: %v\n", err)
+		fmt.Printf("Error fetching source file: %v\n", err)
 		return
 	}
-	
-	randomLogFileName := genRandomFileName()
-	err = backgroundCommand(fmt.Sprintf("get %s %s", log_file, randomLogFileName))
-	if err != nil {
-		fmt.Printf("Error getting log file: %v\n", err)
-		return
-	}
-	
-	remainingLines := numLines
-	src_file, err := os.OpenFile("client/" + randomSrcFileName, os.O_RDONLY, 0644)
-	if err != nil {
-		fmt.Printf("Error opening file: %v\n", err)
-	}
-	src_file.Seek(int64(startCharacter), io.SeekStart)
+	defer os.Remove("client/" + tempFileName)
 
-	for {
-		if remainingLines == 0 {
-			break
-		}
-		
-		line, err := readLineFromFile(src_file)
+	// Open file for reading
+	file, err := os.OpenFile("client/"+tempFileName, os.O_RDONLY, 0644)
+	if err != nil {
+		fmt.Printf("Error opening source file: %v\n", err)
+		return
+	}
+	defer file.Close()
+
+	// Seek to start character
+	_, err = file.Seek(int64(startChar), io.SeekStart)
+	if err != nil {
+		fmt.Printf("Error seeking file: %v\n", err)
+		return
+	}
+
+	// Fetch log file to check for duplicates
+	tempLogFileName := genRandomFileName()
+	err = backgroundCommand(fmt.Sprintf("get %s %s", logFile, tempLogFileName))
+	if err != nil {
+		fmt.Printf("Error fetching log file: %v\n", err)
+		return
+	}
+	defer os.Remove("client/" + tempLogFileName)
+
+	// Process the chunk
+	remainingLines := numLines
+	for remainingLines > 0 {
+		line, err := readLineFromFile(file)
 		if err != nil {
 			if err == io.EOF {
-				fmt.Printf("EOF reached\n")
-			} else {
-				fmt.Printf("Error on reading file: %v\n", err)
+				fmt.Println("EOF reached.")
+				break
 			}
-			break
-		}
-
-		uniqueID := startLine + numLines - remainingLines
-		idInLog, err := searchLog(randomLogFileName, strconv.Itoa(uniqueID))
-		if err != nil {
-			fmt.Printf("Error on log search: %v\n")
+			fmt.Printf("Error reading line: %v\n", err)
 			return
 		}
 
-		// if we haven't already processed this line, go ahead and process it
-		if idInLog == false {
-			fmt.Printf("Sending line %s\n", line)
-			fmt.Printf("ACK received!\n")
-			backgroundCommand(fmt.Sprintf("appendstring %d %s", uniqueID, log_file))
+		uniqueID := startLine + numLines - remainingLines
+		processed, err := checkDuplicate(tempLogFileName, strconv.Itoa(uniqueID))
+		if err != nil {
+			fmt.Printf("Error checking duplicates: %v\n", err)
+			return
+		}
+
+		if !processed {
+			tuple := generateTuple(uniqueID, line)
+			sendToNextStage(tuple)
+			logProcessed(uniqueID, logFile)
 		} else {
-			fmt.Printf("Unique ID %d already in log, continuing...\n", uniqueID)
+			fmt.Printf("Line %d already processed. Skipping.\n", uniqueID)
 		}
 
 		remainingLines--
 	}
-
-	// remove background files
-	os.Remove("client/" + randomSrcFileName)
-	os.Remove("client/" + randomLogFileName)
 }
+
+// readLineFromFile reads a single line from the file
+
+
+// checkDuplicate verifies if a unique ID exists in the log file
+func checkDuplicate(logFile, uniqueID string) (bool, error) {
+	log, err := os.OpenFile("client/"+logFile, os.O_RDONLY, 0644)
+	if err != nil {
+		return false, err
+	}
+	defer log.Close()
+
+	for {
+		line, err := readLineFromFile(log)
+		if err != nil {
+			if err == io.EOF {
+				return false, nil
+			}
+			return false, err
+		}
+
+		if line == uniqueID {
+			return true, nil
+		}
+	}
+}
+
+// generateTuple creates a key-value tuple from the unique ID and line
+func generateTuple(uniqueID int, line string) map[string]string {
+	return map[string]string{
+		"key":   strconv.Itoa(uniqueID),
+		"value": line,
+	}
+}
+
+// sendToNextStage sends the tuple to the next stage via RPC or other means
+func sendToNextStage(tuple map[string]string) {
+	fmt.Printf("Sending tuple: %v\n", tuple)
+	// Implement RPC or network logic here
+}
+
+// logProcessed appends the unique ID to the log file
+func logProcessed(uniqueID int, logFile string) {
+	err := backgroundCommand(fmt.Sprintf("appendstring %d %s", uniqueID, logFile))
+	if err != nil {
+		fmt.Printf("Error logging processed line %d: %v\n", uniqueID, err)
+	}
+}
+
 
 func readLineFromFile(f *os.File) (string, error) {
 	var line string
@@ -86,24 +140,4 @@ func readLineFromFile(f *os.File) (string, error) {
 	}
 }
 
-func searchLog(log_file string, uniqueID string) (bool, error) {
-	lf, err := os.OpenFile("client/" + log_file, os.O_RDONLY, 0644)
-	if err != nil {
-		return false, err
-	}
 
-	for {
-		line, err := readLineFromFile(lf)
-		if err != nil {
-			if err == io.EOF {
-				return false, nil
-			} else {
-				return false, err
-			}
-		}
-
-		if uniqueID == line {
-			return true, nil
-		}
-	}
-}
