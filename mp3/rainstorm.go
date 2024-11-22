@@ -7,6 +7,13 @@ import (
 	"os"
 )
 
+// FileChunkInfo contains the line and character information for file chunks
+type FileChunkInfo struct {
+	StartLines     []int
+	StartChars     []int
+	LinesPerSource []int
+}
+
 var (
 	topologyArray [][]int
 )
@@ -21,7 +28,7 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 	}
 
 	// backgroundCommand("createemptyfile source.log")
-	for i := 0; i < len(sourceArgs[0]); i++ {
+	for i := 0; i < len(sourceArgs.StartLines); i++ {
 		client, err := rpc.DialHTTP("tcp", vmToIP(topologyArray[0][i])+":"+RPC_PORT)
 		if err != nil {
 			fmt.Printf("Failed to dial source: %v\n", err)
@@ -29,7 +36,13 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 		}
 
 		var reply string
-		err = client.Call("HyDFSReq.Source", SourceArgs{hydfs_src_file, "source.log", sourceArgs[0][i], sourceArgs[1][i], sourceArgs[2][i]}, &reply)
+		err = client.Call("HyDFSReq.Source", SourceArgs{
+			hydfs_src_file,
+			"source.log",
+			sourceArgs.StartLines[i],
+			sourceArgs.StartChars[i],
+			sourceArgs.LinesPerSource[i],
+		}, &reply)
 		if err != nil {
 			fmt.Printf("Failed to initiate Rainstorm: %v\n", err)
 		}
@@ -84,71 +97,116 @@ func genTopology(num_tasks int) {
 	}
 }
 
-func createFileChunks(num_sources int, hydfs_src_file string) ([][]int, error) {
-	if num_sources == 0 {
-		return nil, fmt.Errorf("No sources to pass chunks to\n")
-	} else {
-		err := backgroundCommand(fmt.Sprintf("merge %s", hydfs_src_file))
-		if err != nil {
-			return nil, err
-		}
+// createFileChunks splits a HydFS file into chunks for multiple sources
+func createFileChunks(numSources int, hydfsSourceFile string) (*FileChunkInfo, error) {
+	if numSources == 0 {
+		return nil, fmt.Errorf("no sources to pass chunks to")
+	}
 
-		randomFileName := genRandomFileName()
-		err = backgroundCommand(fmt.Sprintf("get %s %s", hydfs_src_file, randomFileName))
-		if err != nil {
-			return nil, err
-		}
+	if err := prepareSourceFile(hydfsSourceFile); err != nil {
+		return nil, fmt.Errorf("failed to prepare source file: %w", err)
+	}
 
-		src_file, err := os.OpenFile("client/" + randomFileName, os.O_RDONLY, 0644)
-		if err != nil {
-			return nil, err
-		}
+	randomFileName := genRandomFileName()
+	defer cleanupTempFile(randomFileName)
 
-		// total number of lines in file
-		lineCount := 0
-		// cumulative sum of characters in file at start of each line
-		totalChars := 0
-		charsAtLine := []int {0}
-		b := make([]byte, 1)
-		for {
-			n1, err := src_file.Read(b)
-			if n1 == 0 {
-				if err != nil && err != io.EOF {
-					return nil, err
-				}
-				break
+	fileInfo, err := analyzeFile(randomFileName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to analyze file: %w", err)
+	}
+
+	return distributeLines(fileInfo.lineCount, fileInfo.charsAtLine, numSources)
+}
+
+// prepareSourceFile merges and retrieves the source file from HydFS
+func prepareSourceFile(hydfsSourceFile string) error {
+	if err := backgroundCommand(fmt.Sprintf("merge %s", hydfsSourceFile)); err != nil {
+		return err
+	}
+
+	if err := backgroundCommand(fmt.Sprintf("get %s %s", hydfsSourceFile, genRandomFileName())); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+type fileAnalysis struct {
+	lineCount   int
+	charsAtLine []int
+}
+
+// analyzeFile counts lines and characters in the file
+func analyzeFile(fileName string) (*fileAnalysis, error) {
+	src, err := os.OpenFile("client/"+fileName, os.O_RDONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	defer src.Close()
+
+	lineCount := 0
+	totalChars := 0
+	charsAtLine := []int{0}
+	
+	buf := make([]byte, 1)
+	for {
+		n, err := src.Read(buf)
+		if n == 0 {
+			if err != nil && err != io.EOF {
+				return nil, err
 			}
-
-			totalChars++
-
-			if string(b) == "\n" {
-				charsAtLine = append(charsAtLine, totalChars)
-				lineCount++
-			}
+			break
 		}
 		
-		sourceTotalLines := make([]int, num_sources, num_sources)
-		linesPerSource := lineCount/num_sources
-		for i := 0; i < num_sources; i++ {
-			sourceTotalLines[i] = linesPerSource
+		totalChars++
+		if string(buf) == "\n" {
+			charsAtLine = append(charsAtLine, totalChars)
+			lineCount++
 		}
-		remaining_lines := lineCount - (linesPerSource * num_sources)
-		for i := 0; i < remaining_lines; i++ {
-			sourceTotalLines[i]++
-		}
-
-		sourceStartLines := make([]int, num_sources, num_sources)
-		sourceStartCharacters := make([]int, num_sources, num_sources)
-		sourceStartLines[0] = 0
-		sourceStartCharacters[0] = 0
-		for i := 1; i < num_sources; i++ {
-			sourceStartLines[i] = sourceStartLines[i - 1] + sourceTotalLines[i - 1]
-			sourceStartCharacters[i] = charsAtLine[sourceStartLines[i]];
-		}
-
-		os.Remove("client/" + randomFileName)
-		return [][]int{sourceStartLines, sourceStartCharacters, sourceTotalLines}, nil
 	}
+
+	return &fileAnalysis{
+		lineCount:   lineCount,
+		charsAtLine: charsAtLine,
+	}, nil
+}
+
+// distributeLines calculates how to distribute lines across sources
+func distributeLines(lineCount int, charsAtLine []int, numSources int) (*FileChunkInfo, error) {
+	// Calculate lines per source
+	linesPerSource := make([]int, numSources)
+	baseLines := lineCount / numSources
+	for i := range linesPerSource {
+		linesPerSource[i] = baseLines
+	}
+
+	// Distribute remaining lines
+	remainingLines := lineCount - (baseLines * numSources)
+	for i := 0; i < remainingLines; i++ {
+		linesPerSource[i]++
+	}
+
+	// Calculate starting positions
+	startLines := make([]int, numSources)
+	startChars := make([]int, numSources)
+	
+	startLines[0] = 0
+	startChars[0] = 0
+	for i := 1; i < numSources; i++ {
+		startLines[i] = startLines[i-1] + linesPerSource[i-1]
+		startChars[i] = charsAtLine[startLines[i]]
+	}
+
+	return &FileChunkInfo{
+		StartLines:     startLines,
+		StartChars:     startChars,
+		LinesPerSource: linesPerSource,
+	}, nil
+}
+
+// cleanupTempFile removes the temporary file
+func cleanupTempFile(fileName string) {
+	os.Remove("client/" + fileName)
 }
 
 func initRainstorm(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
