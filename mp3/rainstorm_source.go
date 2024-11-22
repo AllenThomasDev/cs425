@@ -55,6 +55,7 @@ func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines 
 			return
 		}
 
+    // why is filename not being used?
 		uniqueID := startLine + numLines - remainingLines
 		processed, err := checkDuplicate(tempLogFileName, strconv.Itoa(uniqueID))
 		if err != nil {
