@@ -24,6 +24,8 @@ const (
 )
 
 var cache = expirable.NewLRU[string, string](0, nil, 15000*time.Second)
+var UIDCache = make(map[int]bool)
+const logFilePath = "processed_records.log"
 
 type ack_type_t int
 const (

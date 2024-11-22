@@ -34,13 +34,12 @@ func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines 
 	}
 
 	// Fetch log file to check for duplicates
-	tempLogFileName := genRandomFileName()
-	err = backgroundCommand(fmt.Sprintf("get %s %s", logFile, tempLogFileName))
+	err = backgroundCommand(fmt.Sprintf("get %s %s", logFile, logFilePath))
 	if err != nil {
 		fmt.Printf("Error fetching log file: %v\n", err)
 		return
 	}
-	defer os.Remove("client/" + tempLogFileName)
+	defer os.Remove("client/" + logFilePath)
 
 	// Process the chunk
 	remainingLines := numLines
@@ -54,52 +53,15 @@ func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines 
 			fmt.Printf("Error reading line: %v\n", err)
 			return
 		}
-
-    // why is filename not being used?
 		uniqueID := startLine + numLines - remainingLines
-		processed, err := checkDuplicate(tempLogFileName, strconv.Itoa(uniqueID))
-		if err != nil {
-			fmt.Printf("Error checking duplicates: %v\n", err)
-			return
-		}
-
-		if !processed {
-			tuple := generateTuple(uniqueID, line)
-			sendToNextStage(tuple)
-			logProcessed(uniqueID, logFile)
-		} else {
-			fmt.Printf("Line %d already processed. Skipping.\n", uniqueID)
-		}
-
+		processRecord(uniqueID, line)
 		remainingLines--
 	}
 }
 
 // readLineFromFile reads a single line from the file
 
-
 // checkDuplicate verifies if a unique ID exists in the log file
-func checkDuplicate(logFile, uniqueID string) (bool, error) {
-	log, err := os.OpenFile("client/"+logFile, os.O_RDONLY, 0644)
-	if err != nil {
-		return false, err
-	}
-	defer log.Close()
-
-	for {
-		line, err := readLineFromFile(log)
-		if err != nil {
-			if err == io.EOF {
-				return false, nil
-			}
-			return false, err
-		}
-
-		if line == uniqueID {
-			return true, nil
-		}
-	}
-}
 
 // generateTuple creates a key-value tuple from the unique ID and line
 func generateTuple(uniqueID int, line string) map[string]string {
@@ -116,13 +78,6 @@ func sendToNextStage(tuple map[string]string) {
 }
 
 // logProcessed appends the unique ID to the log file
-func logProcessed(uniqueID int, logFile string) {
-	err := backgroundCommand(fmt.Sprintf("appendstring %d %s", uniqueID, logFile))
-	if err != nil {
-		fmt.Printf("Error logging processed line %d: %v\n", uniqueID, err)
-	}
-}
-
 
 func readLineFromFile(f *os.File) (string, error) {
 	var line string
@@ -140,5 +95,3 @@ func readLineFromFile(f *os.File) (string, error) {
 		line += string(b)
 	}
 }
-
-
