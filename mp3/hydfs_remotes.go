@@ -175,6 +175,6 @@ func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *s
 
 func (h *HyDFSReq) Source(args *SourceArgs, reply *string) error {
 	fmt.Printf("Processing %d lines of %s starting at line %d\n", args.LinesToRead, args.SrcFilename, args.StartLine)
-	source_wrapper(args.SrcFilename, args.LogFilename, args.StartLine, args.StartCharacter, args.LinesToRead)
+	sourceWrapper(args.SrcFilename, args.LogFilename, args.StartLine, args.StartCharacter, args.LinesToRead)
 	return nil
 }

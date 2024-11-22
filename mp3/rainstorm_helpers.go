@@ -73,7 +73,7 @@ func processRecord(uniqueID int, line string) {
 		return
 	}
 	//@TODO: Process the record
-	fmt.Printf("Processing record with uniqueID %d\n", uniqueID)
+	fmt.Printf("Processing record with uniqueID %d %s\n", uniqueID, line)
 	// send line to next stage and after ack, log prcocessed
 	logProcessed(uniqueID)
 }
