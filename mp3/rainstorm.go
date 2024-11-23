@@ -9,8 +9,7 @@ import (
 
 // can use line number + operation within line (i.e. first operation, second operation, etc.) as unique identifier for subsequent stages beyond source
 
-// TODO: add common wrapper for operations (can handle Transform, FilteredTransform, and AggregateByKey), add start channel to all workers
-// handle failures!
+// TODO: handle failures!
 
 var (
 	topologyArray [][]task_addr_t

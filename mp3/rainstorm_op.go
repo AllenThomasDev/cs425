@@ -2,7 +2,11 @@ package main
 
 import "fmt"
 
-func opWrapper(execFilename string, isStateful bool, stateFilename string, isOutput bool, outputFilename string, logFilename string) {
-	fmt.Println(execFilename, isStateful, stateFilename, isOutput, outputFilename, logFilename)
+var (
+	portToOpData = make(map[int]OpArgs)
+)
+
+func opWrapper(OA OpArgs, appPort int) {
 	fmt.Printf("Wrapping up the ops\n")
+	portToOpData[appPort] = OA
 }

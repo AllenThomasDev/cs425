@@ -209,7 +209,7 @@ func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
 	go startRPCListenerWorker(freePort)
 	if args.TaskType == OP {
 		fmt.Printf("Executing op %s, stateful = %t, output = %t\n", args.OA.ExecFilename, args.OA.IsStateful, args.OA.IsOutput)
-		go opWrapper(args.OA.ExecFilename, args.OA.IsStateful, args.OA.StateFilename, args.OA.IsOutput, args.OA.OutputFilename, args.OA.LogFilename)
+		go opWrapper(args.OA, freePort)
 		return nil
 	} else if args.TaskType == SOURCE {
 		fmt.Printf("Processing %d lines of %s starting at line %d\n", args.SA.LinesToRead, args.SA.SrcFilename, args.SA.StartLine)

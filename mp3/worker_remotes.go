@@ -25,3 +25,8 @@ func (w *WorkerReq) KillSelf(reply *string) error {
 	fmt.Println("I have been told to kill myself :(")
 	return nil
 }
+
+func (w *WorkerReq) RunExec(reply *string) error {
+	// run executable, send to buffer where we will attempt to send to subsequent stages
+	return nil
+}
