@@ -7,13 +7,13 @@ import (
 )
 
 type Rainstorm_tuple_t struct {
-	key string
-	value string
+	Key string
+	Value string
 }
 
 type topology_entry_t struct {
-	layer int
-	hash int
+	Layer int
+	Hash int
 }
 
 // note this is hashable, so we can use it as a key in a map
@@ -61,7 +61,7 @@ var (
 	PANIC_ON_ERROR		= 0
 	RAINSTORM_LAYERS	= 3		// source, op1, op2 -> we will always have 3 layers for rainstorm operation
 	RPC_PORT			= "2233"
-	SCHEDULER_PORT		= "808"
+	SCHEDULER_PORT		= "7654"
 	introducerIP        = "172.22.94.178"
 	ipList              = []string {
 							"172.22.94.178",

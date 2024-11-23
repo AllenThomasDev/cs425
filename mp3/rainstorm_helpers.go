@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"net/rpc"
 	"os"
 	"strconv"
 	"sync"
@@ -69,9 +70,23 @@ func processRecord(uniqueID int, line string, hydfsSrcFile string, logFile strin
 		return
 	}
 	fmt.Printf("Sending record with uniqueID %d %s\n", uniqueID, line)
-	// key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
-	// getNextStage(generateTuple(key, line))
+	key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
+	args := GetNextStageArgs{Rainstorm_tuple_t{key, line}, currentVM}
+	client, err := rpc.DialHTTP("tcp", vmToIP(LEADER_ID) + ":" + SCHEDULER_PORT)
+	if err != nil {
+		fmt.Printf("Error dialing leader: %v\n", err)
+	}
+
+	var reply string
+	err = client.Call("SchedulerReq.GetNextStage", args, &reply)
+	if err != nil {
+		fmt.Printf("Error getting next stage: %v\n", err)
+	}
+	
+	nextVM, _ := strconv.Atoi(reply);
+	fmt.Printf("Sending data to node %d\n", nextVM)
 	// send line to next stage and after ack, log processed
+	// if call to client fails, sleep for a second and try again to give the scheduler some time to update topology
 	logProcessed(uniqueID, logFile)
 }
 

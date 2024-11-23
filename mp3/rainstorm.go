@@ -9,7 +9,7 @@ import (
 
 // can use line number + operation within line (i.e. first operation, second operation, etc.) as unique identifier for subsequent stages beyond source
 
-// TODO: Undo Allen's BS, adjust source to output tuples of form <filename:linenumber, line>, add common wrapper for operations (can handle Transform, FilteredTransform, and AggregateByKey), handle failures!
+// TODO: add common wrapper for operations (can handle Transform, FilteredTransform, and AggregateByKey), handle failures!
 
 var (
 	topologyArray [][]int
@@ -18,6 +18,8 @@ var (
 func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
 	fmt.Println("Starting Rainstorm")
 	genTopology(num_tasks)
+	go startRPCListenerScheduler()
+	
 	sourceArgs, err := createFileChunks(len(topologyArray[0]), hydfs_src_file)
 	if err != nil {
 		fmt.Printf("Error breaking file into chunks: %v\n", err)
