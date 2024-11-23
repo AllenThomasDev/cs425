@@ -4,10 +4,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 )
 
 // SourceWrapper processes the file chunk line by line and sends to the next stage
 func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines int) {
+	// TODO: make this more robust. right now if source finishes operation before topologyArray is populated it causes issues
+	time.Sleep(time.Second)
+	
 	// Fetch and open the file chunk
 	tempFileName := genRandomFileName()
 	err := backgroundCommand(fmt.Sprintf("get %s %s", hydfsSrcFile, tempFileName))
@@ -56,12 +60,6 @@ func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines 
 		processRecord(uniqueID, line, hydfsSrcFile, logFile)
 		remainingLines--
 	}
-}
-
-// sendToNextStage sends the tuple to the next stage via RPC or other means
-func sendToNextStage(tuple Rainstorm_tuple_t) {
-	fmt.Printf("Sending tuple: %v\n", tuple)
-	// Implement RPC or network logic here
 }
 
 // readLineFromFile reads a single line from the file

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"net"
 	"net/rpc"
 	"os"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 
 var UIDLock sync.Mutex
 
-func isProcessed(uniqueID int, logFile string) bool {
+func isProcessed(uniqueID int) bool {
 	// Lock the entire operation to ensure atomic check and update
 	UIDLock.Lock()
 	defer UIDLock.Unlock()
@@ -65,32 +66,56 @@ func checkDuplicate(uniqueID string) (bool, error) {
 }
 
 func processRecord(uniqueID int, line string, hydfsSrcFile string, logFile string) {
-	if isProcessed(uniqueID, logFile) {
+	if isProcessed(uniqueID) {
 		fmt.Printf("Record with uniqueID %d has already been processed. Skipping.\n", uniqueID)
 		return
 	}
 	fmt.Printf("Sending record with uniqueID %d %s\n", uniqueID, line)
+	
 	key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
 	args := GetNextStageArgs{Rainstorm_tuple_t{key, line}, currentVM}
+	sendToNextStage(args)
+	
+	logProcessed(uniqueID, logFile)
+}
+
+// sendToNextStage sends the tuple to the next stage via RPC or other means
+func sendToNextStage(args GetNextStageArgs) error {
+	fmt.Printf("Sending tuple: %v\n", args.Rt)
+	
 	client, err := rpc.DialHTTP("tcp", vmToIP(LEADER_ID) + ":" + SCHEDULER_PORT)
 	if err != nil {
-		fmt.Printf("Error dialing leader: %v\n", err)
+		return err
 	}
 
 	var reply string
 	err = client.Call("SchedulerReq.GetNextStage", args, &reply)
 	if err != nil {
-		fmt.Printf("Error getting next stage: %v\n", err)
+		return err
 	}
-	
+
 	nextVM, _ := strconv.Atoi(reply);
 	fmt.Printf("Sending data to node %d\n", nextVM)
-	// send line to next stage and after ack, log processed
-	// if call to client fails, sleep for a second and try again to give the scheduler some time to update topology
-	logProcessed(uniqueID, logFile)
+
+	// wait for ack from receiver node
+	// if call to client FAILS, sleep for a second and try again to give the scheduler some time to update topology
+	
+	return nil
 }
 
 // generateTuple creates a key-value tuple
 func generateTuple(key string, value string) Rainstorm_tuple_t {
 	return Rainstorm_tuple_t{key, value}
+}
+
+func getFreePort() (int, error) {
+	listener, err := net.Listen("tcp", ":0") // :0 asks the OS to choose an available port
+	if err != nil {
+		return 0, err
+	}
+	defer listener.Close()
+
+	// Extract the port from the listener address
+	addr := listener.Addr().(*net.TCPAddr)
+	return addr.Port, nil
 }

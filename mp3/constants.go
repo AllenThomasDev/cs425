@@ -11,10 +11,21 @@ type Rainstorm_tuple_t struct {
 	Value string
 }
 
+type task_addr_t struct {
+	VM int
+	port string 
+}
+
 type topology_entry_t struct {
 	Layer int
 	Hash int
 }
+
+type Task_type_t int
+const (
+	SOURCE Task_type_t = iota
+	OP
+)
 
 // note this is hashable, so we can use it as a key in a map
 type Append_id_t struct {
@@ -61,7 +72,7 @@ var (
 	PANIC_ON_ERROR		= 0
 	RAINSTORM_LAYERS	= 3		// source, op1, op2 -> we will always have 3 layers for rainstorm operation
 	RPC_PORT			= "2233"
-	SCHEDULER_PORT		= "7654"
+	SCHEDULER_PORT		= "2234"
 	introducerIP        = "172.22.94.178"
 	ipList              = []string {
 							"172.22.94.178",

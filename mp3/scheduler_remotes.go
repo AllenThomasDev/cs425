@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/http"
 	"net/rpc"
-	"strconv"
 )
 
 type SchedulerReq string
@@ -29,11 +28,11 @@ func (s *SchedulerReq) GetNextStage(args *GetNextStageArgs, reply *string) error
 	senderLayer := searchTopology(args.SenderNum).Layer
 	if senderLayer == -1 {
 		return fmt.Errorf("Error: node not found")
-	} else if senderLayer == 2 {
-		// to indicate sender is in the last stage and should write to console/output file, send them back their number
-		*reply = strconv.Itoa(args.SenderNum)
 	}
-	keyHash := hash(args.Rt.Key, len(topologyArray[senderLayer + 1]))
-	*reply = strconv.Itoa(topologyArray[senderLayer + 1][keyHash])
+
+	if senderLayer != RAINSTORM_LAYERS - 1 {
+		keyHash := hash(args.Rt.Key, len(topologyArray[senderLayer + 1]))
+		*reply = fmt.Sprintf("%d:%s", topologyArray[senderLayer + 1][keyHash].VM, topologyArray[senderLayer + 1][keyHash].port)
+	}
 	return nil
 }

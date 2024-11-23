@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/rpc"
 	"os"
+	"strconv"
 	"sync"
 )
 
@@ -43,7 +44,9 @@ type RemoveArgs struct {
 
 type StartRainstormRemoteArgs struct {
 	Op1_exe string
+	Op1_type string
 	Op2_exe string
+	Op2_type string
 	Hydfs_src_file string
 	Hydfs_dest_file string
 	Num_tasks int
@@ -57,7 +60,22 @@ type SourceArgs struct {
 	LinesToRead int
 }
 
-func startRPCListener() {
+type OpArgs struct {
+	ExecFilename string
+	IsStateful bool
+	StateFilename string
+	IsOutput bool
+	OutputFilename string
+	LogFilename string
+}
+
+type TaskArgs struct {
+	TaskType Task_type_t
+	SA SourceArgs
+	OA OpArgs
+}
+
+func startRPCListenerHyDFS() {
 	hydfsreq := new(HyDFSReq)
 	rpc.Register(hydfsreq)
 	rpc.HandleHTTP()
@@ -169,7 +187,7 @@ func (h *HyDFSReq) Remove(args *RemoveArgs, reply *string) error {
 }
 
 func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *string) error {
-	go rainstormMain(args.Op1_exe, args.Op2_exe, args.Hydfs_src_file, args.Hydfs_dest_file, args.Num_tasks)
+	go rainstormMain(args.Op1_exe, args.Op1_type, args.Op2_exe, args.Op2_type, args.Hydfs_src_file, args.Hydfs_dest_file, args.Num_tasks)
 	return nil
 }
 
@@ -178,4 +196,26 @@ func (h *HyDFSReq) Source(args *SourceArgs, reply *string) error {
 	// start this in background so scheduler can move on to bigger, better things
 	go sourceWrapper(args.SrcFilename, args.LogFilename, args.StartLine, args.StartCharacter, args.LinesToRead)
 	return nil
+}
+
+func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
+	freePort, err := getFreePort()
+	if err != nil {
+		return err
+	}
+	*reply = strconv.Itoa(freePort)
+
+	// Start serving worker functions from passed port
+	go startRPCListenerWorker(freePort)
+	if args.TaskType == OP {
+		fmt.Printf("Executing op %s, stateful = %t, output = %t\n", args.OA.ExecFilename, args.OA.IsStateful, args.OA.IsOutput)
+		go opWrapper(args.OA.ExecFilename, args.OA.IsStateful, args.OA.StateFilename, args.OA.IsOutput, args.OA.OutputFilename, args.OA.LogFilename)
+		return nil
+	} else if args.TaskType == SOURCE {
+		fmt.Printf("Processing %d lines of %s starting at line %d\n", args.SA.LinesToRead, args.SA.SrcFilename, args.SA.StartLine)
+		go sourceWrapper(args.SA.SrcFilename, args.SA.LogFilename, args.SA.StartLine, args.SA.StartCharacter, args.SA.LinesToRead)
+		return nil
+	} else {
+		return fmt.Errorf("Unknown task type")
+	}
 }
