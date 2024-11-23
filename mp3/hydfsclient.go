@@ -448,7 +448,7 @@ func commandListener() {
 }
 
 func backgroundCommand(input string) error {
-	args := strings.Fields(input)
+	args := strings.Split(input, " ")
 	if len(args) < 1 {
 		return fmt.Errorf("Error: need at least one command\n")
 	}
@@ -481,6 +481,7 @@ func backgroundCommand(input string) error {
 			return fmt.Errorf("Error: Insufficient arguments. Usage: appendstring writeString HyDFSfilename")
 		}
 		fileContent := args[0]
+
 		hyDFSFilename := args[1]
 		modifiedFilename := slashesToBackticks(hyDFSFilename)
 		ts := time.Now()

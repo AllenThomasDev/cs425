@@ -10,7 +10,7 @@ import (
 
 var UIDLock sync.Mutex
 
-func isProcessed(uniqueID int) bool {
+func isProcessed(uniqueID int, logFile string) bool {
 	// Lock the entire operation to ensure atomic check and update
 	UIDLock.Lock()
 	defer UIDLock.Unlock()
@@ -26,18 +26,13 @@ func isProcessed(uniqueID int) bool {
 		fmt.Printf("Error checking for duplicate: %v\n", err)
 		return false
 	}
-
-	// If not found in the log, log the record and update the cache
-	if !status {
-		logProcessed(uniqueID)
-	}
 	return status
 }
 
+// using the client copy is NOT fine here since we need a record that persists even if this node fails
 // Log the fact that a record has been processed
-func logProcessed(uniqueID int) {
-	// Log the fact that a record has been processed
-	err := backgroundCommand(fmt.Sprintf("appendstring %d %s", uniqueID, logFilePath))
+func logProcessed(uniqueID int, logFile string) {
+	err := backgroundCommand(fmt.Sprintf("appendstring %s %s", strconv.Itoa(uniqueID) + "\n", logFile))
 	if err != nil {
 		fmt.Printf("Error logging processed line %d: %v\n", uniqueID, err)
 		return
@@ -47,6 +42,7 @@ func logProcessed(uniqueID int) {
 	UIDCache[uniqueID] = true
 }
 
+// using the client copy is fine here since duplicates will only come from logged changes at the time of repartitioning
 func checkDuplicate(uniqueID string) (bool, error) {
 	log, err := os.OpenFile("client/"+logFilePath, os.O_RDONLY, 0644)
 	if err != nil {
@@ -67,13 +63,19 @@ func checkDuplicate(uniqueID string) (bool, error) {
 	}
 }
 
-func processRecord(uniqueID int, line string) {
-	if isProcessed(uniqueID) {
+func processRecord(uniqueID int, line string, hydfsSrcFile string, logFile string) {
+	if isProcessed(uniqueID, logFile) {
 		fmt.Printf("Record with uniqueID %d has already been processed. Skipping.\n", uniqueID)
 		return
 	}
-	//@TODO: Process the record
-	fmt.Printf("Processing record with uniqueID %d %s\n", uniqueID, line)
-	// send line to next stage and after ack, log prcocessed
-	logProcessed(uniqueID)
+	fmt.Printf("Sending record with uniqueID %d %s\n", uniqueID, line)
+	// key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
+	// getNextStage(generateTuple(key, line))
+	// send line to next stage and after ack, log processed
+	logProcessed(uniqueID, logFile)
+}
+
+// generateTuple creates a key-value tuple
+func generateTuple(key string, value string) Rainstorm_tuple_t {
+	return Rainstorm_tuple_t{key, value}
 }

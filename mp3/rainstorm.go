@@ -7,12 +7,9 @@ import (
 	"os"
 )
 
-// FileChunkInfo contains the line and character information for file chunks
-type FileChunkInfo struct {
-	StartLines     []int
-	StartChars     []int
-	LinesPerSource []int
-}
+// can use line number + operation within line (i.e. first operation, second operation, etc.) as unique identifier for subsequent stages beyond source
+
+// TODO: Undo Allen's BS, adjust source to output tuples of form <filename:linenumber, line>, add common wrapper for operations (can handle Transform, FilteredTransform, and AggregateByKey), handle failures!
 
 var (
 	topologyArray [][]int
@@ -27,7 +24,7 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 		return
 	}
 
-	// backgroundCommand("createemptyfile source.log")
+	backgroundCommand("createemptyfile source.log")
 	for i := 0; i < len(sourceArgs.StartLines); i++ {
 		client, err := rpc.DialHTTP("tcp", vmToIP(topologyArray[0][i])+":"+RPC_PORT)
 		if err != nil {
@@ -49,7 +46,7 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 	}
 
 	// remove log files after operation completes (not doing now for debugging purposes)
-}
+} 
 
 func genTopology(num_tasks int) {
 	// clear topologyArray
@@ -97,20 +94,31 @@ func genTopology(num_tasks int) {
 	}
 }
 
+func searchTopology(node int) topology_entry_t {
+	for i := 0; i < len(topologyArray); i++ {
+		for j := 0; j < len(topologyArray[i]); j++ {
+			if topologyArray[i][j] == node {
+				return topology_entry_t{i, j}
+			}
+		}
+	}
+	return topology_entry_t{-1, -1}
+}
+
 // createFileChunks splits a HydFS file into chunks for multiple sources
 func createFileChunks(numSources int, hydfsSourceFile string) (*FileChunkInfo, error) {
 	if numSources == 0 {
 		return nil, fmt.Errorf("no sources to pass chunks to")
 	}
 
-	if err := prepareSourceFile(hydfsSourceFile); err != nil {
+	tempFileName, err := prepareSourceFile(hydfsSourceFile)
+	if err != nil {
 		return nil, fmt.Errorf("failed to prepare source file: %w", err)
 	}
 
-	randomFileName := genRandomFileName()
-	defer cleanupTempFile(randomFileName)
+	defer cleanupTempFile(tempFileName)
 
-	fileInfo, err := analyzeFile(randomFileName)
+	fileInfo, err := analyzeFile(tempFileName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to analyze file: %w", err)
 	}
@@ -119,21 +127,17 @@ func createFileChunks(numSources int, hydfsSourceFile string) (*FileChunkInfo, e
 }
 
 // prepareSourceFile merges and retrieves the source file from HydFS
-func prepareSourceFile(hydfsSourceFile string) error {
+func prepareSourceFile(hydfsSourceFile string) (string, error) {
 	if err := backgroundCommand(fmt.Sprintf("merge %s", hydfsSourceFile)); err != nil {
-		return err
+		return "", err
 	}
 
-	if err := backgroundCommand(fmt.Sprintf("get %s %s", hydfsSourceFile, genRandomFileName())); err != nil {
-		return err
+	tempFileName := genRandomFileName()
+	if err := backgroundCommand(fmt.Sprintf("get %s %s", hydfsSourceFile, tempFileName)); err != nil {
+		return "", err
 	}
 
-	return nil
-}
-
-type fileAnalysis struct {
-	lineCount   int
-	charsAtLine []int
+	return tempFileName, nil
 }
 
 // analyzeFile counts lines and characters in the file

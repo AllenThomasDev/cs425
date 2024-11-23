@@ -6,6 +6,16 @@ import (
 	"github.com/hashicorp/golang-lru/v2/expirable"
 )
 
+type Rainstorm_tuple_t struct {
+	key string
+	value string
+}
+
+type topology_entry_t struct {
+	layer int
+	hash int
+}
+
 // note this is hashable, so we can use it as a key in a map
 type Append_id_t struct {
 	Vm int
@@ -23,6 +33,18 @@ const (
 	OLD_MEMBER
 )
 
+// FileChunkInfo contains the line and character information for file chunks
+type FileChunkInfo struct {
+	StartLines     []int
+	StartChars     []int
+	LinesPerSource []int
+}
+
+type fileAnalysis struct {
+	lineCount   int
+	charsAtLine []int
+}
+
 var cache = expirable.NewLRU[string, string](0, nil, 15000*time.Second)
 var UIDCache = make(map[int]bool)
 const logFilePath = "processed_records.log"
@@ -39,6 +61,7 @@ var (
 	PANIC_ON_ERROR		= 0
 	RAINSTORM_LAYERS	= 3		// source, op1, op2 -> we will always have 3 layers for rainstorm operation
 	RPC_PORT			= "2233"
+	SCHEDULER_PORT		= "808"
 	introducerIP        = "172.22.94.178"
 	ipList              = []string {
 							"172.22.94.178",

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strconv"
 )
 
 // SourceWrapper processes the file chunk line by line and sends to the next stage
@@ -54,31 +53,18 @@ func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines 
 			return
 		}
 		uniqueID := startLine + numLines - remainingLines
-		processRecord(uniqueID, line)
+		processRecord(uniqueID, line, hydfsSrcFile, logFile)
 		remainingLines--
 	}
 }
 
-// readLineFromFile reads a single line from the file
-
-// checkDuplicate verifies if a unique ID exists in the log file
-
-// generateTuple creates a key-value tuple from the unique ID and line
-func generateTuple(uniqueID int, line string) map[string]string {
-	return map[string]string{
-		"key":   strconv.Itoa(uniqueID),
-		"value": line,
-	}
-}
-
 // sendToNextStage sends the tuple to the next stage via RPC or other means
-func sendToNextStage(tuple map[string]string) {
+func sendToNextStage(tuple Rainstorm_tuple_t) {
 	fmt.Printf("Sending tuple: %v\n", tuple)
 	// Implement RPC or network logic here
 }
 
-// logProcessed appends the unique ID to the log file
-
+// readLineFromFile reads a single line from the file
 func readLineFromFile(f *os.File) (string, error) {
 	var line string
 	b := make([]byte, 1)
