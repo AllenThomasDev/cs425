@@ -37,12 +37,13 @@ func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines 
 	}
 
 	// Fetch log file to check for duplicates
-	err = backgroundCommand(fmt.Sprintf("get %s %s", logFile, logFilePath))
+	oldLogFile := genRandomFileName()
+	err = backgroundCommand(fmt.Sprintf("get %s %s", logFile, oldLogFile))
 	if err != nil {
 		fmt.Printf("Error fetching log file: %v\n", err)
 		return
 	}
-	defer os.Remove("client/" + logFilePath)
+	defer os.Remove("client/" + oldLogFile)
 
 	// Process the chunk
 	remainingLines := numLines
@@ -57,7 +58,7 @@ func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines 
 			return
 		}
 		uniqueID := startLine + numLines - remainingLines
-		processRecord(uniqueID, line, hydfsSrcFile, logFile)
+		processRecord(uniqueID, line, hydfsSrcFile, logFile, oldLogFile)
 		remainingLines--
 	}
 }

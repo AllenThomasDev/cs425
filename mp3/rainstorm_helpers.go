@@ -12,7 +12,7 @@ import (
 
 var UIDLock sync.Mutex
 
-func isProcessed(uniqueID int) bool {
+func isProcessed(uniqueID int, oldLogFile string) bool {
 	// Lock the entire operation to ensure atomic check and update
 	UIDLock.Lock()
 	defer UIDLock.Unlock()
@@ -23,7 +23,7 @@ func isProcessed(uniqueID int) bool {
 	}
 
 	// If not in cache, check the persistent log
-	status, err := checkDuplicate(strconv.Itoa(uniqueID))
+	status, err := checkDuplicate(strconv.Itoa(uniqueID), oldLogFile)
 	if err != nil {
 		fmt.Printf("Error checking for duplicate: %v\n", err)
 		return false
@@ -45,8 +45,8 @@ func logProcessed(uniqueID int, logFile string) {
 }
 
 // using the client copy is fine here since duplicates will only come from logged changes at the time of repartitioning
-func checkDuplicate(uniqueID string) (bool, error) {
-	log, err := os.OpenFile("client/"+logFilePath, os.O_RDONLY, 0644)
+func checkDuplicate(uniqueID string, oldLogFile string) (bool, error) {
+	log, err := os.OpenFile("client/"+oldLogFile, os.O_RDONLY, 0644)
 	if err != nil {
 		return false, err
 	}
@@ -65,8 +65,8 @@ func checkDuplicate(uniqueID string) (bool, error) {
 	}
 }
 
-func processRecord(uniqueID int, line string, hydfsSrcFile string, logFile string) {
-	if isProcessed(uniqueID) {
+func processRecord(uniqueID int, line string, hydfsSrcFile string, logFile string, oldLogFile string) {
+	if isProcessed(uniqueID, oldLogFile) {
 		fmt.Printf("Record with uniqueID %d has already been processed. Skipping.\n", uniqueID)
 		return
 	}
