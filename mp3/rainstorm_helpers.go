@@ -7,7 +7,9 @@ import (
 	"net/rpc"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
+	"time"
 )
 
 var UIDLock sync.Mutex
@@ -65,7 +67,7 @@ func checkDuplicate(uniqueID string, oldLogFile string) (bool, error) {
 	}
 }
 
-func processRecord(uniqueID int, line string, hydfsSrcFile string, logFile string, oldLogFile string) {
+func processRecord(uniqueID int, line string, hydfsSrcFile string, logFile string, oldLogFile string, port string) {
 	if isProcessed(uniqueID, oldLogFile) {
 		fmt.Printf("Record with uniqueID %d has already been processed. Skipping.\n", uniqueID)
 		return
@@ -73,8 +75,17 @@ func processRecord(uniqueID int, line string, hydfsSrcFile string, logFile strin
 	fmt.Printf("Sending record with uniqueID %d %s\n", uniqueID, line)
 	
 	key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
-	args := GetNextStageArgs{Rainstorm_tuple_t{key, line}, currentVM}
-	sendToNextStage(args)
+	args := GetNextStageArgs{Rainstorm_tuple_t{key, line}, currentVM, port}
+	
+	// retry sends until we get through
+	err := sendToNextStage(args)
+	for {
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+		err = sendToNextStage(args)
+	}
 	
 	logProcessed(uniqueID, logFile)
 }
@@ -94,8 +105,10 @@ func sendToNextStage(args GetNextStageArgs) error {
 		return err
 	}
 
-	nextVM, _ := strconv.Atoi(reply);
-	fmt.Printf("Sending data to node %d\n", nextVM)
+	replyParts := strings.Split(reply, ":")
+	nextVM, _ := strconv.Atoi(replyParts[0])
+	nextPort, _ := strconv.Atoi(replyParts[1])
+	fmt.Printf("Sending data to node %d, port %d\n", nextVM, nextPort)
 
 	// wait for ack from receiver node
 	// if call to client FAILS, sleep for a second and try again to give the scheduler some time to update topology

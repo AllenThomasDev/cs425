@@ -191,29 +191,27 @@ func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *s
 	return nil
 }
 
-func (h *HyDFSReq) Source(args *SourceArgs, reply *string) error {
-	fmt.Printf("Processing %d lines of %s starting at line %d\n", args.LinesToRead, args.SrcFilename, args.StartLine)
-	// start this in background so scheduler can move on to bigger, better things
-	go sourceWrapper(args.SrcFilename, args.LogFilename, args.StartLine, args.StartCharacter, args.LinesToRead)
-	return nil
-}
-
 func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
 	freePort, err := getFreePort()
 	if err != nil {
 		return err
 	}
-	*reply = strconv.Itoa(freePort)
+
+	portString := strconv.Itoa(freePort)
+	*reply = portString
 
 	// Start serving worker functions from passed port
-	go startRPCListenerWorker(freePort)
+	go startRPCListenerWorker(portString)
+	// initialize channel for stopping task due to rescheduling
+	stopChannels[portString] = make(chan string)
+	
 	if args.TaskType == OP {
 		fmt.Printf("Executing op %s, stateful = %t, output = %t\n", args.OA.ExecFilename, args.OA.IsStateful, args.OA.IsOutput)
-		go opWrapper(args.OA, freePort)
+		go opWrapper(args.OA, portString)
 		return nil
 	} else if args.TaskType == SOURCE {
 		fmt.Printf("Processing %d lines of %s starting at line %d\n", args.SA.LinesToRead, args.SA.SrcFilename, args.SA.StartLine)
-		go sourceWrapper(args.SA.SrcFilename, args.SA.LogFilename, args.SA.StartLine, args.SA.StartCharacter, args.SA.LinesToRead)
+		go sourceWrapper(args.SA.SrcFilename, args.SA.LogFilename, args.SA.StartLine, args.SA.StartCharacter, args.SA.LinesToRead, portString)
 		return nil
 	} else {
 		return fmt.Errorf("Unknown task type")

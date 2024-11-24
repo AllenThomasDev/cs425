@@ -169,6 +169,46 @@ func sendMerge(args MergeArgs, hash int) error {
 	return nil
 }
 
+func sendRemove(args RemoveArgs, ip string) error {
+	client, err := rpc.DialHTTP("tcp", ip+":"+RPC_PORT)
+	if err != nil {
+		return err
+	}
+
+	var reply string
+	err = client.Call("HyDFSReq.Remove", args, &reply)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func sendRemoveToQuorum(args RemoveArgs, hash int) error {
+	successorsMutex.RLock()
+	defer successorsMutex.RUnlock()
+	if len(successors) <= 3 {
+		for i := 0; i < len(successors); i++ {
+			err := sendRemove(args, vmToIP(successors[i]))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	} else {
+		routingTableMutex.RLock()
+		defer routingTableMutex.RUnlock()
+
+		_, baseIndex := searchSuccessors(hash)
+		for i := baseIndex; i != (baseIndex+3)%len(successors); i = (i + 1) % len(successors) {
+			err := sendRemove(args, vmToIP(successors[i]))
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+}
+
 func commandListener() {
 	reader := bufio.NewReader(os.Stdin)
 	for {
@@ -585,6 +625,18 @@ func backgroundCommand(input string) error {
 		modifiedFilename := slashesToBackticks(hyDFSFilename)
 		for {
 			err := sendMerge(MergeArgs{modifiedFilename}, hash(modifiedFilename, MACHINES_IN_NETWORK))
+			if err == nil {
+				break
+			}
+		}
+	case "remove":
+		if len(args) != 1 {
+			return fmt.Errorf("Error: Incorrect arguments. Usage: remove HyDFSfilename")
+		}
+		hyDFSFilename := args[0]
+		modifiedFilename := slashesToBackticks(hyDFSFilename)
+		for {
+			err := sendRemoveToQuorum(RemoveArgs{[]string{modifiedFilename}}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
 			if err == nil {
 				break
 			}

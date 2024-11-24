@@ -5,24 +5,32 @@ import (
 	"net"
 	"net/http"
 	"net/rpc"
-	"strconv"
 )
 
 type WorkerReq string
 
-func startRPCListenerWorker(port int) {
+type StopTaskArgs struct {
+	Port string
+}
+
+func startRPCListenerWorker(port string) {
 	workerreq := new(WorkerReq)
 	rpc.Register(workerreq)
-	servePort, err := net.Listen("tcp", ":" + strconv.Itoa(port))
+	servePort, err := net.Listen("tcp", ":" + port)
 	if err != nil {
 		panic(err)
 	}
 	go http.Serve(servePort, nil)
+	
+	<-stopChannels[port]
+
+	fmt.Println("closing channel")
+	servePort.Close()
 }
 
 // used by scheduler to tell worker to stop task
-func (w *WorkerReq) KillSelf(reply *string) error {
-	fmt.Println("I have been told to kill myself :(")
+func (w *WorkerReq) StopTask(args *StopTaskArgs, reply *string) error {
+	go deferredStop(args.Port)
 	return nil
 }
 

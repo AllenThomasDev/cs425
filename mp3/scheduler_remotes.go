@@ -12,6 +12,7 @@ type SchedulerReq string
 type GetNextStageArgs struct {
 	Rt Rainstorm_tuple_t
 	SenderNum int
+	Port string
 }
 
 func startRPCListenerScheduler() {
@@ -25,14 +26,18 @@ func startRPCListenerScheduler() {
 }
 
 func (s *SchedulerReq) GetNextStage(args *GetNextStageArgs, reply *string) error {
-	senderLayer := searchTopology(args.SenderNum).Layer
-	if senderLayer == -1 {
+	senderTasks := searchTopology(args.SenderNum)
+	if senderTasks == nil {
 		return fmt.Errorf("Error: node not found")
 	}
 
-	if senderLayer != RAINSTORM_LAYERS - 1 {
-		keyHash := hash(args.Rt.Key, len(topologyArray[senderLayer + 1]))
-		*reply = fmt.Sprintf("%d:%s", topologyArray[senderLayer + 1][keyHash].VM, topologyArray[senderLayer + 1][keyHash].port)
+	for i := 0; i < len(senderTasks); i++ {
+		if topologyArray[senderTasks[i].Layer][senderTasks[i].Hash].port == args.Port {
+			keyHash := hash(args.Rt.Key, len(topologyArray[senderTasks[i].Layer + 1]))
+			retStr := fmt.Sprintf("%d:%s", topologyArray[senderTasks[i].Layer + 1][keyHash].VM, topologyArray[senderTasks[i].Layer + 1][keyHash].port)
+			fmt.Println(retStr)
+			*reply = fmt.Sprintf(retStr)
+		}
 	}
 	return nil
 }

@@ -8,7 +8,7 @@ import (
 )
 
 // SourceWrapper processes the file chunk line by line and sends to the next stage
-func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines int) {
+func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines int, port string) {
 	// TODO: make this more robust. right now if source finishes operation before topologyArray is populated it causes issues
 	time.Sleep(time.Second)
 	
@@ -58,8 +58,19 @@ func sourceWrapper(hydfsSrcFile, logFile string, startLine, startChar, numLines 
 			return
 		}
 		uniqueID := startLine + numLines - remainingLines
-		processRecord(uniqueID, line, hydfsSrcFile, logFile, oldLogFile)
+		processRecord(uniqueID, line, hydfsSrcFile, logFile, oldLogFile, port)
 		remainingLines--
+
+		select {
+		case _, ok := <-stopChannels[port]:
+			if ok {
+				return
+			} else {
+				fmt.Printf("Error: channel closed!\n")
+				return
+			}
+		default:
+		}
 	}
 }
 

@@ -218,6 +218,9 @@ func removeMember(ip string) {
 	delete(membershipList, ip)
 	membershipListMutex.Unlock()
 	removeFromHyDFS(ip)
+	if rainstormActive {
+		rescheduleTask("LEAVE", ipToVM(ip))
+	}
 	logger.Printf("Node %s removed from membership list", ip)
 }
 
@@ -254,6 +257,9 @@ func addMember(ip, timestamp, incarnation string, memType member_type_t) {
 		if !exists || member.Incarnation < convertedInc {
 			membershipList[ip] = Member{ip, convertedTS, convertedInc}
 			addToHyDFS(ip, memType)
+			if rainstormActive {
+				rescheduleTask("JOIN", ipToVM(ip))
+			}
 			logger.Printf("Node %s added to membership list with incarnation %d", ip, convertedInc)
 		}
 	}

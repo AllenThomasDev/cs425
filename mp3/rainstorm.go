@@ -7,57 +7,35 @@ import (
 	"os"
 )
 
-// can use line number + operation within line (i.e. first operation, second operation, etc.) as unique identifier for subsequent stages beyond source
-
-// TODO: handle failures!
-
 var (
 	topologyArray [][]task_addr_t
 	tasksPerWorker = make(map[int]int)
+	rainstormArgs StartRainstormRemoteArgs // save args for rescheduling
+	rainstormActive bool // flag to enable rescheduling on joins/leaves
 )
 
 func rainstormMain (op1_exe string, op1_type string, op2_exe string, op2_type string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
 	fmt.Println("Starting Rainstorm")
+	rainstormArgs = StartRainstormRemoteArgs{
+		op1_exe,
+		op1_type,
+		op2_exe,
+		op2_type,
+		hydfs_src_file,
+		hydfs_dest_file,
+		num_tasks,
+	}
+	createLogFiles()
+
 	go startRPCListenerScheduler()
 	
-	// determine op args
-	var op1Args OpArgs
-	var op2Args OpArgs
 	if (op1_type != "Transform" && op1_type != "FilteredTransform" && op1_type != "AggregateByKey") ||
 		(op2_type != "Transform" && op2_type != "FilteredTransform" && op2_type != "AggregateByKey") {
 		fmt.Println("Error: op type must be one of Transform, FilteredTransform, AggregateByKey")
 		return
-	} else {
-		// create file for op1 nodes to log processed IDs
-		backgroundCommand("createemptyfile op1.log")
-		
-		// determine args for op1 nodes
-		op1Args.ExecFilename = op1_exe
-		op1Args.LogFilename = "op1.log"
-		op1Args.IsOutput = false
-		op1Args.OutputFilename = ""
-		
-		if op1_type == "AggregateByKey" {
-			backgroundCommand("createemptyfile op1_state.log")
-			op1Args.IsStateful = true
-			op1Args.StateFilename = "op1_state.log"
-		}
-		
-		// create file for op2 nodes to log processed IDs
-		backgroundCommand("createemptyfile op2.log")
-		
-		// determine args for op2 nodes
-		op2Args.ExecFilename = op2_exe
-		op2Args.LogFilename = "op2.log"
-		op2Args.IsOutput = true
-		op2Args.OutputFilename = hydfs_dest_file
-		
-		if op2_type == "AggregateByKey" {
-			backgroundCommand("createemptyfile op2_state.log")
-			op2Args.IsStateful = true
-			op2Args.StateFilename = "op2_state.log"
-		}
-	}
+	} 
+	op1Args := constructOp1Args(op1_exe, op1_type)
+	op2Args := constructOp2Args(op2_exe, op2_type, hydfs_dest_file)
 	
 	// determine topology so we know which nodes to assign to each task to
 	nodeTopology := genTopology(num_tasks)
@@ -70,73 +48,51 @@ func rainstormMain (op1_exe string, op1_type string, op2_exe string, op2_type st
 		return
 	}
 
-	// create log for sources
-	backgroundCommand("createemptyfile source.log")
-
 	// start sources
 	var ta TaskArgs
 	for i := 0; i < len(nodeTopology[0]); i++ {
-		client, err := rpc.DialHTTP("tcp", vmToIP(nodeTopology[0][i])+":"+RPC_PORT)
+		ta.TaskType = SOURCE
+		ta.SA = constructSourceArgs(hydfs_src_file, sourceArgs.StartLines[i], sourceArgs.StartChars[i], sourceArgs.LinesPerSource[i])
+
+		port, err := callStartTask(nodeTopology[0][i], ta)
 		if err != nil {
 			fmt.Printf("Failed to dial worker: %v\n", err)
 			return
 		}
-
-		ta.TaskType = SOURCE
-		ta.SA.SrcFilename = hydfs_src_file
-		ta.SA.LogFilename = "source.log"
-		ta.SA.StartLine = sourceArgs.StartLines[i]
-		ta.SA.StartCharacter = sourceArgs.StartChars[i]
-		ta.SA.LinesToRead = sourceArgs.LinesPerSource[i]
-
-		var reply string
-		err = client.Call("HyDFSReq.StartTask", ta, &reply)
-		if err != nil {
-			fmt.Printf("Failed to initiate Rainstorm: %v\n", err)
-		}
-
-		topologyArray[0] = append(topologyArray[0], task_addr_t{nodeTopology[0][i], reply})
+		
+		topologyArray[0] = append(topologyArray[0], task_addr_t{nodeTopology[0][i], port})
 	}
 
 	// start op1
 	for i := 0; i < len(nodeTopology[1]); i++ {
-		client, err := rpc.DialHTTP("tcp", vmToIP(nodeTopology[1][i])+":"+RPC_PORT)
+		ta.TaskType = OP
+		ta.OA = op1Args
+
+		port, err := callStartTask(nodeTopology[1][i], ta)
 		if err != nil {
 			fmt.Printf("Failed to dial worker: %v\n", err)
 			return
 		}
 
-		ta.TaskType = OP
-		ta.OA = op1Args
-
-		var reply string
-		err = client.Call("HyDFSReq.StartTask", ta, &reply)
-		if err != nil {
-			fmt.Printf("Failed to initiate Rainstorm: %v\n", err)
-		}
-
-		topologyArray[1] = append(topologyArray[1], task_addr_t{nodeTopology[1][i], reply})
+		topologyArray[1] = append(topologyArray[1], task_addr_t{nodeTopology[1][i], port})
 	}
 
 	// start op2
 	for i := 0; i < len(nodeTopology[2]); i++ {
-		client, err := rpc.DialHTTP("tcp", vmToIP(nodeTopology[2][i])+":"+RPC_PORT)
+		ta.TaskType = OP
+		ta.OA = op2Args
+
+		port, err := callStartTask(nodeTopology[2][i], ta)
 		if err != nil {
 			fmt.Printf("Failed to dial worker: %v\n", err)
 			return
 		}
 
-		ta.TaskType = OP
-		ta.OA = op2Args
-
-		var reply string
-		err = client.Call("HyDFSReq.StartTask", ta, &reply)
-		if err != nil {
-			fmt.Printf("Failed to initiate Rainstorm: %v\n", err)
-		}
-
-		topologyArray[2] = append(topologyArray[2], task_addr_t{nodeTopology[2][i], reply})
+		topologyArray[2] = append(topologyArray[2], task_addr_t{nodeTopology[2][i], port})
 	}
+
+	// set flag high so we reschedule on member joins/leaves
+	rainstormActive = true
 
 	for i := 0; i < RAINSTORM_LAYERS; i++ {
 		fmt.Printf("LAYER %d: ", i)
@@ -146,7 +102,161 @@ func rainstormMain (op1_exe string, op1_type string, op2_exe string, op2_type st
 		fmt.Printf("\n")
 	}
 
-	// remove log files after operation completes (not doing now for debugging purposes)
+	// removeLogFiles()
+}
+
+func createLogFiles() {
+	backgroundCommand("createemptyfile op1.log")
+	backgroundCommand("createemptyfile op1_state.log")
+	backgroundCommand("createemptyfile op2.log")
+	backgroundCommand("createemptyfile op2_state.log")
+	backgroundCommand("createemptyfile source.log")
+}
+
+func removeLogFiles() {
+	backgroundCommand("remove op1.log")
+	backgroundCommand("remove op1_state.log")
+	backgroundCommand("remove op2.log")
+	backgroundCommand("remove op2_state.log")
+	backgroundCommand("remove source.log")
+}
+
+func callStartTask(vm int, ta TaskArgs) (string, error) {
+	client, err := rpc.DialHTTP("tcp", vmToIP(vm)+":"+RPC_PORT)
+	if err != nil {
+		return "", err
+	}
+
+	var reply string
+	err = client.Call("HyDFSReq.StartTask", ta, &reply)
+	if err != nil {
+		return "", err
+	}
+
+	return reply, nil
+}
+
+func constructSourceArgs(hydfs_src_file string, startLine int, startCharacter int, linesToRead int) SourceArgs {
+	var sa SourceArgs
+	sa.SrcFilename = hydfs_src_file
+	sa.LogFilename = "source.log"
+	sa.StartLine = startLine
+	sa.StartCharacter = startCharacter
+	sa.LinesToRead = linesToRead
+	return sa
+}
+
+func constructOp1Args(op1_exe string, op1_type string) OpArgs {
+	var op1Args OpArgs
+	op1Args.ExecFilename = op1_exe
+	op1Args.LogFilename = "op1.log"
+	op1Args.IsOutput = false
+	op1Args.OutputFilename = ""
+	
+	if op1_type == "AggregateByKey" {
+		op1Args.IsStateful = true
+		op1Args.StateFilename = "op1_state.log"
+	}
+	return op1Args
+}
+
+func constructOp2Args(op2_exe string, op2_type string, hydfs_dest_file string) OpArgs {
+	var op2Args OpArgs
+	op2Args.ExecFilename = op2_exe
+	op2Args.LogFilename = "op2.log"
+	op2Args.IsOutput = true
+	op2Args.OutputFilename = hydfs_dest_file
+	
+	if op2_type == "AggregateByKey" {
+		op2Args.IsStateful = true
+		op2Args.StateFilename = "op2_state.log"
+	}
+	return op2Args
+}
+
+func constructRescheduleArgs(tent topology_entry_t) (TaskArgs, error) {
+	var ta TaskArgs
+	if tent.Layer == 0 {
+		sourceArgs, err := createFileChunks(len(topologyArray[0]), rainstormArgs.Hydfs_src_file)
+		if err != nil {
+			return TaskArgs{}, err
+		}
+
+		ta.TaskType = SOURCE
+		ta.SA = constructSourceArgs(rainstormArgs.Hydfs_src_file, sourceArgs.StartLines[tent.Hash], sourceArgs.StartChars[tent.Hash], sourceArgs.LinesPerSource[tent.Hash])
+	} else if tent.Layer == 1 {
+		ta.TaskType = OP
+		ta.OA = constructOp1Args(rainstormArgs.Op1_exe, rainstormArgs.Op1_type)
+	} else {
+		ta.TaskType = OP
+		ta.OA = constructOp1Args(rainstormArgs.Op2_exe, rainstormArgs.Op2_type)
+	}
+
+	return ta, nil
+}
+
+func rescheduleTask(change string, vm int) {
+	
+	if change == "LEAVE" {
+		hangingTasks := searchTopology(vm)
+
+		for i := 0; i < len(hangingTasks); i++ {
+			ta, err := constructRescheduleArgs(hangingTasks[i])
+			if err != nil {
+				fmt.Printf("Error constructing args for rescheduling: %v\n", err)
+				return
+			}
+
+			slackerNode := getSlackerNode()
+			port, err := callStartTask(slackerNode, ta)
+			if err != nil {
+				fmt.Printf("Failed to start task on new node: %v\n", err)
+				return
+			}
+
+			topologyArray[hangingTasks[i].Layer][hangingTasks[i].Hash] = task_addr_t{slackerNode, port}
+			tasksPerWorker[slackerNode]++
+		}
+
+		// clear failed node
+		delete(tasksPerWorker, vm)
+	} else {
+		grinderNode := getGrinderNode()
+		grinderTasks := searchTopology(grinderNode)
+		
+		// stop task we wish to reschedule
+		if len(grinderTasks) > 0 {
+			client, err := rpc.DialHTTP("tcp", vmToIP(topologyArray[grinderTasks[0].Layer][grinderTasks[0].Hash].VM)+":"+topologyArray[grinderTasks[0].Layer][grinderTasks[0].Hash].port)
+			if err != nil {
+				fmt.Printf("Error dialing grinder: %v\n", err)
+				return
+			}
+
+			var reply string
+			err = client.Call("WorkerReq.StopTask", StopTaskArgs{topologyArray[grinderTasks[0].Layer][grinderTasks[0].Hash].port}, &reply)
+			if err != nil {
+				fmt.Printf("Error calling StopTask: %v\n", err)
+				return
+			}
+
+			// reschedule task on newly joined node
+			ta, err := constructRescheduleArgs(grinderTasks[0])
+			if err != nil {
+				fmt.Printf("Error constructing args for rescheduling: %v\n", err)
+				return
+			}
+
+			port, err := callStartTask(vm, ta)
+			if err != nil {
+				fmt.Printf("Failed to start task on new node: %v\n", err)
+				return
+			}
+
+			topologyArray[grinderTasks[0].Layer][grinderTasks[0].Hash] = task_addr_t{vm, port}
+			tasksPerWorker[vm] = 1
+		}
+	}
+	fmt.Printf("Rescheduling finished\n")
 }
 
 func genTopology(num_tasks int) [][]int {
@@ -216,15 +326,16 @@ func getGrinderNode() int {
 	return mostTasksNode
 }
 
-func searchTopology(node int) topology_entry_t {
+func searchTopology(node int) []topology_entry_t {
+	var matchingEntries []topology_entry_t
 	for i := 0; i < len(topologyArray); i++ {
 		for j := 0; j < len(topologyArray[i]); j++ {
 			if topologyArray[i][j].VM == node {
-				return topology_entry_t{i, j}
+				matchingEntries = append(matchingEntries, topology_entry_t{i, j})
 			}
 		}
 	}
-	return topology_entry_t{-1, -1}
+	return matchingEntries
 }
 
 // createFileChunks splits a HydFS file into chunks for multiple sources
@@ -250,9 +361,10 @@ func createFileChunks(numSources int, hydfsSourceFile string) (*FileChunkInfo, e
 
 // prepareSourceFile merges and retrieves the source file from HydFS
 func prepareSourceFile(hydfsSourceFile string) (string, error) {
-	if err := backgroundCommand(fmt.Sprintf("merge %s", hydfsSourceFile)); err != nil {
-		return "", err
-	}
+	// TODO: merging on reschedules breaks program, see doc
+	// if err := backgroundCommand(fmt.Sprintf("merge %s", hydfsSourceFile)); err != nil {
+	// 	return "", err
+	// }
 
 	tempFileName := genRandomFileName()
 	if err := backgroundCommand(fmt.Sprintf("get %s %s", hydfsSourceFile, tempFileName)); err != nil {
