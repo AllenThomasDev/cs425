@@ -18,7 +18,7 @@ VMDomainNames=(
   "fa24-cs425-5410.cs.illinois.edu"
 )
 
-REPO_DIR="./mp3/"
+REPO_DIR="../mp3/"
 EXECUTABLE="daemon"
 REMOTE_DIR="~"
 USER=$1
