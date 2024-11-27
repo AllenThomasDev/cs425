@@ -58,7 +58,7 @@ func periodicMerge() {
 	}
 }
 
-func genRandomFileName() string {
+var genRandomFileName = func() string {
 	return(strconv.Itoa(int(rand.Int31())))
 }
 

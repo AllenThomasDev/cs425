@@ -489,7 +489,7 @@ func commandListener() {
 	}
 }
 
-func backgroundCommand(input string) error {
+var backgroundCommand = func(input string) error {
 	args := strings.Split(input, " ")
 	if len(args) < 1 {
 		return fmt.Errorf("Error: need at least one command\n")
