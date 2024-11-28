@@ -73,8 +73,16 @@ func TestSourceWrapper(t *testing.T) {
 	processRecord = mockProcessRecord
 	backgroundCommand = mockBackgroundCommand
 	logProcessed = mockLogProcessed
-	lines1 := sourceWrapper(hydfsSrcFile, logFile, startLine, startChar, numLines, port)
-	lines2 := sourceWrapper(hydfsSrcFile, logFile, startLine, 1000, numLines, port)
-	fmt.Print(lines1)
-	fmt.Print(lines2)
+	lines := generateSourceTuples(hydfsSrcFile, logFile, startLine, startChar, numLines, port)
+  fmt.Print("\n")
+  i := 0
+  for _, line := range lines {
+    stage1 := splitLine(line)
+    i++
+    fmt.Printf("Stage %d\n", i)
+    for _, tuple := range stage1 {
+      wordCountOperator(tuple)
+    }
+  }
+  fmt.Print(wordCounts)
 }

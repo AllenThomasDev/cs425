@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -22,7 +21,6 @@ func splitLine(rt Rainstorm_tuple_t) []Rainstorm_tuple_t {
 
 func wordCountOperator(rt Rainstorm_tuple_t) Rainstorm_tuple_t {
 	wordCounts[rt.Key]++
-	fmt.Printf("%s Count: %s\n", rt.Key, strconv.Itoa(wordCounts[rt.Key]))
   return Rainstorm_tuple_t{
 		Key:   rt.Key,
 		Value: strconv.Itoa(wordCounts[rt.Key]), // Running count as string
