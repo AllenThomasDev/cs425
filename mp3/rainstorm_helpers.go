@@ -36,7 +36,7 @@ var isProcessed = func(uniqueID int, oldLogFile string) bool {
 // using the client copy is NOT fine here since we need a record that persists even if this node fails
 // Log the fact that a record has been processed
 var logProcessed = func(uniqueID int, logFile string) {
-	err := backgroundCommand(fmt.Sprintf("appendstring %s %s", strconv.Itoa(uniqueID) + "\n", logFile))
+	err := backgroundCommand(fmt.Sprintf("appendstring %s %s", strconv.Itoa(uniqueID)+"\n", logFile))
 	if err != nil {
 		fmt.Printf("Error logging processed line %d: %v\n", uniqueID, err)
 		return
@@ -73,10 +73,10 @@ var processRecord = func(uniqueID int, line string, hydfsSrcFile string, logFile
 		return
 	}
 	fmt.Printf("Sending record with uniqueID %d %s\n", uniqueID, line)
-	
+
 	key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
-	args := GetNextStageArgs{Rainstorm_tuple_t{key, line}, currentVM, port}
-	
+	args := ArgsWithSender{Rainstorm_tuple_t{key, line}, currentVM, port}
+
 	// retry sends until we get through
 	err := sendToNextStage(args)
 	for {
@@ -86,14 +86,14 @@ var processRecord = func(uniqueID int, line string, hydfsSrcFile string, logFile
 		time.Sleep(time.Second)
 		err = sendToNextStage(args)
 	}
-	
+
 	logProcessed(uniqueID, logFile)
 }
 
 // sendToNextStage sends the tuple to the next stage via RPC or other means
-func sendToNextStage(args GetNextStageArgs) error {
+func sendToNextStage(args ArgsWithSender) error {
 	fmt.Printf("Sending tuple: %v\n", args.Rt)
-	client, err := rpc.DialHTTP("tcp", vmToIP(LEADER_ID) + ":" + SCHEDULER_PORT)
+	client, err := rpc.DialHTTP("tcp", vmToIP(LEADER_ID)+":"+SCHEDULER_PORT)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func sendToNextStage(args GetNextStageArgs) error {
 	fmt.Printf("Sending data to node %d, port %d\n", nextVM, nextPort)
 	// wait for ack from receiver node
 	// if call to client FAILS, sleep for a second and try again to give the scheduler some time to update topology
-	
+
 	return nil
 }
 

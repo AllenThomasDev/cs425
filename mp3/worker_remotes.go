@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net"
-	"net/http"
 	"net/rpc"
 )
 
@@ -13,6 +12,12 @@ type StopTaskArgs struct {
 	Port string
 }
 
+type ArgsWithSender struct {
+	Rt        Rainstorm_tuple_t
+	SenderNum int
+	Port      string
+}
+
 func startRPCListenerWorker(port string) {
 	workerreq := new(WorkerReq)
 	rpc.Register(workerreq)
@@ -20,7 +25,7 @@ func startRPCListenerWorker(port string) {
 	if err != nil {
 		panic(err)
 	}
-	go http.Serve(servePort, nil)
+	go rpc.Accept(servePort)
 	
 	<-stopChannels[port]
 
@@ -28,7 +33,6 @@ func startRPCListenerWorker(port string) {
 	servePort.Close()
 }
 
-// used by scheduler to tell worker to stop task
 func (w *WorkerReq) StopTask(args *StopTaskArgs, reply *string) error {
 	go deferredStop(args.Port)
 	return nil
@@ -36,5 +40,13 @@ func (w *WorkerReq) StopTask(args *StopTaskArgs, reply *string) error {
 
 func (w *WorkerReq) RunExec(reply *string) error {
 	// run executable, send to buffer where we will attempt to send to subsequent stages
+	return nil
+}
+
+func (r *WorkerReq) HandleTuple(args *ArgsWithSender, reply *string) error {
+	// Process the incoming request
+	fmt.Printf("Received request from sender %d, Port: %s\n", args.SenderNum, args.Port)
+	fmt.Printf("Rainstorm tuple: %s\n", args.Rt)
+	*reply = fmt.Sprintf("Request from sender %d processed successfully", args.SenderNum)
 	return nil
 }

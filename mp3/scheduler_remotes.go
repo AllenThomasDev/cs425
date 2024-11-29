@@ -9,12 +9,6 @@ import (
 
 type SchedulerReq string
 
-type GetNextStageArgs struct {
-	Rt Rainstorm_tuple_t
-	SenderNum int
-	Port string
-}
-
 func startRPCListenerScheduler() {
 	schedulerreq := new(SchedulerReq)
 	rpc.Register(schedulerreq)
@@ -25,7 +19,7 @@ func startRPCListenerScheduler() {
 	go http.Serve(servePort, nil)
 }
 
-func (s *SchedulerReq) GetNextStage(args *GetNextStageArgs, reply *string) error {
+func (s *SchedulerReq) GetNextStage(args *ArgsWithSender, reply *string) error {
 	// Locate tasks for the sender node in the topology
 	senderTasks := searchTopology(args.SenderNum)
 	if senderTasks == nil {

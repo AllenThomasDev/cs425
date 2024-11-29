@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"io"
+	"net/rpc"
 	"os"
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 func copyFile(sourcePath, destinationPath string) error {
@@ -36,7 +38,7 @@ func mockProcessRecord(uniqueID int, line string, hydfsSrcFile string, logFile s
 		return
 	}
 	key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
-	args := GetNextStageArgs{Rainstorm_tuple_t{key, line}, currentVM, port}
+	args := ArgsWithSender{Rainstorm_tuple_t{key, line}, currentVM, port}
 	sendToNextStage(args)
 	fmt.Printf("here hereh here\n")
 	logProcessed(uniqueID, logFile)
@@ -61,7 +63,7 @@ func TestSourceWrapper(t *testing.T) {
 	logFile := "test_log.txt"
 	startLine := 40
 	startChar := 0
-	numLines := 20
+	numLines := 1000
 	port := "8080"
 
 	err := os.WriteFile("client/"+logFile, []byte(""), 0644) // Empty log file
@@ -74,15 +76,54 @@ func TestSourceWrapper(t *testing.T) {
 	backgroundCommand = mockBackgroundCommand
 	logProcessed = mockLogProcessed
 	lines := generateSourceTuples(hydfsSrcFile, logFile, startLine, startChar, numLines, port)
-  fmt.Print("\n")
-  i := 0
-  for _, line := range lines {
-    stage1 := splitLine(line)
-    i++
-    fmt.Printf("Stage %d\n", i)
-    for _, tuple := range stage1 {
-      wordCountOperator(tuple)
-    }
-  }
-  fmt.Print(wordCounts)
+	fmt.Print("\n")
+	i := 0
+	for _, line := range lines {
+		stage1 := splitLine(line)
+		i++
+		fmt.Printf("Stage %d\n", i)
+		for _, tuple := range stage1 {
+			wordCountOperator(tuple)
+		}
+	}
+	fmt.Print(wordCounts)
+}
+
+func sendRequestToServer(port string, args *ArgsWithSender) {
+	// Establish a connection to the RPC server
+	client, err := rpc.Dial("tcp", "localhost:"+port)
+	if err != nil {
+		fmt.Println("Error connecting to server:", err)
+		return
+	}
+	defer client.Close()
+
+	// Define the reply variable
+	var reply string
+
+	// Call the RPC method
+	err = client.Call("WorkerReq.HandleTuple", args, &reply)
+	if err != nil {
+		fmt.Println("Error during RPC call:", err)
+		return
+	}
+
+	// Print the server's reply
+	fmt.Println("Server reply:", reply)
+}
+
+func TestRPCCommunication(t *testing.T) {
+	// Start the server on a new port (e.g., "12345")
+	port := "12345"
+	go startRPCListenerWorker(port)
+
+	// Allow the server to start and begin listening
+	time.Sleep(6 * time.Second)
+	fmt.Println("done waiting")
+	args := &ArgsWithSender{
+		Rt:        Rainstorm_tuple_t{"1", "1"}, // Use appropriate data
+		SenderNum: 1,
+		Port:      port,
+	}
+	sendRequestToServer(port, args)
 }
