@@ -14,13 +14,11 @@ var (
 	rainstormActive bool // flag to enable rescheduling on joins/leaves
 )
 
-func rainstormMain (op1_exe string, op1_type string, op2_exe string, op2_type string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
+func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
 	fmt.Println("Starting Rainstorm")
 	rainstormArgs = StartRainstormRemoteArgs{
 		op1_exe,
-		op1_type,
 		op2_exe,
-		op2_type,
 		hydfs_src_file,
 		hydfs_dest_file,
 		num_tasks,
@@ -28,14 +26,8 @@ func rainstormMain (op1_exe string, op1_type string, op2_exe string, op2_type st
 	createLogFiles()
 
 	go startRPCListenerScheduler()
-	
-	if (op1_type != "Transform" && op1_type != "FilteredTransform" && op1_type != "AggregateByKey") ||
-		(op2_type != "Transform" && op2_type != "FilteredTransform" && op2_type != "AggregateByKey") {
-		fmt.Println("Error: op type must be one of Transform, FilteredTransform, AggregateByKey")
-		return
-	} 
-	op1Args := constructOp1Args(op1_exe, op1_type)
-	op2Args := constructOp2Args(op2_exe, op2_type, hydfs_dest_file)
+	op1Args := constructOp1Args(op1_exe)
+	op2Args := constructOp2Args(op2_exe, hydfs_dest_file)
 	
 	// determine topology so we know which nodes to assign to each task to
 	nodeTopology := genTopology(num_tasks)
@@ -146,31 +138,31 @@ func constructSourceArgs(hydfs_src_file string, startLine int, startCharacter in
 	return sa
 }
 
-func constructOp1Args(op1_exe string, op1_type string) OpArgs {
+func constructOp1Args(op1_exe string) OpArgs {
 	var op1Args OpArgs
 	op1Args.ExecFilename = op1_exe
 	op1Args.LogFilename = "op1.log"
 	op1Args.IsOutput = false
 	op1Args.OutputFilename = ""
-	
-	if op1_type == "AggregateByKey" {
-		op1Args.IsStateful = true
-		op1Args.StateFilename = "op1_state.log"
-	}
+//@todo handle IsStateful from operator name?	
+	// if op1_type == "AggregateByKey" {
+	// 	op1Args.IsStateful = true
+	// 	op1Args.StateFilename = "op1_state.log"
+	// }
 	return op1Args
 }
 
-func constructOp2Args(op2_exe string, op2_type string, hydfs_dest_file string) OpArgs {
+func constructOp2Args(op2_exe string, hydfs_dest_file string) OpArgs {
 	var op2Args OpArgs
 	op2Args.ExecFilename = op2_exe
 	op2Args.LogFilename = "op2.log"
 	op2Args.IsOutput = true
 	op2Args.OutputFilename = hydfs_dest_file
-	
-	if op2_type == "AggregateByKey" {
-		op2Args.IsStateful = true
-		op2Args.StateFilename = "op2_state.log"
-	}
+	//
+	// if op2_type == "AggregateByKey" {
+	// 	op2Args.IsStateful = true
+	// 	op2Args.StateFilename = "op2_state.log"
+	// }
 	return op2Args
 }
 
@@ -186,10 +178,10 @@ func constructRescheduleArgs(tent topology_entry_t) (TaskArgs, error) {
 		ta.SA = constructSourceArgs(rainstormArgs.Hydfs_src_file, sourceArgs.StartLines[tent.Hash], sourceArgs.StartChars[tent.Hash], sourceArgs.LinesPerSource[tent.Hash])
 	} else if tent.Layer == 1 {
 		ta.TaskType = OP
-		ta.OA = constructOp1Args(rainstormArgs.Op1_exe, rainstormArgs.Op1_type)
+		ta.OA = constructOp1Args(rainstormArgs.Op1_exe)
 	} else {
 		ta.TaskType = OP
-		ta.OA = constructOp1Args(rainstormArgs.Op2_exe, rainstormArgs.Op2_type)
+		ta.OA = constructOp1Args(rainstormArgs.Op2_exe)
 	}
 
 	return ta, nil
@@ -447,9 +439,9 @@ func cleanupTempFile(fileName string) {
 	os.Remove("client/" + fileName)
 }
 
-func initRainstorm(op1_exe string, op1_type string, op2_exe string, op2_type string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
+func initRainstormOnScheduler(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
 	if selfIP == introducerIP {
-		rainstormMain(op1_exe, op1_type, op2_exe, op2_type, hydfs_src_file, hydfs_dest_file, num_tasks)
+		rainstormMain(op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks)
 	} else {
 		client, err := rpc.DialHTTP("tcp", introducerIP+":"+RPC_PORT)
 		if err != nil {
@@ -458,7 +450,7 @@ func initRainstorm(op1_exe string, op1_type string, op2_exe string, op2_type str
 		}
 
 		var reply string
-		err = client.Call("HyDFSReq.StartRainstormRemote", StartRainstormRemoteArgs{op1_exe, op1_type, op2_exe, op2_type, hydfs_src_file, hydfs_dest_file, num_tasks}, &reply)
+		err = client.Call("HyDFSReq.StartRainstormRemote", StartRainstormRemoteArgs{op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks}, &reply)
 		if err != nil {
 			fmt.Printf("Failed to initiate Rainstorm: %v\n", err)
 		}

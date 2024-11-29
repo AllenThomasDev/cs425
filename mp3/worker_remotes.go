@@ -21,12 +21,12 @@ type ArgsWithSender struct {
 func startRPCListenerWorker(port string) {
 	workerreq := new(WorkerReq)
 	rpc.Register(workerreq)
-	servePort, err := net.Listen("tcp", ":" + port)
+	servePort, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		panic(err)
 	}
 	go rpc.Accept(servePort)
-	
+
 	<-stopChannels[port]
 
 	fmt.Println("closing channel")

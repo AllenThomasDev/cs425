@@ -44,9 +44,7 @@ type RemoveArgs struct {
 
 type StartRainstormRemoteArgs struct {
 	Op1_exe string
-	Op1_type string
 	Op2_exe string
-	Op2_type string
 	Hydfs_src_file string
 	Hydfs_dest_file string
 	Num_tasks int
@@ -187,7 +185,7 @@ func (h *HyDFSReq) Remove(args *RemoveArgs, reply *string) error {
 }
 
 func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *string) error {
-	go rainstormMain(args.Op1_exe, args.Op1_type, args.Op2_exe, args.Op2_type, args.Hydfs_src_file, args.Hydfs_dest_file, args.Num_tasks)
+	go rainstormMain(args.Op1_exe,  args.Op2_exe, args.Hydfs_src_file, args.Hydfs_dest_file, args.Num_tasks)
 	return nil
 }
 
