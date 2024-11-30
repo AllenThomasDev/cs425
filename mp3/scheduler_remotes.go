@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net"
-	"net/http"
 	"net/rpc"
 )
 
@@ -16,13 +15,17 @@ func startRPCListenerScheduler() {
 	if err != nil {
 		panic(err)
 	}
-	go http.Serve(servePort, nil)
+	go rpc.Accept(servePort)
 }
 
 func (s *SchedulerReq) GetNextStage(args *ArgsWithSender, reply *string) error {
 	// Locate tasks for the sender node in the topology
+  fmt.Print("I;m in GetNextStage\n here the map looks like - \n \n")
 	senderTasks := searchTopology(args.SenderNum)
+  //////////////// i need a to fix this, thsi shouyld be easier
 	if senderTasks == nil {
+    showTopology()
+    fmt.Printf("%d, %s",args.SenderNum, args.Port)
 		return fmt.Errorf("Error: node not found")
 	}
 

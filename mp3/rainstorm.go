@@ -8,13 +8,13 @@ import (
 )
 
 var (
-	topologyArray [][]task_addr_t
-	tasksPerWorker = make(map[int]int)
-	rainstormArgs StartRainstormRemoteArgs // save args for rescheduling
-	rainstormActive bool // flag to enable rescheduling on joins/leaves
+  topologyArray = make([][]task_addr_t, 3, 3)
+	tasksPerWorker  = make(map[int]int)
+	rainstormArgs   StartRainstormRemoteArgs // save args for rescheduling
+	rainstormActive bool                     // flag to enable rescheduling on joins/leaves
 )
 
-func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
+func rainstormMain(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
 	fmt.Println("Starting Rainstorm")
 	rainstormArgs = StartRainstormRemoteArgs{
 		op1_exe,
@@ -25,13 +25,12 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 	}
 	createLogFiles()
 
-	go startRPCListenerScheduler()
+	startRPCListenerScheduler()
 	op1Args := constructOp1Args(op1_exe)
 	op2Args := constructOp2Args(op2_exe, hydfs_dest_file)
-	
+
 	// determine topology so we know which nodes to assign to each task to
 	nodeTopology := genTopology(num_tasks)
-	topologyArray = make([][]task_addr_t, 3, 3)
 
 	// break file into chunks
 	sourceArgs, err := createFileChunks(len(nodeTopology[0]), hydfs_src_file)
@@ -51,8 +50,9 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 			fmt.Printf("Failed to dial worker: %v\n", err)
 			return
 		}
-		
+
 		topologyArray[0] = append(topologyArray[0], task_addr_t{nodeTopology[0][i], port})
+    fmt.Printf("After append: %v\n", topologyArray[0])
 	}
 
 	// start op1
@@ -67,6 +67,7 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 		}
 
 		topologyArray[1] = append(topologyArray[1], task_addr_t{nodeTopology[1][i], port})
+    fmt.Printf("After append: %v\n", topologyArray[1])
 	}
 
 	// start op2
@@ -81,19 +82,13 @@ func rainstormMain (op1_exe string, op2_exe string, hydfs_src_file string, hydfs
 		}
 
 		topologyArray[2] = append(topologyArray[2], task_addr_t{nodeTopology[2][i], port})
+    fmt.Printf("After append: %v\n", topologyArray[2])
 	}
 
 	// set flag high so we reschedule on member joins/leaves
 	rainstormActive = true
-
-	for i := 0; i < RAINSTORM_LAYERS; i++ {
-		fmt.Printf("LAYER %d: ", i)
-		for j := 0; j < len(topologyArray[i]); j++ {
-			fmt.Printf("%d: %s |", topologyArray[i][j].VM, topologyArray[i][j].port)
-		}
-		fmt.Printf("\n")
-	}
-
+  fmt.Println("Populated the topologyArray")
+	showTopology()
 	// removeLogFiles()
 }
 
@@ -144,7 +139,7 @@ func constructOp1Args(op1_exe string) OpArgs {
 	op1Args.LogFilename = "op1.log"
 	op1Args.IsOutput = false
 	op1Args.OutputFilename = ""
-//@todo handle IsStateful from operator name?	
+	//@todo handle IsStateful from operator name?
 	// if op1_type == "AggregateByKey" {
 	// 	op1Args.IsStateful = true
 	// 	op1Args.StateFilename = "op1_state.log"
@@ -188,7 +183,7 @@ func constructRescheduleArgs(tent topology_entry_t) (TaskArgs, error) {
 }
 
 func rescheduleTask(change string, vm int) {
-	
+
 	if change == "LEAVE" {
 		hangingTasks := searchTopology(vm)
 
@@ -215,7 +210,7 @@ func rescheduleTask(change string, vm int) {
 	} else {
 		grinderNode := getGrinderNode()
 		grinderTasks := searchTopology(grinderNode)
-		
+
 		// stop task we wish to reschedule
 		if len(grinderTasks) > 0 {
 			client, err := rpc.DialHTTP("tcp", vmToIP(topologyArray[grinderTasks[0].Layer][grinderTasks[0].Hash].VM)+":"+topologyArray[grinderTasks[0].Layer][grinderTasks[0].Hash].port)
@@ -253,11 +248,11 @@ func rescheduleTask(change string, vm int) {
 
 func genTopology(num_tasks int) [][]int {
 	nodeTopology := make([][]int, 3, 3)
-	
+
 	// use successors (not member list) to determine number of members since rainstorm is just another hydfs command
 	successorsMutex.RLock()
 
-	for i := 0; i < len(successors) - 1; i++ {
+	for i := 0; i < len(successors)-1; i++ {
 		tasksPerWorker[successors[i]] = 0
 	}
 
@@ -270,7 +265,7 @@ func genTopology(num_tasks int) [][]int {
 			tasksPerWorker[slackerNode]++
 		}
 	}
-	
+
 	for i := 0; i < RAINSTORM_LAYERS; i++ {
 		fmt.Printf("LAYER %d: ", i)
 		for j := 0; j < len(nodeTopology[i]); j++ {
@@ -286,15 +281,15 @@ func genTopology(num_tasks int) [][]int {
 func getSlackerNode() int {
 	minTasks := 10
 	minTasksNode := 10
-	
+
 	successorsMutex.RLock()
 	defer successorsMutex.RUnlock()
-	
-	for i := 0; i < len(successors) - 1; i++ {
+
+	for i := 0; i < len(successors)-1; i++ {
 		if tasksPerWorker[successors[i]] < minTasks {
 			minTasks = tasksPerWorker[successors[i]]
 			minTasksNode = successors[i]
-		} 
+		}
 	}
 
 	return minTasksNode
@@ -307,12 +302,12 @@ func getGrinderNode() int {
 
 	successorsMutex.RLock()
 	defer successorsMutex.RUnlock()
-	
-	for i := 0; i < len(successors) - 1; i++ {
+
+	for i := 0; i < len(successors)-1; i++ {
 		if tasksPerWorker[successors[i]] > mostTasks {
 			mostTasks = tasksPerWorker[successors[i]]
 			mostTasksNode = successors[i]
-		} 
+		}
 	}
 
 	return mostTasksNode
@@ -377,7 +372,7 @@ func analyzeFile(fileName string) (*fileAnalysis, error) {
 	lineCount := 0
 	totalChars := 0
 	charsAtLine := []int{0}
-	
+
 	buf := make([]byte, 1)
 	for {
 		n, err := src.Read(buf)
@@ -387,7 +382,7 @@ func analyzeFile(fileName string) (*fileAnalysis, error) {
 			}
 			break
 		}
-		
+
 		totalChars++
 		if string(buf) == "\n" {
 			charsAtLine = append(charsAtLine, totalChars)
@@ -419,7 +414,7 @@ func distributeLines(lineCount int, charsAtLine []int, numSources int) (*FileChu
 	// Calculate starting positions
 	startLines := make([]int, numSources)
 	startChars := make([]int, numSources)
-	
+
 	startLines[0] = 0
 	startChars[0] = 0
 	for i := 1; i < numSources; i++ {

@@ -93,22 +93,15 @@ var processRecord = func(uniqueID int, line string, hydfsSrcFile string, logFile
 // sendToNextStage sends the tuple to the next stage via RPC or other means
 func sendToNextStage(args ArgsWithSender) error {
 	fmt.Printf("Sending tuple: %v\n", args.Rt)
-	client, err := rpc.DialHTTP("tcp", vmToIP(LEADER_ID)+":"+SCHEDULER_PORT)
-	if err != nil {
-		return err
-	}
-	var reply string
-	err = client.Call("SchedulerReq.GetNextStage", args, &reply)
-	if err != nil {
-		return err
-	}
+	reply := getNextStageArgsFromScheduler(&args)
 	replyParts := strings.Split(reply, ":")
-	nextVM, _ := strconv.Atoi(replyParts[0])
-	nextPort, _ := strconv.Atoi(replyParts[1])
-	fmt.Printf("Sending data to node %d, port %d\n", nextVM, nextPort)
-	// wait for ack from receiver node
-	// if call to client FAILS, sleep for a second and try again to give the scheduler some time to update topology
-
+	nextVM, err := strconv.Atoi(replyParts[0])
+	if err != nil {
+		fmt.Println("this is where i die")
+	}
+	nextPort := replyParts[1]
+	fmt.Printf("Sending data to node %d, port %s\n", nextVM, nextPort)
+	sendRequestToServer(nextVM, nextPort, &args)
 	return nil
 }
 
@@ -127,4 +120,50 @@ func getFreePort() (int, error) {
 	// Extract the port from the listener address
 	addr := listener.Addr().(*net.TCPAddr)
 	return addr.Port, nil
+}
+
+func sendRequestToServer(vm int, port string, args *ArgsWithSender) {
+	// Establish a connection to the RPC server
+	client, err := rpc.Dial("tcp", vmToIP(vm)+":"+port)
+	if err != nil {
+		fmt.Println("Error connecting to server:", err)
+		return
+	}
+	defer client.Close()
+	var reply string
+	err = client.Call("WorkerReq.HandleTuple", args, &reply)
+	if err != nil {
+		fmt.Println("Error during RPC call:", err)
+		return
+	}
+	fmt.Println("Server reply:", reply)
+}
+
+func getNextStageArgsFromScheduler(args *ArgsWithSender) string {
+	// Establish a connection to the RPC server
+	fmt.Println("Asking scheduler where to send this")
+	client, err := rpc.Dial("tcp", vmToIP(LEADER_ID)+":"+SCHEDULER_PORT)
+	if err != nil {
+		fmt.Println("Error connecting to scheduler:", err)
+		return ""
+	}
+	defer client.Close()
+	var reply string
+	err = client.Call("SchedulerReq.GetNextStage", args, &reply)
+	if err != nil {
+		fmt.Println("Error during RPC call:", err)
+		return ""
+	}
+	fmt.Println("Server reply:", reply)
+	return reply
+}
+
+func showTopology() {
+	for i := 0; i < RAINSTORM_LAYERS; i++ {
+		fmt.Printf("LAYER %d: ", i)
+		for j := 0; j < len(topologyArray[i]); j++ {
+			fmt.Printf("%d: %s |", topologyArray[i][j].VM, topologyArray[i][j].port)
+		}
+		fmt.Printf("\n")
+	}
 }

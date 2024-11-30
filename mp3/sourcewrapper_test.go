@@ -89,7 +89,7 @@ func TestSourceWrapper(t *testing.T) {
 	fmt.Print(wordCounts)
 }
 
-func sendRequestToServer(port string, args *ArgsWithSender) {
+func MockSendRequestToServer(port string, args *ArgsWithSender) {
 	// Establish a connection to the RPC server
 	client, err := rpc.Dial("tcp", "localhost:"+port)
 	if err != nil {
@@ -97,27 +97,18 @@ func sendRequestToServer(port string, args *ArgsWithSender) {
 		return
 	}
 	defer client.Close()
-
-	// Define the reply variable
 	var reply string
-
-	// Call the RPC method
 	err = client.Call("WorkerReq.HandleTuple", args, &reply)
 	if err != nil {
 		fmt.Println("Error during RPC call:", err)
 		return
 	}
-
-	// Print the server's reply
 	fmt.Println("Server reply:", reply)
 }
 
 func TestRPCCommunication(t *testing.T) {
-	// Start the server on a new port (e.g., "12345")
 	port := "12345"
 	go startRPCListenerWorker(port)
-
-	// Allow the server to start and begin listening
 	time.Sleep(6 * time.Second)
 	fmt.Println("done waiting")
 	args := &ArgsWithSender{
@@ -125,5 +116,5 @@ func TestRPCCommunication(t *testing.T) {
 		SenderNum: 1,
 		Port:      port,
 	}
-	sendRequestToServer(port, args)
+	MockSendRequestToServer(port, args)
 }

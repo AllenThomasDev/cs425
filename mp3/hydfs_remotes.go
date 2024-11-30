@@ -209,7 +209,11 @@ func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
 		return nil
 	} else if args.TaskType == SOURCE {
 		fmt.Printf("Processing %d lines of %s starting at line %d\n", args.SA.LinesToRead, args.SA.SrcFilename, args.SA.StartLine)
-		go generateSourceTuples(args.SA.SrcFilename, args.SA.LogFilename, args.SA.StartLine, args.SA.StartCharacter, args.SA.LinesToRead, portString)
+    tuples  := generateSourceTuples(args.SA.SrcFilename, args.SA.LogFilename, args.SA.StartLine, args.SA.StartCharacter, args.SA.LinesToRead, portString)
+    for _, tuple := range(tuples){
+      fmt.Println(tuple)
+      sendToNextStage(ArgsWithSender{tuple, currentVM, portString})
+    }
 		return nil
 	} else {
 		return fmt.Errorf("Unknown task type")
