@@ -79,11 +79,11 @@ func TestSourceWrapper(t *testing.T) {
 	fmt.Print("\n")
 	i := 0
 	for _, line := range lines {
-		stage1 := splitLine(line)
+		stage1 := operators["splitLineOperator"].Operator(line).([]Rainstorm_tuple_t)
 		i++
 		fmt.Printf("Stage %d\n", i)
 		for _, tuple := range stage1 {
-			wordCountOperator(tuple)
+			operators["wordCountOperator"].Operator(tuple)
 		}
 	}
 	fmt.Print(wordCounts)

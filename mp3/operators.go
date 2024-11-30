@@ -1,28 +1,50 @@
 package main
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
 
-var wordCounts = make(map[string]int)
-
-func splitLine(rt Rainstorm_tuple_t) []Rainstorm_tuple_t {
-	words := strings.Fields(rt.Value)
-	var tuples []Rainstorm_tuple_t
-	for _, word := range words {
-		tuples = append(tuples, Rainstorm_tuple_t{
-			Key:   word,            // Append the index to the key to make each tuple unique
-			Value: strconv.Itoa(1), // Assign each word to a new tuple
-		})
-	}
-	return tuples
+type OperatorFunc func(rt Rainstorm_tuple_t) interface{}
+type Operator struct {
+	Name     string
+	Operator OperatorFunc
+	Stateful bool
 }
 
-func wordCountOperator(rt Rainstorm_tuple_t) Rainstorm_tuple_t {
-	wordCounts[rt.Key]++
-  return Rainstorm_tuple_t{
-		Key:   rt.Key,
-		Value: strconv.Itoa(wordCounts[rt.Key]), // Running count as string
+var operators = make(map[string]Operator)
+
+var wordCounts = make(map[string]int)
+
+func initOperators() {
+	operators["splitLineOperator"] = Operator{
+		Name: "splitLineOperator",
+		Operator: func(rt Rainstorm_tuple_t) interface{} {
+			words := strings.Fields(rt.Value)
+			var tuples []Rainstorm_tuple_t
+			for _, word := range words {
+				tuples = append(tuples, Rainstorm_tuple_t{
+					Key:   word,
+					Value: strconv.Itoa(1),
+				})
+			}
+			return tuples
+		},
+		Stateful: false,
 	}
+
+	operators["wordCountOperator"] = Operator{
+		Name: "wordCountOperator",
+		Operator: func(rt Rainstorm_tuple_t) interface{} {
+			wordCounts[rt.Key]++
+			return Rainstorm_tuple_t{
+				Key:   rt.Key,
+				Value: strconv.Itoa(wordCounts[rt.Key]),
+			}
+		},
+		Stateful: true,
+	}
+  fmt.Println("Available Operators are - ")
+  for key := range operators { fmt.Println(key) }
 }

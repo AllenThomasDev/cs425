@@ -1,14 +1,15 @@
 package main
 
 import (
-  "testing"
+	"fmt"
+	"testing"
 )
 
 var line = "This is a test line that will be split, This is an example line that is under test"
 var rt = Rainstorm_tuple_t{Key: "test_source.txt:0", Value: line}
 
 func TestSplitLine(t *testing.T) {
-	result := splitLine(rt)
+	result := operators["splitLineOperator"].Operator(rt).([]Rainstorm_tuple_t) 
 	expected := []Rainstorm_tuple_t{
     {Key: "This", Value: "1"},
 		{Key: "is", Value: "1"},
@@ -41,8 +42,10 @@ func TestSplitLine(t *testing.T) {
 }
 
 func TestCountOccureneces(t *testing.T) {
-  result := splitLine(rt)
+  initOperators()
+  fmt.Print(operators)
+  result := operators["splitLineOperator"].Operator(rt).([]Rainstorm_tuple_t)
   for _, tuple := range result {
-    wordCountOperator(tuple)
+    operators["wordCountOperator"].Operator(tuple)
   }
 }

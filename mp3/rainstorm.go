@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+var availableOperators = make([]string, 2)
+
 var (
 	topologyArray   = make([][]task_addr_t, 3, 3)
 	tasksPerWorker  = make(map[int]int)
@@ -14,20 +16,20 @@ var (
 	rainstormActive bool                     // flag to enable rescheduling on joins/leaves
 )
 
-func rainstormMain(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
+func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
 	fmt.Println("Starting Rainstorm")
 	rainstormArgs = StartRainstormRemoteArgs{
-		op1_exe,
-		op2_exe,
+		op1,
+		op2,
 		hydfs_src_file,
 		hydfs_dest_file,
 		num_tasks,
 	}
 	createLogFiles()
 
-	startRPCListenerScheduler()
-	op1Args := constructOp1Args(op1_exe)
-	op2Args := constructOp2Args(op2_exe, hydfs_dest_file)
+	listener, _ := startRPCListenerScheduler()
+	op1Args := constructOp1Args(op1)
+	op2Args := constructOp2Args(op2, hydfs_dest_file)
 
 	// determine topology so we know which nodes to assign to each task to
 	nodeTopology := genTopology(num_tasks)
@@ -100,6 +102,7 @@ func rainstormMain(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_
 	rainstormActive = true
 	fmt.Println("Populated the topologyArray")
 	showTopology()
+	defer stopRPCListener(listener)
 }
 
 func createLogFiles() {
