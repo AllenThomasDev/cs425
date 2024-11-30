@@ -71,6 +71,7 @@ type TaskArgs struct {
 	TaskType Task_type_t
 	SA SourceArgs
 	OA OpArgs
+  ADDRESS task_addr_t
 }
 
 func startRPCListenerHyDFS() {
@@ -189,14 +190,17 @@ func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *s
 	return nil
 }
 
-func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
-	freePort, err := getFreePort()
-	if err != nil {
-		return err
-	}
+func (h *HyDFSReq) FindFreePort(args struct{}, reply *string) error {
+  freePort, err := getFreePort()
+  if err!=nil{
+    return err
+  }
+  *reply = strconv.Itoa(freePort)
+  return nil
+}
 
-	portString := strconv.Itoa(freePort)
-	*reply = portString
+func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
+	portString := args.ADDRESS.port 
 
 	// Start serving worker functions from passed port
 	go startRPCListenerWorker(portString)
@@ -209,11 +213,7 @@ func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
 		return nil
 	} else if args.TaskType == SOURCE {
 		fmt.Printf("Processing %d lines of %s starting at line %d\n", args.SA.LinesToRead, args.SA.SrcFilename, args.SA.StartLine)
-    tuples  := generateSourceTuples(args.SA.SrcFilename, args.SA.LogFilename, args.SA.StartLine, args.SA.StartCharacter, args.SA.LinesToRead, portString)
-    for _, tuple := range(tuples){
-      fmt.Println(tuple)
-      sendToNextStage(ArgsWithSender{tuple, currentVM, portString})
-    }
+		go generateSourceTuples(args.SA.SrcFilename, args.SA.LogFilename, args.SA.StartLine, args.SA.StartCharacter, args.SA.LinesToRead, portString)
 		return nil
 	} else {
 		return fmt.Errorf("Unknown task type")

@@ -45,14 +45,20 @@ func rainstormMain(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_
 		ta.TaskType = SOURCE
 		ta.SA = constructSourceArgs(hydfs_src_file, sourceArgs.StartLines[i], sourceArgs.StartChars[i], sourceArgs.LinesPerSource[i])
 
-		port, err := callStartTask(nodeTopology[0][i], ta)
+    port, err := callFindFreePort(nodeTopology[0][i])
+    if err!=nil{
+      fmt.Printf("couldn't find port, or something went wrong")
+      fmt.Println(err)
+    }
+    ta.ADDRESS = task_addr_t{nodeTopology[0][i], port}
+		topologyArray[0] = append(topologyArray[0], ta.ADDRESS)
+    fmt.Printf("After append: %v\n", topologyArray[0])
+    port, err = callStartTask(nodeTopology[0][i], ta)
 		if err != nil {
 			fmt.Printf("Failed to dial worker: %v\n", err)
 			return
 		}
 
-		topologyArray[0] = append(topologyArray[0], task_addr_t{nodeTopology[0][i], port})
-    fmt.Printf("After append: %v\n", topologyArray[0])
 	}
 
 	// start op1
@@ -75,16 +81,44 @@ func rainstormMain(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_
 		ta.TaskType = OP
 		ta.OA = op2Args
 
-		port, err := callStartTask(nodeTopology[2][i], ta)
+		_ , err := callStartTask(nodeTopology[2][i], ta)
 		if err != nil {
 			fmt.Printf("Failed to dial worker: %v\n", err)
 			return
 		}
 
-		topologyArray[2] = append(topologyArray[2], task_addr_t{nodeTopology[2][i], port})
-    fmt.Printf("After append: %v\n", topologyArray[2])
 	}
 
+	// // start op1
+	// for i := 0; i < len(nodeTopology[1]); i++ {
+	// 	ta.TaskType = OP
+	// 	ta.OA = op1Args
+	//
+	// 	port, err := callStartTask(nodeTopology[1][i], ta)
+	// 	if err != nil {
+	// 		fmt.Printf("Failed to dial worker: %v\n", err)
+	// 		return
+	// 	}
+	//
+	// 	topologyArray[1] = append(topologyArray[1], task_addr_t{nodeTopology[1][i], port})
+	//    fmt.Printf("After append: %v\n", topologyArray[1])
+	// }
+	//
+	// // start op2
+	// for i := 0; i < len(nodeTopology[2]); i++ {
+	// 	ta.TaskType = OP
+	// 	ta.OA = op2Args
+	//
+	// 	port, err := callStartTask(nodeTopology[2][i], ta)
+	// 	if err != nil {
+	// 		fmt.Printf("Failed to dial worker: %v\n", err)
+	// 		return
+	// 	}
+	//
+	// 	topologyArray[2] = append(topologyArray[2], task_addr_t{nodeTopology[2][i], port})
+	//    fmt.Printf("After append: %v\n", topologyArray[2])
+	// }
+	//
 	// set flag high so we reschedule on member joins/leaves
 	rainstormActive = true
   fmt.Println("Populated the topologyArray")
@@ -116,6 +150,21 @@ func callStartTask(vm int, ta TaskArgs) (string, error) {
 
 	var reply string
 	err = client.Call("HyDFSReq.StartTask", ta, &reply)
+	if err != nil {
+		return "", err
+	}
+
+	return reply, nil
+}
+
+func callFindFreePort(vm int) (string, error) {
+	client, err := rpc.DialHTTP("tcp", vmToIP(vm)+":"+RPC_PORT)
+	if err != nil {
+		return "", err
+	}
+
+	var reply string
+  err = client.Call("HyDFSReq.FindFreePort", struct{}{}, &reply)
 	if err != nil {
 		return "", err
 	}
@@ -195,7 +244,8 @@ func rescheduleTask(change string, vm int) {
 			}
 
 			slackerNode := getSlackerNode()
-			port, err := callStartTask(slackerNode, ta)
+      port, _ := callFindFreePort(slackerNode)
+			_, err = callStartTask(slackerNode, ta)
 			if err != nil {
 				fmt.Printf("Failed to start task on new node: %v\n", err)
 				return
@@ -233,7 +283,8 @@ func rescheduleTask(change string, vm int) {
 				return
 			}
 
-			port, err := callStartTask(vm, ta)
+      port, _ := callFindFreePort(vm)
+			_, err = callStartTask(vm, ta)
 			if err != nil {
 				fmt.Printf("Failed to start task on new node: %v\n", err)
 				return
