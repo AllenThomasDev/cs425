@@ -21,6 +21,7 @@ func startRPCListenerScheduler() {
 func (s *SchedulerReq) GetNextStage(args *ArgsWithSender, reply *string) error {
 	// Locate tasks for the sender node in the topology
   fmt.Print("I;m in GetNextStage\n here the map looks like - \n \n")
+  showTopology()
 	senderTasks := searchTopology(args.SenderNum)
   //////////////// i need a to fix this, thsi shouyld be easier
 	if senderTasks == nil {
