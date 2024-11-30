@@ -17,8 +17,12 @@ var (
 )
 
 func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
-	fmt.Println("Starting Rainstorm")
-	rainstormArgs = StartRainstormRemoteArgs{
+  fmt.Println("Starting Rainstorm ...")
+  if valid := validateOperations([]string{op1, op2}); !valid {
+    return
+  }
+
+  rainstormArgs = StartRainstormRemoteArgs{
 		op1,
 		op2,
 		hydfs_src_file,

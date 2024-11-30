@@ -48,3 +48,13 @@ func initOperators() {
   fmt.Println("Available Operators are - ")
   for key := range operators { fmt.Println(key) }
 }
+
+func validateOperations(operations []string) bool {
+  for _, op := range operations {
+    if _, exists := operators[op]; !exists {
+      fmt.Printf("Error - Operation %s does not exist \nrefer to the legal operations that are registered \n\n", op)
+      return false
+    }
+  }
+  return true
+}
