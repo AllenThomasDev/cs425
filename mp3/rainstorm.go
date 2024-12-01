@@ -49,14 +49,14 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 	// }
 
 	for i := 0; i < len(nodeTopology[1]); i++ {
-		_, err := callInitializeOperatorOnVM(nodeTopology[1][i], operators[op1])
+		_, err := callInitializeOperatorOnVM(nodeTopology[1][i], op1)
 		if err != nil {
 			fmt.Print(err)
 		}
 	}
 
 	for i := 0; i < len(nodeTopology[2]); i++ {
-		_, err := callInitializeOperatorOnVM(nodeTopology[2][i], operators[op2])
+		_, err := callInitializeOperatorOnVM(nodeTopology[2][i], op2)
 		if err != nil {
 			fmt.Print(err)
 		}
@@ -129,7 +129,7 @@ func callStartTask(vm int, ta TaskArgs) (string, error) {
 	return reply, nil
 }
 
-func callInitializeOperatorOnVM(vm int, op Operator) (string, error) {
+func callInitializeOperatorOnVM(vm int, op string) (string, error) {
 	client, err := rpc.DialHTTP("tcp", vmToIP(vm)+":"+RPC_PORT)
 	if err != nil {
 		fmt.Printf("breaks here, %s", err.Error())
@@ -137,7 +137,7 @@ func callInitializeOperatorOnVM(vm int, op Operator) (string, error) {
 	}
 	port, err := callFindFreePort(vm)
   opPort := OperatorPort{
-    Operator: op,
+    OperatorName: op,
     Port:     port,
   }
 	var reply string
@@ -149,8 +149,8 @@ func callInitializeOperatorOnVM(vm int, op Operator) (string, error) {
 	if currentActiveOperators[vm] == nil {
 		currentActiveOperators[vm] = make(map[string]Operator)
 	}
-	currentActiveOperators[vm][port] = op
-	fmt.Printf("Started %s on VM %d:%s\n", op.Name, vm, port)
+	currentActiveOperators[vm][port] = operators[op]
+	fmt.Printf("Started %s on VM %d:%s\n", operators[op].Name, vm, port)
 	return reply, nil
 }
 

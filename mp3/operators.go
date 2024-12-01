@@ -14,7 +14,7 @@ type Operator struct {
 }
 
 type OperatorPort struct {
-  Operator Operator
+  OperatorName string
   Port string
 }
 

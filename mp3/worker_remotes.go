@@ -40,9 +40,10 @@ func (w *WorkerReq) RunExec(reply *string) error {
 }
 
 func (r *WorkerReq) HandleTuple(args *ArgsWithSender, reply *string) error {
-	// Process the incoming request
-	fmt.Printf("Received request from sender %d, Port: %s\n", args.SenderNum, args.Port)
-	fmt.Printf("Rainstorm tuple: %s\n", args.Rt)
-	*reply = fmt.Sprintf("Request from sender %d processed successfully", args.SenderNum)
-	return nil
+    channels, exists := portToChannels[args.Port]
+    if !exists {
+        return fmt.Errorf("no channels found for port %s", args.Port)
+    }
+    channels.Input <- args.Rt
+    return nil
 }

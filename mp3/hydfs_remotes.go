@@ -203,7 +203,7 @@ func (h *HyDFSReq) FindFreePort(args struct{}, reply *string) error {
 
 func (h *HyDFSReq) InitializeOperatorOnPort(args *OperatorPort, reply *string) error {
 	portString := args.Port
-  fmt.Printf("Operator name: %s", args.Operator.Name)
+  fmt.Printf("Operator name: %s", args.OperatorName)
   // this listener will send the tuples to the input channel for this port
 	go startRPCListenerWorker(portString)
   channels := OperatorChannels{
@@ -215,8 +215,8 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *OperatorPort, reply *string) e
   fmt.Printf("created a channel to listen to inputs, \n the port here is %s", args.Port)
   go func() {
 		for input := range channels.Input {
-			output := args.Operator.Operator(input)
-			channels.Output <- output
+			output := operators[args.OperatorName].Operator(input)
+      fmt.Print(output)
 		}
 		close(channels.Output) // Close the output channel when input channel is closed
 	}()
