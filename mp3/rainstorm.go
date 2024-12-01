@@ -5,10 +5,10 @@ import (
 	"io"
 	"net/rpc"
 	"os"
-	"reflect"
 	"strconv"
 )
 
+// this is vm:port:operator, needs to be updated when things fail
 var currentActiveOperators = make(map[int]map[string]Operator)
 var availableOperators = make([]string, 2)
 var operatorSequence = make([]string, 3)
@@ -20,7 +20,7 @@ var (
 	rainstormActive bool                     // flag to enable rescheduling on joins/leaves
 )
 
-func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
+func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_file string, numTasks int) {
 	fmt.Println("Starting Rainstorm ...")
 	if valid := validateOperations([]string{op1, op2}); !valid {
 		return
@@ -32,82 +32,35 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 		op2,
 		hydfs_src_file,
 		hydfs_dest_file,
-		num_tasks,
+		numTasks,
 	}
 	createLogFiles()
-
+	distributeTasks(numTasks)
 	go startRPCListenerScheduler()
-
-	// determine topology so we know which nodes to assign to each task to
-	nodeTopology := genTopology(num_tasks)
-
-	// var ta TaskArgs
-	// break file into chunks
-	sourceArgs, err := createFileChunks(len(nodeTopology[0]), hydfs_src_file)
+	// here i am making the assumption that a source does not fail before we send the chunks to it
+	sourceArgs, err := createFileChunks(numTasks, hydfs_src_file)
 	if err != nil {
 		fmt.Printf("Error breaking file into chunks: %v\n", err)
 		return
 	}
-	fmt.Printf("type of sourceArgs is %s", reflect.TypeOf(sourceArgs))
-
-	for i := 0; i < len(nodeTopology[0]); i++ {
-		_, err := callInitializeOperatorOnVM(nodeTopology[0][i], "source")
-		if err != nil {
-			fmt.Print(err)
-		}
-	}
-
-	for i := 0; i < len(nodeTopology[1]); i++ {
-		_, err := callInitializeOperatorOnVM(nodeTopology[1][i], op1)
-		if err != nil {
-			fmt.Print(err)
-		}
-	}
-
-	for i := 0; i < len(nodeTopology[2]); i++ {
-		_, err := callInitializeOperatorOnVM(nodeTopology[2][i], op2)
-		if err != nil {
-			fmt.Print(err)
-		}
-	}
-	numSources := len(nodeTopology[0])
-  sourceTriggers := convertFileInfoStructListToTuples(hydfs_src_file, *sourceArgs, numSources)
-	// start sources
-	// for i := 0; i < len(nodeTopology[0]); i++ {
-	// 	ta.TaskType = SOURCE
-	// 	ta.SA = constructSourceArgs(hydfs_src_file, sourceArgs.StartLines[i], sourceArgs.StartChars[i], sourceArgs.LinesPerSource[i])
-	//
-	// 	port, err := callFindFreePort(nodeTopology[0][i])
-	// 	if err != nil {
-	// 		fmt.Printf("couldn't find port, or something went wrong")
-	// 		fmt.Println(err)
-	// 	}
-	// 	ta.ADDRESS = task_addr_t{nodeTopology[0][i], port}
-	// 	topologyArray[0] = append(topologyArray[0], ta.ADDRESS)
-	// 	fmt.Printf("After append: %v\n", topologyArray[0])
-	// 	_, err = callStartTask(nodeTopology[0][i], ta)
-	// 	if err != nil {
-	// 		fmt.Printf("Failed to dial worker: %v\n", err)
-	// 		return
+	sourceTriggers := convertFileInfoStructListToTuples(hydfs_src_file, *sourceArgs, numTasks)
+	// i := 0
+	// for key, value := range currentActiveOperators[10] {
+	// 	if value.Name == "source" {
+	// 		args := &ArgsWithSender{
+	// 			Rt:        sourceTriggers[i],
+	// 			SenderNum: 10,
+	// 			Port:      string(key),
+	// 		}
+	// 		i++
+	// 		fmt.Printf(string(key))
+	// 		sendRequestToServer(0, string(key), args)
+	// 	} else {
+	// 		continue
 	// 	}
 	// }
-	// rainstormActive = true
-  i := 0
-	for key, value := range currentActiveOperators[10] {
-		if value.Name == "source" {
-			args := &ArgsWithSender{
-				Rt:        sourceTriggers[i],
-				SenderNum: 10,
-				Port:      string(key),
-			}
-      i++
-			fmt.Printf(string(key))
-			sendRequestToServer(0, string(key), args)
-		} else {
-			continue
-		}
-	}
-	showTopology()
+	// showTopology()
+	fmt.Println(currentActiveOperators, sourceTriggers)
 	select {}
 }
 
@@ -312,6 +265,32 @@ func rescheduleTask(change string, vm int) {
 		}
 	}
 	fmt.Printf("Rescheduling finished\n")
+}
+
+func distributeTasks(numTasks int) {
+	memberKeys := make([]string, 0, len(membershipList))
+	for key := range membershipList {
+		memberKeys = append(memberKeys, key)
+	}
+	// @todo: we should remove the leader from the list, it should not be assigned any tasks
+	if len(memberKeys) > 1 {
+		fmt.Printf("We are excluding the leader from the list of members to assign tasks to")
+		memberKeys = memberKeys[1:]
+	}
+	if len(memberKeys) == 0 {
+		fmt.Println("No members available.")
+		return
+	}
+	totalOperators := len(operatorSequence)
+	totalTasks := numTasks * totalOperators
+	memberIndex := 0
+	for i := 0; i < totalTasks; i++ {
+		operatorIndex := i / numTasks
+		operator := operatorSequence[operatorIndex]
+		member := memberKeys[memberIndex]
+		callInitializeOperatorOnVM(ipToVM(member), operator)
+		memberIndex = (memberIndex + 1) % len(memberKeys)
+	}
 }
 
 func genTopology(num_tasks int) [][]int {
