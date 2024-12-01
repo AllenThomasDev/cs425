@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"net"
 	"net/rpc"
 	"os"
 	"strconv"
@@ -94,6 +93,7 @@ var processRecord = func(uniqueID int, line string, hydfsSrcFile string, logFile
 func sendToNextStage(args ArgsWithSender) error {
 	fmt.Printf("Sending tuple: %v\n", args.Rt)
 	reply := getNextStageArgsFromScheduler(&args)
+  fmt.Println(reply)
 	replyParts := strings.Split(reply, ":")
 	nextVM, err := strconv.Atoi(replyParts[0])
 	if err != nil {
@@ -108,18 +108,6 @@ func sendToNextStage(args ArgsWithSender) error {
 // generateTuple creates a key-value tuple
 func generateTuple(key string, value string) Rainstorm_tuple_t {
 	return Rainstorm_tuple_t{key, value}
-}
-
-func getFreePort() (int, error) {
-	listener, err := net.Listen("tcp", ":0") // :0 asks the OS to choose an available port
-	if err != nil {
-		return 0, err
-	}
-	defer listener.Close()
-
-	// Extract the port from the listener address
-	addr := listener.Addr().(*net.TCPAddr)
-	return addr.Port, nil
 }
 
 func sendRequestToServer(vm int, port string, args *ArgsWithSender) {
@@ -145,10 +133,11 @@ func getNextStageArgsFromScheduler(args *ArgsWithSender) string {
 	client, err := rpc.Dial("tcp", vmToIP(LEADER_ID)+":"+SCHEDULER_PORT)
 	if err != nil {
 		fmt.Println("Error connecting to scheduler:", err)
-		return ""
+		return "ohhhhhhhhhh is it failing here?"
 	}
 	defer client.Close()
 	var reply string
+	fmt.Println("I reached before rpc call")
 	err = client.Call("SchedulerReq.GetNextStage", args, &reply)
 	if err != nil {
 		fmt.Println("Error during RPC call:", err)

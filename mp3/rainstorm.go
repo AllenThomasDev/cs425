@@ -5,9 +5,12 @@ import (
 	"io"
 	"net/rpc"
 	"os"
+	"strconv"
 )
 
+var currentActiveOperators = make(map[int]map[string]Operator)
 var availableOperators = make([]string, 2)
+var operatorSequence = make([]string, 3)
 
 var (
 	topologyArray   = make([][]task_addr_t, 3, 3)
@@ -17,12 +20,13 @@ var (
 )
 
 func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
-  fmt.Println("Starting Rainstorm ...")
-  if valid := validateOperations([]string{op1, op2}); !valid {
-    return
-  }
+	fmt.Println("Starting Rainstorm ...")
+	if valid := validateOperations([]string{op1, op2}); !valid {
+		return
+	}
+	operatorSequence = []string{"source", op1, op2}
 
-  rainstormArgs = StartRainstormRemoteArgs{
+	rainstormArgs = StartRainstormRemoteArgs{
 		op1,
 		op2,
 		hydfs_src_file,
@@ -31,82 +35,67 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 	}
 	createLogFiles()
 
-	listener, _ := startRPCListenerScheduler()
-	op1Args := constructOp1Args(op1)
-	op2Args := constructOp2Args(op2, hydfs_dest_file)
+	go startRPCListenerScheduler()
 
 	// determine topology so we know which nodes to assign to each task to
 	nodeTopology := genTopology(num_tasks)
 
-	var ta TaskArgs
+	// var ta TaskArgs
 	// break file into chunks
-	sourceArgs, err := createFileChunks(len(nodeTopology[0]), hydfs_src_file)
-	if err != nil {
-		fmt.Printf("Error breaking file into chunks: %v\n", err)
-		return
-	}
+	// sourceArgs, err := createFileChunks(len(nodeTopology[0]), hydfs_src_file)
+	// if err != nil {
+	// 	fmt.Printf("Error breaking file into chunks: %v\n", err)
+	// 	return
+	// }
 
 	for i := 0; i < len(nodeTopology[1]); i++ {
-		ta.TaskType = OP
-		ta.OA = op1Args
-		port, err := callFindFreePort(nodeTopology[1][i])
+		_, err := callInitializeOperatorOnVM(nodeTopology[1][i], operators[op1])
 		if err != nil {
-			fmt.Printf("couldn't find port, or something went wrong")
-			fmt.Println(err)
-		}
-		ta.ADDRESS = task_addr_t{nodeTopology[1][i], port}
-		topologyArray[1] = append(topologyArray[1], ta.ADDRESS)
-		fmt.Printf("After append: %v\n", topologyArray[1])
-		_, err = callStartTask(nodeTopology[1][i], ta)
-		if err != nil {
-			fmt.Printf("Failed to dial worker: %v\n", err)
-			return
+			fmt.Print(err)
 		}
 	}
-	showTopology()
 
-	// start op2
 	for i := 0; i < len(nodeTopology[2]); i++ {
-		ta.TaskType = OP
-		ta.OA = op2Args
-		port, err := callFindFreePort(nodeTopology[2][i])
+		_, err := callInitializeOperatorOnVM(nodeTopology[2][i], operators[op2])
 		if err != nil {
-			fmt.Printf("couldn't find port, or something went wrong")
-			fmt.Println(err)
-		}
-		ta.ADDRESS = task_addr_t{nodeTopology[2][i], port}
-		topologyArray[2] = append(topologyArray[2], ta.ADDRESS)
-		fmt.Printf("After append: %v\n", topologyArray[2])
-		_, err = callStartTask(nodeTopology[2][i], ta)
-		if err != nil {
-			fmt.Printf("Failed to dial worker: %v\n", err)
-			return
+			fmt.Print(err)
 		}
 	}
-	showTopology()
 	// start sources
-	for i := 0; i < len(nodeTopology[0]); i++ {
-		ta.TaskType = SOURCE
-		ta.SA = constructSourceArgs(hydfs_src_file, sourceArgs.StartLines[i], sourceArgs.StartChars[i], sourceArgs.LinesPerSource[i])
-
-		port, err := callFindFreePort(nodeTopology[0][i])
-		if err != nil {
-			fmt.Printf("couldn't find port, or something went wrong")
-			fmt.Println(err)
+	// for i := 0; i < len(nodeTopology[0]); i++ {
+	// 	ta.TaskType = SOURCE
+	// 	ta.SA = constructSourceArgs(hydfs_src_file, sourceArgs.StartLines[i], sourceArgs.StartChars[i], sourceArgs.LinesPerSource[i])
+	//
+	// 	port, err := callFindFreePort(nodeTopology[0][i])
+	// 	if err != nil {
+	// 		fmt.Printf("couldn't find port, or something went wrong")
+	// 		fmt.Println(err)
+	// 	}
+	// 	ta.ADDRESS = task_addr_t{nodeTopology[0][i], port}
+	// 	topologyArray[0] = append(topologyArray[0], ta.ADDRESS)
+	// 	fmt.Printf("After append: %v\n", topologyArray[0])
+	// 	_, err = callStartTask(nodeTopology[0][i], ta)
+	// 	if err != nil {
+	// 		fmt.Printf("Failed to dial worker: %v\n", err)
+	// 		return
+	// 	}
+	// }
+	// rainstormActive = true
+	var line = "This is a test line that will be split, This is an example line that is under test"
+	var rt = Rainstorm_tuple_t{Key: "test_source.txt:0", Value: line}
+	for key, value := range currentActiveOperators[10] {
+		fmt.Println(key, value) // Print the first key-value pair
+		args := &ArgsWithSender{
+			Rt:        rt,
+			SenderNum: 10,
+			Port:      string(key),
 		}
-		ta.ADDRESS = task_addr_t{nodeTopology[0][i], port}
-		topologyArray[0] = append(topologyArray[0], ta.ADDRESS)
-		fmt.Printf("After append: %v\n", topologyArray[0])
-		_, err = callStartTask(nodeTopology[0][i], ta)
-		if err != nil {
-			fmt.Printf("Failed to dial worker: %v\n", err)
-			return
-		}
+		fmt.Printf(string(key))
+		sendRequestToServer(0, string(key), args)
+		break
 	}
-	rainstormActive = true
-	fmt.Println("Populated the topologyArray")
 	showTopology()
-	defer stopRPCListener(listener)
+	select {}
 }
 
 func createLogFiles() {
@@ -140,19 +129,51 @@ func callStartTask(vm int, ta TaskArgs) (string, error) {
 	return reply, nil
 }
 
-func callFindFreePort(vm int) (string, error) {
+func callInitializeOperatorOnVM(vm int, op Operator) (string, error) {
 	client, err := rpc.DialHTTP("tcp", vmToIP(vm)+":"+RPC_PORT)
 	if err != nil {
+		fmt.Printf("breaks here, %s", err.Error())
 		return "", err
 	}
-
+	port, err := callFindFreePort(vm)
+  opPort := OperatorPort{
+    Operator: op,
+    Port:     port,
+  }
 	var reply string
-	err = client.Call("HyDFSReq.FindFreePort", struct{}{}, &reply)
+	err = client.Call("HyDFSReq.InitializeOperatorOnPort", opPort, &reply)
 	if err != nil {
+		fmt.Printf("breaks here, %s", err.Error())
 		return "", err
 	}
-
+	if currentActiveOperators[vm] == nil {
+		currentActiveOperators[vm] = make(map[string]Operator)
+	}
+	currentActiveOperators[vm][port] = op
+	fmt.Printf("Started %s on VM %d:%s\n", op.Name, vm, port)
 	return reply, nil
+}
+
+func callFindFreePort(vm int) (string, error) {
+    client, err := rpc.DialHTTP("tcp", vmToIP(vm)+":"+RPC_PORT)
+    if err != nil {
+        return "", fmt.Errorf("failed to dial RPC: %v", err)
+    }
+    defer client.Close()
+
+    var reply string
+    err = client.Call("HyDFSReq.FindFreePort", struct{}{}, &reply)
+    if err != nil {
+        return "", fmt.Errorf("RPC call failed: %v", err)
+    }
+    if reply == "" {
+        return "", fmt.Errorf("received empty port from FindFreePort")
+    }
+    if _, err := strconv.Atoi(reply); err != nil {
+        return "", fmt.Errorf("invalid port format: %s", reply)
+    }
+
+    return reply, nil
 }
 
 func constructSourceArgs(hydfs_src_file string, startLine int, startCharacter int, linesToRead int) SourceArgs {

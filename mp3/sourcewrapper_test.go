@@ -58,36 +58,6 @@ func mockRandomFileName() string {
 	return "test_random_file_name.txt"
 }
 
-func TestSourceWrapper(t *testing.T) {
-	hydfsSrcFile := "test_source.txt"
-	logFile := "test_log.txt"
-	startLine := 40
-	startChar := 0
-	numLines := 1000
-	port := "8080"
-
-	err := os.WriteFile("client/"+logFile, []byte(""), 0644) // Empty log file
-	if err != nil {
-		t.Fatalf("Failed to create test log file: %v", err)
-	}
-	// mock the get command by copying the source file to a temp
-	copyFile("client/"+hydfsSrcFile, "client/"+mockRandomFileName())
-	processRecord = mockProcessRecord
-	backgroundCommand = mockBackgroundCommand
-	logProcessed = mockLogProcessed
-	lines := generateSourceTuples(hydfsSrcFile, logFile, startLine, startChar, numLines, port)
-	fmt.Print("\n")
-	i := 0
-	for _, line := range lines {
-		stage1 := operators["splitLineOperator"].Operator(line).([]Rainstorm_tuple_t)
-		i++
-		fmt.Printf("Stage %d\n", i)
-		for _, tuple := range stage1 {
-			operators["wordCountOperator"].Operator(tuple)
-		}
-	}
-	fmt.Print(wordCounts)
-}
 
 func MockSendRequestToServer(port string, args *ArgsWithSender) {
 	// Establish a connection to the RPC server
@@ -109,6 +79,9 @@ func MockSendRequestToServer(port string, args *ArgsWithSender) {
 func TestRPCCommunication(t *testing.T) {
 	port := "12345"
 	go startRPCListenerWorker(port)
+  go startRPCListenerScheduler()
+  initOperators()
+  callInitializeOperatorOnVM(1, operators["splitLineOperator"])
 	time.Sleep(6 * time.Second)
 	fmt.Println("done waiting")
 	args := &ArgsWithSender{
@@ -116,5 +89,5 @@ func TestRPCCommunication(t *testing.T) {
 		SenderNum: 1,
 		Port:      port,
 	}
-	MockSendRequestToServer(port, args)
+	sendRequestToServer(0, port, args)
 }

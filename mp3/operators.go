@@ -13,8 +13,18 @@ type Operator struct {
 	Stateful bool
 }
 
-var operators = make(map[string]Operator)
+type OperatorPort struct {
+  Operator Operator
+  Port string
+}
 
+type OperatorChannels struct {
+	Input  chan Rainstorm_tuple_t
+	Output chan interface{}
+}
+
+var operators = make(map[string]Operator)
+var portToChannels = make(map[string]OperatorChannels)
 var wordCounts = make(map[string]int)
 
 func initOperators() {

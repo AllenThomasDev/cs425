@@ -191,11 +191,35 @@ func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *s
 }
 
 func (h *HyDFSReq) FindFreePort(args struct{}, reply *string) error {
-  freePort, err := getFreePort()
-  if err!=nil{
-    return err
-  }
-  *reply = strconv.Itoa(freePort)
+    listener, err := net.Listen("tcp", ":0")
+    if err != nil {
+        return err
+    }
+    defer listener.Close()
+    port := listener.Addr().(*net.TCPAddr).Port
+    *reply = strconv.Itoa(port)
+    return nil
+}
+
+func (h *HyDFSReq) InitializeOperatorOnPort(args *OperatorPort, reply *string) error {
+	portString := args.Port
+  fmt.Printf("Operator name: %s", args.Operator.Name)
+  // this listener will send the tuples to the input channel for this port
+	go startRPCListenerWorker(portString)
+  channels := OperatorChannels{
+		Input:  make(chan Rainstorm_tuple_t),
+		Output: make(chan interface{}),
+	}
+	portToChannels[portString] = channels
+  //start a channel to listen to inputs
+  fmt.Printf("created a channel to listen to inputs, \n the port here is %s", args.Port)
+  go func() {
+		for input := range channels.Input {
+			output := args.Operator.Operator(input)
+			channels.Output <- output
+		}
+		close(channels.Output) // Close the output channel when input channel is closed
+	}()
   return nil
 }
 
@@ -213,10 +237,7 @@ func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
 		return nil
 	} else if args.TaskType == SOURCE {
 		fmt.Printf("Processing %d lines of %s starting at line %d\n", args.SA.LinesToRead, args.SA.SrcFilename, args.SA.StartLine)
-    lines := generateSourceTuples(args.SA.SrcFilename, args.SA.LogFilename, args.SA.StartLine, args.SA.StartCharacter, args.SA.LinesToRead, portString)
-    for _, line := range(lines){
-      sendToNextStage(ArgsWithSender{line, currentVM, portString})
-    }
+    go generateSourceTuples(args.SA.SrcFilename, args.SA.LogFilename, args.SA.StartLine, args.SA.StartCharacter, args.SA.LinesToRead, portString)
 		return nil
 	} else {
 		return fmt.Errorf("Unknown task type")

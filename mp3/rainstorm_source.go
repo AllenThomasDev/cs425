@@ -9,7 +9,7 @@ import (
 )
 
 // SourceWrapper processes the file chunk line by line and sends to the next stage
-func generateSourceTuples(hydfsSrcFile, logFile string, startLine, startChar, numLines int, port string) []Rainstorm_tuple_t {
+func generateSourceTuples(hydfsSrcFile, logFile string, startLine, startChar, numLines int, port string) {
 	// TODO: make this more robust. right now if source finishes operation before topologyArray is populated it causes issues
 	time.Sleep(time.Second)
 
@@ -18,7 +18,6 @@ func generateSourceTuples(hydfsSrcFile, logFile string, startLine, startChar, nu
 	err := backgroundCommand(fmt.Sprintf("get %s %s", hydfsSrcFile, tempFileName))
 	if err != nil {
 		fmt.Printf("Error fetching source file: %v\n", err)
-		return nil
 	}
 	defer os.Remove("client/" + tempFileName)
 
@@ -26,7 +25,6 @@ func generateSourceTuples(hydfsSrcFile, logFile string, startLine, startChar, nu
 	file, err := os.OpenFile("client/"+tempFileName, os.O_RDONLY, 0644)
 	if err != nil {
 		fmt.Printf("Error opening source file: %v\n", err)
-		return nil
 	}
 	defer file.Close()
 
@@ -34,7 +32,6 @@ func generateSourceTuples(hydfsSrcFile, logFile string, startLine, startChar, nu
 	_, err = file.Seek(int64(startChar), io.SeekStart)
 	if err != nil {
 		fmt.Printf("Error seeking file: %v\n", err)
-		return nil
 	}
 
 	// Fetch log file to check for duplicates
@@ -42,12 +39,10 @@ func generateSourceTuples(hydfsSrcFile, logFile string, startLine, startChar, nu
 	err = backgroundCommand(fmt.Sprintf("get %s %s", logFile, oldLogFile))
 	if err != nil {
 		fmt.Printf("Error fetching log file: %v\n", err)
-		return nil
 	}
 	defer os.Remove("client/" + oldLogFile)
 
 	// Process the chunk
-	var lines []Rainstorm_tuple_t
 	remainingLines := numLines
 	for remainingLines > 0 {
 		line, err := readLineFromFile(file)
@@ -57,26 +52,22 @@ func generateSourceTuples(hydfsSrcFile, logFile string, startLine, startChar, nu
 				break
 			}
 			fmt.Printf("Error reading line: %v\n", err)
-			return nil
 		}
 	  uniqueID := startLine + numLines - remainingLines
   	key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
     lineTuple := generateTuple(key, line)
-		lines = append(lines, lineTuple)
+    sendToNextStage(ArgsWithSender{lineTuple, currentVM, port})
 		remainingLines--
 		if remainingLines == 0 {
 			select {
 			case _, ok := <-stopChannels[port]:
 				if ok {
 					fmt.Println("Received stop signal. Exiting...")
-					return nil // Exit the function after processing the current chunk
 				}
 			default:
-				// Continue if no stop signal is received
 			}
 		}
 	}
-	return lines
 }
 
 // readLineFromFile reads a single line from the file

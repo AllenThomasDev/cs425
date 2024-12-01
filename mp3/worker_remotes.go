@@ -25,12 +25,8 @@ func startRPCListenerWorker(port string) {
 	if err != nil {
 		panic(err)
 	}
+  fmt.Printf("Started a server on port: %s", port)
 	go rpc.Accept(servePort)
-
-	<-stopChannels[port]
-
-	fmt.Println("closing channel")
-	servePort.Close()
 }
 
 func (w *WorkerReq) StopTask(args *StopTaskArgs, reply *string) error {
