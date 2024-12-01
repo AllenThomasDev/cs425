@@ -93,7 +93,7 @@ var processRecord = func(uniqueID int, line string, hydfsSrcFile string, logFile
 func sendToNextStage(args ArgsWithSender) error {
 	fmt.Printf("Sending tuple: %v\n", args.Rt)
 	reply := getNextStageArgsFromScheduler(&args)
-  fmt.Println(reply)
+	fmt.Println(reply)
 	replyParts := strings.Split(reply, ":")
 	nextVM, err := strconv.Atoi(replyParts[0])
 	if err != nil {
@@ -155,4 +155,16 @@ func showTopology() {
 		}
 		fmt.Printf("\n")
 	}
+}
+
+func convertFileInfoStructListToTuples(hydfsSrcFile string, input FileChunkInfo, numSources int) []Rainstorm_tuple_t {
+	var tuples []Rainstorm_tuple_t
+	for i := 0; i < numSources; i++ {
+		rainstormTuple := Rainstorm_tuple_t{
+			Key:   hydfsSrcFile + ":" + strconv.Itoa(input.StartLines[i]) + ":" + strconv.Itoa(input.StartChars[i]) + ":" + strconv.Itoa(input.LinesPerSource[i]),
+			Value: "1",
+		}
+		tuples = append(tuples, rainstormTuple)
+	}
+	return tuples
 }

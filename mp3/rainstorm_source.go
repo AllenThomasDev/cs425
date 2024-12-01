@@ -9,7 +9,7 @@ import (
 )
 
 // SourceWrapper processes the file chunk line by line and sends to the next stage
-func generateSourceTuples(hydfsSrcFile, logFile string, startLine, startChar, numLines int, port string) {
+func generateSourceTuples(hydfsSrcFile string, startLine int, startChar int, numLines int, tupleChannel chan Rainstorm_tuple_t) {
 	// TODO: make this more robust. right now if source finishes operation before topologyArray is populated it causes issues
 	time.Sleep(time.Second)
 
@@ -33,16 +33,6 @@ func generateSourceTuples(hydfsSrcFile, logFile string, startLine, startChar, nu
 	if err != nil {
 		fmt.Printf("Error seeking file: %v\n", err)
 	}
-
-	// Fetch log file to check for duplicates
-	oldLogFile := genRandomFileName()
-	err = backgroundCommand(fmt.Sprintf("get %s %s", logFile, oldLogFile))
-	if err != nil {
-		fmt.Printf("Error fetching log file: %v\n", err)
-	}
-	defer os.Remove("client/" + oldLogFile)
-
-	// Process the chunk
 	remainingLines := numLines
 	for remainingLines > 0 {
 		line, err := readLineFromFile(file)
@@ -53,20 +43,11 @@ func generateSourceTuples(hydfsSrcFile, logFile string, startLine, startChar, nu
 			}
 			fmt.Printf("Error reading line: %v\n", err)
 		}
-	  uniqueID := startLine + numLines - remainingLines
-  	key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
-    lineTuple := generateTuple(key, line)
-    sendToNextStage(ArgsWithSender{lineTuple, currentVM, port})
+		uniqueID := startLine + numLines - remainingLines
+		key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
+		lineTuple := generateTuple(key, line)
+    tupleChannel <- lineTuple
 		remainingLines--
-		if remainingLines == 0 {
-			select {
-			case _, ok := <-stopChannels[port]:
-				if ok {
-					fmt.Println("Received stop signal. Exiting...")
-				}
-			default:
-			}
-		}
 	}
 }
 

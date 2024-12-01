@@ -202,25 +202,52 @@ func (h *HyDFSReq) FindFreePort(args struct{}, reply *string) error {
 }
 
 func (h *HyDFSReq) InitializeOperatorOnPort(args *OperatorPort, reply *string) error {
-	portString := args.Port
+  portString := args.Port
   fmt.Printf("Operator name: %s", args.OperatorName)
   // this listener will send the tuples to the input channel for this port
-	go startRPCListenerWorker(portString)
+  go startRPCListenerWorker(portString)
   channels := OperatorChannels{
-		Input:  make(chan Rainstorm_tuple_t),
-		Output: make(chan interface{}),
-	}
-	portToChannels[portString] = channels
+    Input:  make(chan Rainstorm_tuple_t),
+    Output: make(chan interface{}),
+  }
+  portToChannels[portString] = channels
   //start a channel to listen to inputs
   fmt.Printf("created a channel to listen to inputs, \n the port here is %s", args.Port)
-  go func() {
-		for input := range channels.Input {
-			output := operators[args.OperatorName].Operator(input)
-      fmt.Print(output)
-		}
-		close(channels.Output) // Close the output channel when input channel is closed
-	}()
+  go processInputChannel(args.OperatorName, channels)
+  go printOutputChannel(channels)
   return nil
+}
+
+// listens to input channel, processes the tuple using opeartor and puts it to output channel
+func processInputChannel(operatorName string, channels OperatorChannels) {
+  for input := range channels.Input {
+    output := operators[operatorName].Operator(input)
+    switch v := output.(type) {
+    case chan Rainstorm_tuple_t:
+      // If the operator returns a channel, consume from it
+      for tuple := range v {
+        channels.Output <- tuple
+      }
+    case Rainstorm_tuple_t:
+      // If the operator returns a single tuple
+      channels.Output <- v
+    case []Rainstorm_tuple_t:
+      // If the operator returns a slice of tuples, iterate and send each to Output
+      for _, tuple := range v {
+        channels.Output <- tuple
+      }
+    default:
+      fmt.Printf("Unexpected output type: %T\n", output)
+    }
+  }
+  close(channels.Output) // Close the output channel when input channel is closed
+}
+
+// Function to print the contents of the output channel
+func printOutputChannel(channels OperatorChannels) {
+  for output := range channels.Output {
+    fmt.Println("Output channel value:", output)
+  }
 }
 
 func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
@@ -237,7 +264,6 @@ func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
 		return nil
 	} else if args.TaskType == SOURCE {
 		fmt.Printf("Processing %d lines of %s starting at line %d\n", args.SA.LinesToRead, args.SA.SrcFilename, args.SA.StartLine)
-    go generateSourceTuples(args.SA.SrcFilename, args.SA.LogFilename, args.SA.StartLine, args.SA.StartCharacter, args.SA.LinesToRead, portString)
 		return nil
 	} else {
 		return fmt.Errorf("Unknown task type")

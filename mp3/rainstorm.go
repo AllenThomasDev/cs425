@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/rpc"
 	"os"
+	"reflect"
 	"strconv"
 )
 
@@ -42,11 +43,19 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 
 	// var ta TaskArgs
 	// break file into chunks
-	// sourceArgs, err := createFileChunks(len(nodeTopology[0]), hydfs_src_file)
-	// if err != nil {
-	// 	fmt.Printf("Error breaking file into chunks: %v\n", err)
-	// 	return
-	// }
+	sourceArgs, err := createFileChunks(len(nodeTopology[0]), hydfs_src_file)
+	if err != nil {
+		fmt.Printf("Error breaking file into chunks: %v\n", err)
+		return
+	}
+	fmt.Printf("type of sourceArgs is %s", reflect.TypeOf(sourceArgs))
+
+	for i := 0; i < len(nodeTopology[0]); i++ {
+		_, err := callInitializeOperatorOnVM(nodeTopology[0][i], "source")
+		if err != nil {
+			fmt.Print(err)
+		}
+	}
 
 	for i := 0; i < len(nodeTopology[1]); i++ {
 		_, err := callInitializeOperatorOnVM(nodeTopology[1][i], op1)
@@ -61,6 +70,8 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 			fmt.Print(err)
 		}
 	}
+	numSources := len(nodeTopology[0])
+  sourceTriggers := convertFileInfoStructListToTuples(hydfs_src_file, *sourceArgs, numSources)
 	// start sources
 	// for i := 0; i < len(nodeTopology[0]); i++ {
 	// 	ta.TaskType = SOURCE
@@ -81,18 +92,20 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 	// 	}
 	// }
 	// rainstormActive = true
-	var line = "This is a test line that will be split, This is an example line that is under test"
-	var rt = Rainstorm_tuple_t{Key: "test_source.txt:0", Value: line}
+  i := 0
 	for key, value := range currentActiveOperators[10] {
-		fmt.Println(key, value) // Print the first key-value pair
-		args := &ArgsWithSender{
-			Rt:        rt,
-			SenderNum: 10,
-			Port:      string(key),
+		if value.Name == "source" {
+			args := &ArgsWithSender{
+				Rt:        sourceTriggers[i],
+				SenderNum: 10,
+				Port:      string(key),
+			}
+      i++
+			fmt.Printf(string(key))
+			sendRequestToServer(0, string(key), args)
+		} else {
+			continue
 		}
-		fmt.Printf(string(key))
-		sendRequestToServer(0, string(key), args)
-		break
 	}
 	showTopology()
 	select {}
@@ -136,10 +149,10 @@ func callInitializeOperatorOnVM(vm int, op string) (string, error) {
 		return "", err
 	}
 	port, err := callFindFreePort(vm)
-  opPort := OperatorPort{
-    OperatorName: op,
-    Port:     port,
-  }
+	opPort := OperatorPort{
+		OperatorName: op,
+		Port:         port,
+	}
 	var reply string
 	err = client.Call("HyDFSReq.InitializeOperatorOnPort", opPort, &reply)
 	if err != nil {
@@ -155,25 +168,25 @@ func callInitializeOperatorOnVM(vm int, op string) (string, error) {
 }
 
 func callFindFreePort(vm int) (string, error) {
-    client, err := rpc.DialHTTP("tcp", vmToIP(vm)+":"+RPC_PORT)
-    if err != nil {
-        return "", fmt.Errorf("failed to dial RPC: %v", err)
-    }
-    defer client.Close()
+	client, err := rpc.DialHTTP("tcp", vmToIP(vm)+":"+RPC_PORT)
+	if err != nil {
+		return "", fmt.Errorf("failed to dial RPC: %v", err)
+	}
+	defer client.Close()
 
-    var reply string
-    err = client.Call("HyDFSReq.FindFreePort", struct{}{}, &reply)
-    if err != nil {
-        return "", fmt.Errorf("RPC call failed: %v", err)
-    }
-    if reply == "" {
-        return "", fmt.Errorf("received empty port from FindFreePort")
-    }
-    if _, err := strconv.Atoi(reply); err != nil {
-        return "", fmt.Errorf("invalid port format: %s", reply)
-    }
+	var reply string
+	err = client.Call("HyDFSReq.FindFreePort", struct{}{}, &reply)
+	if err != nil {
+		return "", fmt.Errorf("RPC call failed: %v", err)
+	}
+	if reply == "" {
+		return "", fmt.Errorf("received empty port from FindFreePort")
+	}
+	if _, err := strconv.Atoi(reply); err != nil {
+		return "", fmt.Errorf("invalid port format: %s", reply)
+	}
 
-    return reply, nil
+	return reply, nil
 }
 
 func constructSourceArgs(hydfs_src_file string, startLine int, startCharacter int, linesToRead int) SourceArgs {
