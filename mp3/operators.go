@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type OperatorFunc func(rt Rainstorm_tuple_t) interface{}
@@ -25,9 +26,27 @@ type OperatorChannels struct {
 
 var operators = make(map[string]Operator)
 var portToChannels = make(map[string]OperatorChannels)
-var wordCounts = make(map[string]int)
+var wordCountUpdates = make(chan string, 100) // Buffered channel for updates
+var wordCounts sync.Map
+
+
+func startWordCountWorker() {
+  go func() {
+    for key := range wordCountUpdates {
+      value, _ := wordCounts.LoadOrStore(key, 0)
+      wordCounts.Store(key, value.(int)+1)
+      fmt.Println("Updated wordCounts:", key, value.(int)+1)
+    }
+  }()
+}
+
+func updateWordCount(key string) {
+    wordCountUpdates <- key // Push key to the channel for processing
+}
+
 
 func initOperators() {
+  startWordCountWorker()
 	operators["source"] = Operator{
 		Name: "source",
 		Operator: func(rt Rainstorm_tuple_t) interface{} {
@@ -51,10 +70,10 @@ func initOperators() {
 			words := strings.Fields(rt.Value)
 			tupleChannel := make(chan Rainstorm_tuple_t)
 			go func() {
-				for _, word := range words {
+				for i, word := range words {
 					tupleChannel <- Rainstorm_tuple_t{
-						Key:   word,
-						Value: strconv.Itoa(1),
+            Key:   rt.Key + ":" + strconv.Itoa(i), // unique id, i'th word of unique id line
+						Value: word,
 					}
 				}
 				close(tupleChannel) // Close the channel once all tuples are sent
@@ -67,10 +86,11 @@ func initOperators() {
 	operators["wordCountOperator"] = Operator{
 		Name: "wordCountOperator",
 		Operator: func(rt Rainstorm_tuple_t) interface{} {
-			wordCounts[rt.Key]++
+      updateWordCount(rt.Value)
 			return Rainstorm_tuple_t{
 				Key:   rt.Key,
-				Value: strconv.Itoa(wordCounts[rt.Key]),
+        //TODO: temporary 0 for testin
+				Value: "0",
 			}
 		},
 		Stateful: true,

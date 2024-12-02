@@ -23,7 +23,7 @@ tmux new-session -d -s vm-session "ssh $1@${vm_hosts[0]}"
 
 # Loop through the remaining VM hosts and create new panes
 for host in "${vm_hosts[@]:1}"; do
-  tmux split-window -h "ssh $host"
+  tmux split-window -h "ssh $1@$host"
   tmux select-layout tiled
 done
 

@@ -31,6 +31,31 @@ func stopRPCListener(listener net.Listener) {
 }
 
 func (s *SchedulerReq) GetNextStage(args *ArgsWithSender, reply *string) error {
-  fmt.Println("Someone is asking me where to put this shit, %s", args.Port)
-	return nil
+  incomingTupleAddr := task_addr_t{args.SenderNum, args.Port}
+  incomingOperator := findOperatorFromTaskAddr(incomingTupleAddr) 
+  nextOperator := getNextOperator(incomingOperator)
+  keyHash := hash(args.Rt.Key, len(operatorToVmPorts[nextOperator]))
+  if nextOperator == "wordCountOperator" {
+    keyHash = hash(args.Rt.Value, len(operatorToVmPorts[nextOperator]))
+  }
+  nextStageTaskAddr := operatorToVmPorts[nextOperator][keyHash]
+  // what to do when last task?
+  retStr := fmt.Sprintf("%d:%s", nextStageTaskAddr.VM, nextStageTaskAddr.port)
+  *reply = retStr
+  return nil
 }
+
+
+	// for i := 0; i < len(senderTasks); i++ {
+	// 	// Check if the current task matches the sender's port
+	// 	if topologyArray[senderTasks[i].Layer][senderTasks[i].Hash].port == args.Port {
+	// 		// Hash the tuple's key to determine the next node in the next layer
+	// 		keyHash := hash(args.Rt.Key, len(topologyArray[senderTasks[i].Layer + 1]))
+	// 		// Construct the address of the next stage as "VM:port"
+	// 		retStr := fmt.Sprintf("%d:%s", topologyArray[senderTasks[i].Layer + 1][keyHash].VM, topologyArray[senderTasks[i].Layer + 1][keyHash].port)
+	// 		fmt.Println(retStr)
+	// 		// Set the reply to the target node's address
+	// 		*reply = fmt.Sprintf(retStr)
+	// 	}
+	// }
+	//

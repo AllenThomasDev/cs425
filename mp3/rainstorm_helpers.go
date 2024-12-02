@@ -91,17 +91,18 @@ var processRecord = func(uniqueID int, line string, hydfsSrcFile string, logFile
 
 // sendToNextStage sends the tuple to the next stage via RPC or other means
 func sendToNextStage(args ArgsWithSender) error {
-	fmt.Printf("Sending tuple: %v\n", args.Rt)
 	reply := getNextStageArgsFromScheduler(&args)
-	fmt.Println(reply)
 	replyParts := strings.Split(reply, ":")
 	nextVM, err := strconv.Atoi(replyParts[0])
 	if err != nil {
 		fmt.Println("this is where i die")
 	}
 	nextPort := replyParts[1]
-	fmt.Printf("Sending data to node %d, port %s\n", nextVM, nextPort)
-	sendRequestToServer(nextVM, nextPort, &args)
+  nextStageArgs := ArgsWithSender{
+    Rt: args.Rt,
+    SenderNum: nextVM,
+    Port: nextPort}
+	sendRequestToServer(nextVM, nextPort, &nextStageArgs)
 	return nil
 }
 
@@ -124,12 +125,10 @@ func sendRequestToServer(vm int, port string, args *ArgsWithSender) {
 		fmt.Println("Error during RPC call:", err)
 		return
 	}
-	fmt.Println("Server reply:", reply)
 }
 
 func getNextStageArgsFromScheduler(args *ArgsWithSender) string {
 	// Establish a connection to the RPC server
-	fmt.Println("Asking scheduler where to send this")
 	client, err := rpc.Dial("tcp", vmToIP(LEADER_ID)+":"+SCHEDULER_PORT)
 	if err != nil {
 		fmt.Println("Error connecting to scheduler:", err)
@@ -137,13 +136,11 @@ func getNextStageArgsFromScheduler(args *ArgsWithSender) string {
 	}
 	defer client.Close()
 	var reply string
-	fmt.Println("I reached before rpc call")
 	err = client.Call("SchedulerReq.GetNextStage", args, &reply)
 	if err != nil {
 		fmt.Println("Error during RPC call:", err)
 		return ""
 	}
-	fmt.Println("Server reply:", reply)
 	return reply
 }
 

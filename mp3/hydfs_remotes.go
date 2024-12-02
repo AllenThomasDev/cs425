@@ -203,7 +203,7 @@ func (h *HyDFSReq) FindFreePort(args struct{}, reply *string) error {
 
 func (h *HyDFSReq) InitializeOperatorOnPort(args *OperatorPort, reply *string) error {
   portString := args.Port
-  fmt.Printf("Operator name: %s", args.OperatorName)
+  fmt.Printf("Operator name: %s \n\n", args.OperatorName)
   // this listener will send the tuples to the input channel for this port
   go startRPCListenerWorker(portString)
   channels := OperatorChannels{
@@ -212,36 +212,42 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *OperatorPort, reply *string) e
   }
   portToChannels[portString] = channels
   //start a channel to listen to inputs
-  fmt.Printf("created a channel to listen to inputs, \n the port here is %s", args.Port)
+  fmt.Println("created a channel to listen to inputs, \n the port here is %s", args.Port)
   go processInputChannel(args.OperatorName, channels)
   go processOutputChannel(channels, args.Port)
   return nil
 }
 
 // listens to input channel, processes the tuple using opeartor and puts it to output channel
+
 func processInputChannel(operatorName string, channels OperatorChannels) {
   for input := range channels.Input {
     output := operators[operatorName].Operator(input)
-    switch v := output.(type) {
-    case chan Rainstorm_tuple_t:
-      // If the operator returns a channel, consume from it
-      for tuple := range v {
-        channels.Output <- tuple
+    // TODO: 
+    // If this operator is the last one in the sequence, don't push to output channel
+    // ideally this should be dynamic
+    // but it is okay for now, in the last stage we don't want to put anything in the output channels
+    if operatorName != "wordCountOperator" {
+      switch v := output.(type) {
+      case chan Rainstorm_tuple_t:
+        for tuple := range v {
+          channels.Output <- tuple
+        }
+      case Rainstorm_tuple_t:
+        channels.Output <- v
+      case []Rainstorm_tuple_t:
+        for _, tuple := range v {
+          channels.Output <- tuple
+        }
+      default:
+        fmt.Printf("Unexpected output type: %T\n", output)
       }
-    case Rainstorm_tuple_t:
-      // If the operator returns a single tuple
-      channels.Output <- v
-    case []Rainstorm_tuple_t:
-      // If the operator returns a slice of tuples, iterate and send each to Output
-      for _, tuple := range v {
-        channels.Output <- tuple
-      }
-    default:
-      fmt.Printf("Unexpected output type: %T\n", output)
+    } else {
     }
   }
   close(channels.Output) // Close the output channel when input channel is closed
 }
+
 
 // Function to print the contents of the output channel
 func processOutputChannel(channels OperatorChannels, port string) {

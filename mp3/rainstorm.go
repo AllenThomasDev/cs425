@@ -265,7 +265,7 @@ func distributeTasks(numTasks int) {
 	// we need to do this because membership list is a map, and order is not deterministic
 	// we need to sort it so that we get rid of leader, we could also do this, by iterating once, this is just easier
 	if len(memberKeys) > 1 {
-		fmt.Printf("We are excluding the leader from the list of members to assign tasks to")
+		fmt.Println("We are excluding the leader from the list of members to assign tasks to")
 		memberKeys = memberKeys[1:]
 	}
 	if len(memberKeys) == 0 {
