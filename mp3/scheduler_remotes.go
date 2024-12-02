@@ -35,11 +35,7 @@ func (s *SchedulerReq) GetNextStage(args *ArgsWithSender, reply *string) error {
   incomingOperator := findOperatorFromTaskAddr(incomingTupleAddr) 
   nextOperator := getNextOperator(incomingOperator)
   keyHash := hash(args.Rt.Key, len(operatorToVmPorts[nextOperator]))
-  if nextOperator == "wordCountOperator" {
-    keyHash = hash(args.Rt.Value, len(operatorToVmPorts[nextOperator]))
-  }
   nextStageTaskAddr := operatorToVmPorts[nextOperator][keyHash]
-  // what to do when last task?
   retStr := fmt.Sprintf("%d:%s", nextStageTaskAddr.VM, nextStageTaskAddr.port)
   *reply = retStr
   return nil

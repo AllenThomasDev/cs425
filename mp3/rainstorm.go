@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"math/rand"
 	"net/rpc"
 	"os"
 	"sort"
@@ -29,7 +30,7 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 		return
 	}
 	operatorSequence = []string{"source", op1, op2}
-
+  rainstormActive = true
 	rainstormArgs = StartRainstormRemoteArgs{
 		op1,
 		op2,
@@ -39,7 +40,7 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 	}
 	createLogFiles()
 	distributeTasks(numTasks)
-	updateOperatorNodes(currentActiveOperators)
+  // TODO: every time that membership list is updated, we need to update a lot of globals
 	go startRPCListenerScheduler()
 	// here i am making the assumption that a source does not fail before we send the chunks to it
 	sourceArgs, err := createFileChunks(numTasks, hydfs_src_file)
@@ -105,6 +106,7 @@ func callInitializeOperatorOnVM(vm int, op string) (string, error) {
 		currentActiveOperators[vm] = make(map[string]Operator)
 	}
 	currentActiveOperators[vm][port] = operators[op]
+  operatorToVmPorts[op] = append(operatorToVmPorts[op],task_addr_t{vm, port})
 	fmt.Printf("Started %s on VM %d:%s\n", operators[op].Name, vm, port)
 	return reply, nil
 }
@@ -189,6 +191,71 @@ func constructRescheduleArgs(tent topology_entry_t) (TaskArgs, error) {
 
 	return ta, nil
 }
+
+func rebalanceTasksOnNodeFailure(vm int) {
+  tasksOnDeadVM := currentActiveOperators[vm]
+  var taskAddrToBeDeleted []task_addr_t
+  delete(currentActiveOperators, vm)
+  var tasksToBeRessurected []Operator
+  for port, _ := range(tasksOnDeadVM) {
+    tasksToBeRessurected = append(tasksToBeRessurected, tasksOnDeadVM[port])
+    taskAddrToBeDeleted = append(taskAddrToBeDeleted, task_addr_t{vm, port})
+  }
+  for i := range(tasksToBeRessurected){
+    // remove address from operatorToVmPorts[]
+    operatorName := tasksToBeRessurected[i].Name
+    removeTaskAddrFromOperator(operatorName, taskAddrToBeDeleted[i])
+    destination := findNodeWithFewestTasks()
+		callInitializeOperatorOnVM(destination, operatorName)
+  }
+}
+
+
+func removeTaskAddrFromOperator(operatorName string, Addr task_addr_t) {
+  // Retrieve the slice of task addresses for the given operator
+  taskAddrsForOperators := operatorToVmPorts[operatorName]
+  // Iterate through the slice to find the address and remove it
+  for i := 0; i < len(taskAddrsForOperators); i++ {
+    if taskAddrsForOperators[i] == Addr {
+      // Shift all elements to the left, effectively removing the element at index i
+      taskAddrsForOperators = append(taskAddrsForOperators[:i], taskAddrsForOperators[i+1:]...)
+      break // Exit after removing the address
+    }
+  }
+  //entries are added in this global when a task is initalized
+  operatorToVmPorts[operatorName] = taskAddrsForOperators
+}
+
+
+func findNodeWithFewestTasks() int {
+	var shortestKey int
+	minLength := -1
+	multipleKeys := false
+
+	for key, operatorMap := range currentActiveOperators {
+		length := len(operatorMap)
+		if minLength == -1 || length < minLength {
+			minLength = length
+			shortestKey = key
+			multipleKeys = false // Reset multiple keys flag
+		} else if length == minLength {
+			multipleKeys = true
+		}
+	}
+	// If there are multiple shortest keys, pick any random key from the original map
+	if multipleKeys {
+		keys := make([]int, 0, len(currentActiveOperators))
+		for k := range currentActiveOperators {
+			keys = append(keys, k)
+		}
+		return keys[rand.Intn(len(keys))]
+	}
+
+	return shortestKey
+
+}
+
+
 
 func rescheduleTask(change string, vm int) {
 
@@ -284,16 +351,6 @@ func distributeTasks(numTasks int) {
 	}
 }
 
-func updateOperatorNodes(input map[int]map[string]Operator) {
-	for vm, ports := range input {
-		for port, operator := range ports {
-			operatorToVmPorts[operator.Name] = append(operatorToVmPorts[operator.Name], task_addr_t{
-				VM:   vm,
-				port: port,
-			})
-		}
-	}
-}
 
 func findOperatorFromTaskAddr(taskAddr task_addr_t) string {
 	for operatorName, vmPorts := range operatorToVmPorts {
