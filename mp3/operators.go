@@ -20,7 +20,7 @@ type OperatorPort struct {
 
 type OperatorChannels struct {
 	Input  chan Rainstorm_tuple_t
-	Output chan interface{}
+	Output chan Rainstorm_tuple_t
 }
 
 var operators = make(map[string]Operator)

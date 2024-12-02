@@ -5,15 +5,18 @@ import (
 	"io"
 	"net/rpc"
 	"os"
+	"sort"
 	"strconv"
 )
 
 // this is vm:port:operator, needs to be updated when things fail
 var currentActiveOperators = make(map[int]map[string]Operator)
+var operatorToVmPorts = make(map[string][]task_addr_t)
 var availableOperators = make([]string, 2)
 var operatorSequence = make([]string, 3)
 
 var (
+	// TODO: does this have to be 3*3
 	topologyArray   = make([][]task_addr_t, 3, 3)
 	tasksPerWorker  = make(map[int]int)
 	rainstormArgs   StartRainstormRemoteArgs // save args for rescheduling
@@ -36,6 +39,7 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 	}
 	createLogFiles()
 	distributeTasks(numTasks)
+	updateOperatorNodes(currentActiveOperators)
 	go startRPCListenerScheduler()
 	// here i am making the assumption that a source does not fail before we send the chunks to it
 	sourceArgs, err := createFileChunks(numTasks, hydfs_src_file)
@@ -44,22 +48,7 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 		return
 	}
 	sourceTriggers := convertFileInfoStructListToTuples(hydfs_src_file, *sourceArgs, numTasks)
-	// i := 0
-	// for key, value := range currentActiveOperators[10] {
-	// 	if value.Name == "source" {
-	// 		args := &ArgsWithSender{
-	// 			Rt:        sourceTriggers[i],
-	// 			SenderNum: 10,
-	// 			Port:      string(key),
-	// 		}
-	// 		i++
-	// 		fmt.Printf(string(key))
-	// 		sendRequestToServer(0, string(key), args)
-	// 	} else {
-	// 		continue
-	// 	}
-	// }
-	// showTopology()
+	startSources(sourceTriggers)
 	fmt.Println(currentActiveOperators, sourceTriggers)
 	select {}
 }
@@ -158,7 +147,7 @@ func constructOp1Args(op1_exe string) OpArgs {
 	op1Args.LogFilename = "op1.log"
 	op1Args.IsOutput = false
 	op1Args.OutputFilename = ""
-	//@todo handle IsStateful from operator name?
+	// TODO: handle IsStateful from operator name?
 	// if op1_type == "AggregateByKey" {
 	// 	op1Args.IsStateful = true
 	// 	op1Args.StateFilename = "op1_state.log"
@@ -268,11 +257,13 @@ func rescheduleTask(change string, vm int) {
 }
 
 func distributeTasks(numTasks int) {
-	memberKeys := make([]string, 0, len(membershipList))
+	memberKeys := make([]int, 0, len(membershipList))
 	for key := range membershipList {
-		memberKeys = append(memberKeys, key)
+		memberKeys = append(memberKeys, ipToVM(key))
 	}
-	// @todo: we should remove the leader from the list, it should not be assigned any tasks
+	sort.Ints(memberKeys)
+	// we need to do this because membership list is a map, and order is not deterministic
+	// we need to sort it so that we get rid of leader, we could also do this, by iterating once, this is just easier
 	if len(memberKeys) > 1 {
 		fmt.Printf("We are excluding the leader from the list of members to assign tasks to")
 		memberKeys = memberKeys[1:]
@@ -288,8 +279,63 @@ func distributeTasks(numTasks int) {
 		operatorIndex := i / numTasks
 		operator := operatorSequence[operatorIndex]
 		member := memberKeys[memberIndex]
-		callInitializeOperatorOnVM(ipToVM(member), operator)
+		callInitializeOperatorOnVM(member, operator)
 		memberIndex = (memberIndex + 1) % len(memberKeys)
+	}
+}
+
+func updateOperatorNodes(input map[int]map[string]Operator) {
+	for vm, ports := range input {
+		for port, operator := range ports {
+			operatorToVmPorts[operator.Name] = append(operatorToVmPorts[operator.Name], task_addr_t{
+				VM:   vm,
+				port: port,
+			})
+		}
+	}
+}
+
+func findOperatorFromTaskAddr(taskAddr task_addr_t) string {
+	for operatorName, vmPorts := range operatorToVmPorts {
+		for _, addr := range vmPorts {
+			if addr == taskAddr {
+				return operatorName
+			}
+		}
+	}
+	panic("couldn't find operator for a certain address")
+	// TODO:
+	// we could have problems if something dies, we remove it from the operator
+	// to VMs map and then we receive a tuple, we won't know where we got it from
+	// ,thus maybe we should have 2 maps, one that has all operators and ports
+	// mappings that were ever creaeted, the other has only active ones
+	// this can be solved if we along with the tuple, we just send the operator that just operated on the tuple, instead of the VM:Port
+	// but i am bit tired to make that refactor right now
+}
+
+func getNextOperator(operatorName string) string {
+	for i, name := range operatorSequence {
+		if name == operatorName {
+			if i == len(operatorSequence)-1 {
+				return "completed"
+			}
+			return operatorSequence[i+1]
+		}
+	}
+	return "not found"
+}
+
+func startSources(sourceTriggers []Rainstorm_tuple_t) {
+	fmt.Println(operatorToVmPorts)
+	sourceAddrs := operatorToVmPorts["source"]
+	fmt.Println(sourceAddrs)
+	for i := 0; i < len(sourceAddrs); i++ {
+		args := &ArgsWithSender{
+			Rt:        sourceTriggers[i],
+			SenderNum: 10,
+			Port:      sourceAddrs[i].port,
+		}
+		sendRequestToServer(sourceAddrs[i].VM, sourceAddrs[i].port, args)
 	}
 }
 

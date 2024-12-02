@@ -208,13 +208,13 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *OperatorPort, reply *string) e
   go startRPCListenerWorker(portString)
   channels := OperatorChannels{
     Input:  make(chan Rainstorm_tuple_t),
-    Output: make(chan interface{}),
+    Output: make(chan Rainstorm_tuple_t),
   }
   portToChannels[portString] = channels
   //start a channel to listen to inputs
   fmt.Printf("created a channel to listen to inputs, \n the port here is %s", args.Port)
   go processInputChannel(args.OperatorName, channels)
-  go printOutputChannel(channels)
+  go processOutputChannel(channels, args.Port)
   return nil
 }
 
@@ -244,10 +244,14 @@ func processInputChannel(operatorName string, channels OperatorChannels) {
 }
 
 // Function to print the contents of the output channel
-func printOutputChannel(channels OperatorChannels) {
-  for output := range channels.Output {
-    fmt.Println("Output channel value:", output)
-  }
+func processOutputChannel(channels OperatorChannels, port string) {
+	for rt := range channels.Output {
+    sendToNextStage(ArgsWithSender{
+      Rt: rt,
+      SenderNum: ipToVM(selfIP),
+      Port: port,
+    })
+	}
 }
 
 func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
