@@ -212,7 +212,7 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *OperatorPort, reply *string) e
   }
   portToChannels[portString] = channels
   //start a channel to listen to inputs
-  fmt.Println("created a channel to listen to inputs, \n the port here is %s", args.Port)
+  fmt.Printf("created a channel to listen to inputs, \nthe port here is %s", args.Port)
   go processInputChannel(args.OperatorName, channels)
   go processOutputChannel(channels, args.Port)
   return nil

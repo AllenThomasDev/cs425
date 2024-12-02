@@ -107,6 +107,7 @@ func callInitializeOperatorOnVM(vm int, op string) (string, error) {
 	}
 	currentActiveOperators[vm][port] = operators[op]
   operatorToVmPorts[op] = append(operatorToVmPorts[op],task_addr_t{vm, port})
+  fmt.Print(operatorToVmPorts[op])
 	fmt.Printf("Started %s on VM %d:%s\n", operators[op].Name, vm, port)
 	return reply, nil
 }
@@ -224,6 +225,8 @@ func removeTaskAddrFromOperator(operatorName string, Addr task_addr_t) {
   }
   //entries are added in this global when a task is initalized
   operatorToVmPorts[operatorName] = taskAddrsForOperators
+  fmt.Print("things were updated\n")
+  fmt.Print(operatorToVmPorts[operatorName])
 }
 
 

@@ -219,7 +219,8 @@ func removeMember(ip string) {
 	membershipListMutex.Unlock()
 	removeFromHyDFS(ip)
 	if rainstormActive {
-		rescheduleTask("LEAVE", ipToVM(ip))
+		// rescheduleTask("LEAVE", ipToVM(ip))
+    rebalanceTasksOnNodeFailure(ipToVM(ip))
 	}
 	logger.Printf("Node %s removed from membership list", ip)
 }
