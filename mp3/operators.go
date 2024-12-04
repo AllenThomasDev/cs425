@@ -19,13 +19,41 @@ type OperatorPort struct {
 	Port         string
 }
 
+// input needs both tuple and address/UID to ack so output knows who to ACK
+type InputInfo struct {
+	Tup Rainstorm_tuple_t
+	AckInfo Ack_info_t
+}
+
+// output info needs tuple to send, UID to write to log, and address/UID to ACK
+type OutputInfo struct {
+	Tup Rainstorm_tuple_t
+	AckInfo Ack_info_t
+	UID string
+}
+
+type TupleAndAckInfo struct {
+	Tup Rainstorm_tuple_t
+	AckInfo Ack_info_t
+}
+
+type Ack_info_t struct {
+	UID string
+	SenderNum int
+	SenderPort string
+}
+
 type OperatorChannels struct {
-	Input  chan Rainstorm_tuple_t
-	Output chan Rainstorm_tuple_t
+	Input		chan InputInfo
+	Output		chan OutputInfo
+	RecvdAck	chan Ack_info_t
+	SendAck		chan bool
 }
 
 var operators = make(map[string]Operator)
 var portToChannels = make(map[string]OperatorChannels)
+// maps port current task is running on to next ACK we need to send out
+// var portToNextAck = make(map[string]Ack_info_t)
 var wordCountUpdates = make(chan string, 100) // Buffered channel for updates
 var wordCounts sync.Map
 
@@ -33,7 +61,9 @@ var wordCounts sync.Map
 func startWordCountWorker() {
   go func() {
     for key := range wordCountUpdates {
+	// search for word we want to update in HyDFS logFile
       value, _ := wordCounts.LoadOrStore(key, 0)
+	// append updated value to HyDFS state file
       wordCounts.Store(key, value.(int)+1)
       fmt.Println("Updated wordCounts:", key, value.(int)+1)
     }
@@ -50,7 +80,7 @@ func initOperators() {
 	operators["source"] = Operator{
 		Name: "source",
 		Operator: func(rt Rainstorm_tuple_t) interface{} {
-      fmt.Printf("I am a source %s", rt.Key)
+      fmt.Printf("I am a source\n")
 			fileInfo := rt.Key
 			fileInfoParts := strings.Split(fileInfo, ":")
 			fileName := fileInfoParts[0]
@@ -67,6 +97,7 @@ func initOperators() {
 	operators["splitLineOperator"] = Operator{
 		Name: "splitLineOperator",
 		Operator: func(rt Rainstorm_tuple_t) interface{} {
+			fmt.Printf("I am splitting\n")
 			words := strings.Fields(rt.Value)
 			tupleChannel := make(chan Rainstorm_tuple_t)
 			go func() {
@@ -76,6 +107,7 @@ func initOperators() {
 						Value: word,
 					}
 				}
+
 				close(tupleChannel) // Close the channel once all tuples are sent
 			}() // <-- Invoke the anonymous function here
 			return tupleChannel // Return the channel
@@ -86,9 +118,10 @@ func initOperators() {
 	operators["wordCountOperator"] = Operator{
 		Name: "wordCountOperator",
 		Operator: func(rt Rainstorm_tuple_t) interface{} {
+			fmt.Printf("I am counting words\n")
       updateWordCount(rt.Value)
 			return Rainstorm_tuple_t{
-				Key:   rt.Key,
+				Key:   rt.Value,
         //TODO: temporary 0 for testin
 				Value: "0",
 			}

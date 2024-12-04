@@ -112,7 +112,7 @@ func (h *HyDFSReq) Get(args *GetArgs, reply *string) error {
 }
 
 func (h *HyDFSReq) Create(args *CreateArgs, reply *string) error {
-	fmt.Printf("Received CREATE message for %s\n", args.HyDFSFilename)
+	// fmt.Printf("Received CREATE message for %s\n", args.HyDFSFilename)
 
 	err := writeFile(args.HyDFSFilename, args.FileContent, "server")
 	if err != nil {
@@ -131,12 +131,12 @@ func (h *HyDFSReq) Create(args *CreateArgs, reply *string) error {
 	// launch thread to manage appends
 	go writeToLog(args.HyDFSFilename)
 
-	fmt.Println("CREATE completed")
+	// fmt.Println("CREATE completed")
 	return nil
 }
 
 func (h *HyDFSReq) Append(args *AppendArgs, reply *string) error {
-	fmt.Println("Received APPEND message")
+	// fmt.Println("Received APPEND message")
 	
 	aID := Append_id_t{args.CallerVM, args.Timestamp}
 	_, exists := aIDtoFile[args.HyDFSFilename][aID]
@@ -152,7 +152,7 @@ func (h *HyDFSReq) Append(args *AppendArgs, reply *string) error {
 		aIDtoFile[args.HyDFSFilename][aID] = randFilename
 	}
 
-	fmt.Println("APPEND completed")
+	// fmt.Println("APPEND completed")
 	return nil
 }
 
@@ -207,57 +207,17 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *OperatorPort, reply *string) e
   // this listener will send the tuples to the input channel for this port
   go startRPCListenerWorker(portString)
   channels := OperatorChannels{
-    Input:  make(chan Rainstorm_tuple_t),
-    Output: make(chan Rainstorm_tuple_t),
+    Input:  make(chan InputInfo),
+    Output: make(chan OutputInfo),
+	RecvdAck: make(chan Ack_info_t),
+	SendAck: make(chan bool),
   }
   portToChannels[portString] = channels
   //start a channel to listen to inputs
-  fmt.Printf("created a channel to listen to inputs, \nthe port here is %s", args.Port)
-  go processInputChannel(args.OperatorName, channels)
-  go processOutputChannel(channels, args.Port)
+  fmt.Printf("created a channel to listen to inputs, \nthe port here is %s\n", args.Port)
+  go processInputChannel(args.OperatorName, channels, args.Port)
+  go processOutputChannel(args.OperatorName, channels, args.Port)
   return nil
-}
-
-// listens to input channel, processes the tuple using opeartor and puts it to output channel
-
-func processInputChannel(operatorName string, channels OperatorChannels) {
-  for input := range channels.Input {
-    output := operators[operatorName].Operator(input)
-    // TODO: 
-    // If this operator is the last one in the sequence, don't push to output channel
-    // ideally this should be dynamic
-    // but it is okay for now, in the last stage we don't want to put anything in the output channels
-    if operatorName != "wordCountOperator" {
-      switch v := output.(type) {
-      case chan Rainstorm_tuple_t:
-        for tuple := range v {
-          channels.Output <- tuple
-        }
-      case Rainstorm_tuple_t:
-        channels.Output <- v
-      case []Rainstorm_tuple_t:
-        for _, tuple := range v {
-          channels.Output <- tuple
-        }
-      default:
-        fmt.Printf("Unexpected output type: %T\n", output)
-      }
-    } else {
-    }
-  }
-  close(channels.Output) // Close the output channel when input channel is closed
-}
-
-
-// Function to print the contents of the output channel
-func processOutputChannel(channels OperatorChannels, port string) {
-	for rt := range channels.Output {
-    sendToNextStage(ArgsWithSender{
-      Rt: rt,
-      SenderNum: ipToVM(selfIP),
-      Port: port,
-    })
-	}
 }
 
 func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {

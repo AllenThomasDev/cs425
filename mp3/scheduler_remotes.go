@@ -4,9 +4,20 @@ import (
 	"fmt"
 	"net"
 	"net/rpc"
+	"strconv"
 )
 
 type SchedulerReq string
+
+type GetTaskLogArgs struct {
+	VM int
+	Port string
+}
+type GetNextStageArgs struct {
+	VM int
+	Port string
+	Rt Rainstorm_tuple_t
+}
 
 func startRPCListenerScheduler() (net.Listener, error) {
 	schedulerreq := new(SchedulerReq)
@@ -30,15 +41,32 @@ func stopRPCListener(listener net.Listener) {
 	}
 }
 
-func (s *SchedulerReq) GetNextStage(args *ArgsWithSender, reply *string) error {
-  incomingTupleAddr := task_addr_t{args.SenderNum, args.Port}
+func (s *SchedulerReq) GetNextStage(args *GetNextStageArgs, reply *string) error {
+  incomingTupleAddr := task_addr_t{args.VM, args.Port}
   incomingOperator := findOperatorFromTaskAddr(incomingTupleAddr) 
   nextOperator := getNextOperator(incomingOperator)
-  keyHash := hash(args.Rt.Key, len(operatorToVmPorts[nextOperator]))
-  nextStageTaskAddr := operatorToVmPorts[nextOperator][keyHash]
-  retStr := fmt.Sprintf("%d:%s", nextStageTaskAddr.VM, nextStageTaskAddr.port)
-  *reply = retStr
+  // if operation has been completed, have data get sent to the leader
+  if nextOperator == "completed" {
+	*reply = fmt.Sprintf("%d:%s", LEADER_ID, CONSOLE_OUT_PORT)
+  } else {
+	keyHash := hash(args.Rt.Key, len(operatorToVmPorts[nextOperator]))
+	nextStageTaskAddr := operatorToVmPorts[nextOperator][keyHash]
+	retStr := fmt.Sprintf("%d:%s", nextStageTaskAddr.VM, nextStageTaskAddr.port)
+	*reply = retStr
+  }
   return nil
+}
+
+func (s *SchedulerReq) GetTaskLog(args *GetTaskLogArgs, reply *string) error {
+	incomingTupleAddr := task_addr_t{args.VM, args.Port}
+	incomingOperator := findOperatorFromTaskAddr(incomingTupleAddr)
+	currHash := matchTaskWithHash(incomingTupleAddr, incomingOperator)
+	if currHash == -1 {
+		return fmt.Errorf("Error: task not found in operator to port mappings, state may be outdated\n")
+	}
+	logPrefix := incomingOperator + "_" + strconv.Itoa(currHash)
+	*reply = fmt.Sprintf("%s:%s", logPrefix + ".log", logPrefix + "_state" + ".log")
+	return nil
 }
 
 

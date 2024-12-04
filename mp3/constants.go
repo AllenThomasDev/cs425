@@ -72,6 +72,8 @@ var (
 	RAINSTORM_LAYERS	= 3		// source, op1, op2 -> we will always have 3 layers for rainstorm operation
 	RPC_PORT			= "2233"
 	SCHEDULER_PORT		= "2234"
+	CONSOLE_OUT_PORT	= "2235"
+	RAINSTORM_ACK_TIMEOUT = 3 * time.Second
 	introducerIP        = "172.22.94.178"
 	ipList              = []string {
 							"172.22.94.178",

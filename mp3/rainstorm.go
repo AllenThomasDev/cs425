@@ -10,6 +10,8 @@ import (
 	"strconv"
 )
 
+// TODO: make operators write to proper logfile when outputting, have operators check logfile when processing inputs, adjust/remove cache for UIDs
+
 // this is vm:port:operator, needs to be updated when things fail
 var currentActiveOperators = make(map[int]map[string]Operator)
 var operatorToVmPorts = make(map[string][]task_addr_t)
@@ -38,10 +40,12 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 		hydfs_dest_file,
 		numTasks,
 	}
-	createLogFiles()
 	distributeTasks(numTasks)
+	createLogFiles(operatorSequence)
+	backgroundCommand(fmt.Sprintf("createemptyfile %s", hydfs_dest_file))
   // TODO: every time that membership list is updated, we need to update a lot of globals
 	go startRPCListenerScheduler()
+	go startRPCListenerWorker(CONSOLE_OUT_PORT)
 	// here i am making the assumption that a source does not fail before we send the chunks to it
 	sourceArgs, err := createFileChunks(numTasks, hydfs_src_file)
 	if err != nil {
@@ -54,20 +58,22 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 	select {}
 }
 
-func createLogFiles() {
-	backgroundCommand("createemptyfile op1.log")
-	backgroundCommand("createemptyfile op1_state.log")
-	backgroundCommand("createemptyfile op2.log")
-	backgroundCommand("createemptyfile op2_state.log")
-	backgroundCommand("createemptyfile source.log")
+func createLogFiles(operatorSequence []string) {
+	for i := 0; i < len(operatorToVmPorts); i++ {
+		for j := 0; j < len(operatorToVmPorts[operatorSequence[i]]); j++ {
+			backgroundCommand(fmt.Sprintf("createemptyfile %s_%d.log", operatorSequence[i], j))
+			backgroundCommand(fmt.Sprintf("createemptyfile %s_%d_state.log", operatorSequence[i], j))
+		}
+	}
 }
 
-func removeLogFiles() {
-	backgroundCommand("remove op1.log")
-	backgroundCommand("remove op1_state.log")
-	backgroundCommand("remove op2.log")
-	backgroundCommand("remove op2_state.log")
-	backgroundCommand("remove source.log")
+func removeLogFiles(operatorSequence []string) {
+	for opStr := range operatorSequence {
+		for i := 0; i < len(operatorToVmPorts[operatorSequence[opStr]]); i++ {
+			backgroundCommand(fmt.Sprintf("remove %s_%d.log", opStr, i))
+			backgroundCommand(fmt.Sprintf("remove %s_%d_state.log", opStr, i))
+		}
+	}
 }
 
 func callStartTask(vm int, ta TaskArgs) (string, error) {
@@ -197,14 +203,14 @@ func rebalanceTasksOnNodeFailure(vm int) {
   tasksOnDeadVM := currentActiveOperators[vm]
   var taskAddrToBeDeleted []task_addr_t
   delete(currentActiveOperators, vm)
-  var tasksToBeRessurected []Operator
+  var tasksToBeResurrected []Operator
   for port, _ := range(tasksOnDeadVM) {
-    tasksToBeRessurected = append(tasksToBeRessurected, tasksOnDeadVM[port])
+    tasksToBeResurrected = append(tasksToBeResurrected, tasksOnDeadVM[port])
     taskAddrToBeDeleted = append(taskAddrToBeDeleted, task_addr_t{vm, port})
   }
-  for i := range(tasksToBeRessurected){
+  for i := range(tasksToBeResurrected){
     // remove address from operatorToVmPorts[]
-    operatorName := tasksToBeRessurected[i].Name
+    operatorName := tasksToBeResurrected[i].Name
     removeTaskAddrFromOperator(operatorName, taskAddrToBeDeleted[i])
     destination := findNodeWithFewestTasks()
 		callInitializeOperatorOnVM(destination, operatorName)
@@ -373,6 +379,26 @@ func findOperatorFromTaskAddr(taskAddr task_addr_t) string {
 	// but i am bit tired to make that refactor right now
 }
 
+// func findLayerFromTaskAddr(taskAddr task_addr_t) int {
+// 	operatorName := findOperatorFromTaskAddr(taskAddr)
+// 	for i := 0; i < len(operatorSequence); i++ {
+// 		if operatorName == operatorSequence[i] {
+// 			return i
+// 		}
+// 	}
+// 	fmt.Printf("Error: couldn't match operator with layer\n")
+// 	return -1
+// }
+
+func matchTaskWithHash(taskAddr task_addr_t, opString string) int {
+	for i := 0; i < len(operatorToVmPorts[opString]); i++ {
+		if operatorToVmPorts[opString][i] == taskAddr {
+			return i
+		}
+	}
+	return -1
+}
+
 func getNextOperator(operatorName string) string {
 	for i, name := range operatorSequence {
 		if name == operatorName {
@@ -392,8 +418,10 @@ func startSources(sourceTriggers []Rainstorm_tuple_t) {
 	for i := 0; i < len(sourceAddrs); i++ {
 		args := &ArgsWithSender{
 			Rt:        sourceTriggers[i],
-			SenderNum: 10,
-			Port:      sourceAddrs[i].port,
+			SenderNum: 0,
+			SenderPort: SCHEDULER_PORT,
+			TargetPort: sourceAddrs[i].port,
+			UID: strconv.Itoa(i),
 		}
 		sendRequestToServer(sourceAddrs[i].VM, sourceAddrs[i].port, args)
 	}

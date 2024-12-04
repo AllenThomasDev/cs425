@@ -5,14 +5,10 @@ import (
 	"io"
 	"os"
 	"strconv"
-	"time"
 )
 
 // SourceWrapper processes the file chunk line by line and sends to the next stage
 func generateSourceTuples(hydfsSrcFile string, startLine int, startChar int, numLines int, tupleChannel chan Rainstorm_tuple_t) {
-	// TODO: make this more robust. right now if source finishes operation before topologyArray is populated it causes issues
-	time.Sleep(time.Second)
-
 	// Fetch and open the file chunk
 	tempFileName := genRandomFileName()
 	err := backgroundCommand(fmt.Sprintf("get %s %s", hydfsSrcFile, tempFileName))
@@ -49,6 +45,7 @@ func generateSourceTuples(hydfsSrcFile string, startLine int, startChar int, num
     tupleChannel <- lineTuple
 		remainingLines--
 	}
+	close(tupleChannel)
 }
 
 // readLineFromFile reads a single line from the file
