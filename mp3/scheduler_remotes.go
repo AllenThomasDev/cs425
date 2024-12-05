@@ -4,19 +4,18 @@ import (
 	"fmt"
 	"net"
 	"net/rpc"
-	"strconv"
 )
 
 type SchedulerReq string
 
-type GetTaskLogArgs struct {
-	VM int
-	Port string
-}
 type GetNextStageArgs struct {
-	VM int
-	Port string
+	CurrOperator	string
 	Rt Rainstorm_tuple_t
+}
+
+type GetPrevStageArgs struct {
+	PrevOperator string
+	PrevHash int
 }
 
 func startRPCListenerScheduler() (net.Listener, error) {
@@ -42,9 +41,7 @@ func stopRPCListener(listener net.Listener) {
 }
 
 func (s *SchedulerReq) GetNextStage(args *GetNextStageArgs, reply *string) error {
-  incomingTupleAddr := task_addr_t{args.VM, args.Port}
-  incomingOperator := findOperatorFromTaskAddr(incomingTupleAddr) 
-  nextOperator := getNextOperator(incomingOperator)
+  nextOperator := getNextOperator(args.CurrOperator)
   // if operation has been completed, have data get sent to the leader
   if nextOperator == "completed" {
 	*reply = fmt.Sprintf("%d:%s", LEADER_ID, CONSOLE_OUT_PORT)
@@ -57,29 +54,13 @@ func (s *SchedulerReq) GetNextStage(args *GetNextStageArgs, reply *string) error
   return nil
 }
 
-func (s *SchedulerReq) GetTaskLog(args *GetTaskLogArgs, reply *string) error {
-	incomingTupleAddr := task_addr_t{args.VM, args.Port}
-	incomingOperator := findOperatorFromTaskAddr(incomingTupleAddr)
-	currHash := matchTaskWithHash(incomingTupleAddr, incomingOperator)
-	if currHash == -1 {
-		return fmt.Errorf("Error: task not found in operator to port mappings, state may be outdated\n")
+func (s *SchedulerReq) GetPrevStage(args *GetPrevStageArgs, reply *string) error {
+	if (args.PrevOperator == "leader") {
+		*reply = fmt.Sprintf("%d:%s", LEADER_ID, CONSOLE_OUT_PORT)
+	} else {
+		prevStageTaskAddr := operatorToVmPorts[args.PrevOperator][args.PrevHash]
+	  	retStr := fmt.Sprintf("%d:%s", prevStageTaskAddr.VM, prevStageTaskAddr.port)
+	  	*reply = retStr
 	}
-	logPrefix := incomingOperator + "_" + strconv.Itoa(currHash)
-	*reply = fmt.Sprintf("%s:%s", logPrefix + ".log", logPrefix + "_state" + ".log")
 	return nil
-}
-
-
-	// for i := 0; i < len(senderTasks); i++ {
-	// 	// Check if the current task matches the sender's port
-	// 	if topologyArray[senderTasks[i].Layer][senderTasks[i].Hash].port == args.Port {
-	// 		// Hash the tuple's key to determine the next node in the next layer
-	// 		keyHash := hash(args.Rt.Key, len(topologyArray[senderTasks[i].Layer + 1]))
-	// 		// Construct the address of the next stage as "VM:port"
-	// 		retStr := fmt.Sprintf("%d:%s", topologyArray[senderTasks[i].Layer + 1][keyHash].VM, topologyArray[senderTasks[i].Layer + 1][keyHash].port)
-	// 		fmt.Println(retStr)
-	// 		// Set the reply to the target node's address
-	// 		*reply = fmt.Sprintf(retStr)
-	// 	}
-	// }
-	//
+  }

@@ -7,34 +7,12 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 )
-
-var UIDLock sync.Mutex
-
-// var isProcessed = func(uniqueID string, oldLogFile string) bool {
-// 	// Lock the entire operation to ensure atomic check and update
-// 	UIDLock.Lock()
-// 	defer UIDLock.Unlock()
-
-// 	// First, check the cache
-// 	if _, exists := UIDCache[uniqueID]; exists {
-// 		return true
-// 	}
-
-// 	// If not in cache, check the persistent log
-// 	status, err := checkDuplicate(uniqueID, oldLogFile)
-// 	if err != nil {
-// 		fmt.Printf("Error checking for duplicate: %v\n", err)
-// 		return false
-// 	}
-// 	return status
-// }
 
 // using the client copy is NOT fine here since we need a record that persists even if this node fails
 // Log the fact that a record has been processed
 var backgroundWrite = func(writeStr string, writeFile string) {
-	err := backgroundCommand(fmt.Sprintf("appendstring %s %s", writeStr + "\n", writeFile))
+	err := backgroundCommand(fmt.Sprintf("appendstring %s %s", writeStr, writeFile))
 	if err != nil {
 		fmt.Printf("Error writing processed line %d: %v\n", writeStr, err)
 		return
@@ -45,8 +23,18 @@ var backgroundWrite = func(writeStr string, writeFile string) {
 }
 
 // using the client copy is fine here since duplicates will only come from logged changes at the time of repartitioning
-func checkDuplicate(uniqueID string, oldLogFile string) (bool, error) {
-	log, err := os.OpenFile("client/"+oldLogFile, os.O_RDONLY, 0644)
+func checkLogFile(uniqueID string, logFile string) (bool, error) {
+	// fetch local copy of log file
+	tempLogName := genRandomFileName()
+	rainstormLog.Printf("Trying to get logfile %s with temp name %s\n", logFile, tempLogName)
+	err := backgroundCommand(fmt.Sprintf("get %s %s", logFile, tempLogName))
+	if err != nil {
+		return false, err
+	}
+
+	rainstormLog.Printf("checking logfile for UID: %s\n", uniqueID)
+	defer os.Remove("client/" + tempLogName)
+	log, err := os.OpenFile("client/" + tempLogName, os.O_RDONLY, 0644)
 	if err != nil {
 		return false, err
 	}
@@ -65,28 +53,22 @@ func checkDuplicate(uniqueID string, oldLogFile string) (bool, error) {
 	}
 }
 
-// var processRecord = func(uniqueID string, line string, hydfsSrcFile string, logFile string, oldLogFile string, port string) {
-// 	if isProcessed(uniqueID, oldLogFile) {
-// 		fmt.Printf("Record with uniqueID %d has already been processed. Skipping.\n", uniqueID)
-// 		return
-// 	}
-// 	fmt.Printf("Sending record with uniqueID %d %s\n", uniqueID, line)
+// generateTuple creates a key-value tuple
+func generateTuple(key string, value string) Rainstorm_tuple_t {
+	return Rainstorm_tuple_t{key, value}
+}
 
-// 	// key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
-// 	// args := ArgsWithSender{Rainstorm_tuple_t{key, line}, currentVM, port, strconv.Itoa(uniqueID)}
-
-// 	// // retry sends until we get through
-// 	// err := sendToNextStage(args)
-// 	// for {
-// 	// 	if err == nil {
-// 	// 		break
-// 	// 	}
-// 	// 	time.Sleep(time.Second)
-// 	// 	err = sendToNextStage(args)
-// 	// }
-
-// 	logProcessed(uniqueID, logFile)
-// }
+func convertFileInfoStructListToTuples(hydfsSrcFile string, input FileChunkInfo, numSources int) []Rainstorm_tuple_t {
+	var tuples []Rainstorm_tuple_t
+	for i := 0; i < numSources; i++ {
+		rainstormTuple := Rainstorm_tuple_t{
+			Key:   hydfsSrcFile + ":" + strconv.Itoa(input.StartLines[i]) + ":" + strconv.Itoa(input.StartChars[i]) + ":" + strconv.Itoa(input.LinesPerSource[i]),
+			Value: "1",
+		}
+		tuples = append(tuples, rainstormTuple)
+	}
+	return tuples
+}
 
 // sendToNextStage sends the tuple to the next stage via RPC or other means
 func sendToNextStage(args GetNextStageArgs, UID string) error {
@@ -99,22 +81,34 @@ func sendToNextStage(args GetNextStageArgs, UID string) error {
 	nextPort := replyParts[1]
   nextStageArgs := ArgsWithSender{
     Rt: args.Rt,
-    SenderNum: args.VM,
-	SenderPort: args.Port,
+	SenderOp: portToOpData[args.Port].Op,
+    SenderHash: portToOpData[args.Port].Hash,
     TargetPort: nextPort,
 	UID: UID}
 	err = sendRequestToServer(nextVM, nextPort, &nextStageArgs)
 	return err
 }
 
-// generateTuple creates a key-value tuple
-func generateTuple(key string, value string) Rainstorm_tuple_t {
-	return Rainstorm_tuple_t{key, value}
+func getNextStageArgsFromScheduler(args GetNextStageArgs) string {
+	// Establish a connection to the RPC server
+	client, err := rpc.Dial("tcp", vmToIP(LEADER_ID)+":"+SCHEDULER_PORT)
+	if err != nil {
+		rainstormLog.Println("Error connecting to scheduler:", err)
+		return "ohhhhhhhhhh is it failing here?"
+	}
+	defer client.Close()
+	var reply string
+	err = client.Call("SchedulerReq.GetNextStage", &args, &reply)
+	if err != nil {
+		rainstormLog.Println("Error during RPC call:", err)
+		return ""
+	}
+	return reply
 }
 
 func sendRequestToServer(vm int, port string, args *ArgsWithSender) error {
 	// Establish a connection to the RPC server
-	fmt.Printf("sendRequest: Trying to send data to %d:%s\n", vm, port)
+	rainstormLog.Printf("sendRequest: Trying to send data to %d:%s\n", vm, port)
 	client, err := rpc.Dial("tcp", vmToIP(vm)+":"+port)
 	if err != nil {
 		return err
@@ -128,57 +122,99 @@ func sendRequestToServer(vm int, port string, args *ArgsWithSender) error {
 	return nil
 }
 
-func getNextStageArgsFromScheduler(args GetNextStageArgs) string {
+func ackPrevStage(ack Ack_info_t) error {
+	prevStageArgs := GetPrevStageArgs{
+		PrevOperator: ack.SenderOp,
+		PrevHash: ack.SenderHash,
+	}
+
+	reply := getPrevStageArgsFromScheduler(prevStageArgs)
+	replyParts := strings.Split(reply, ":")
+	prevVM, err := strconv.Atoi(replyParts[0])
+	if err != nil {
+		fmt.Println("this is where i die")
+	}
+	prevPort := replyParts[1]
+  	ackArgs := ReceiveAckArgs{
+		UID: ack.UID,
+		Port: prevPort,
+	}
+    
+	err = sendAckToServer(prevVM, prevPort, &ackArgs)
+	return err
+}
+
+func getPrevStageArgsFromScheduler(args GetPrevStageArgs) string {
 	// Establish a connection to the RPC server
 	client, err := rpc.Dial("tcp", vmToIP(LEADER_ID)+":"+SCHEDULER_PORT)
 	if err != nil {
-		fmt.Println("Error connecting to scheduler:", err)
+		rainstormLog.Println("Error connecting to scheduler:", err)
 		return "ohhhhhhhhhh is it failing here?"
 	}
 	defer client.Close()
 	var reply string
-	err = client.Call("SchedulerReq.GetNextStage", &args, &reply)
+	err = client.Call("SchedulerReq.GetPrevStage", &args, &reply)
 	if err != nil {
-		fmt.Println("Error during RPC call:", err)
+		rainstormLog.Println("Error during RPC call:", err)
 		return ""
 	}
 	return reply
 }
 
-func getTaskLogFromScheduler(args *GetTaskLogArgs) string {
-	client, err := rpc.Dial("tcp", vmToIP(LEADER_ID)+":"+SCHEDULER_PORT)
+func sendAckToServer(vm int, port string, args *ReceiveAckArgs) error {
+	rainstormLog.Printf("Sending ACK with ID %s to %d:%s\n", args.UID, vm, port)
+	client, err := rpc.Dial("tcp", vmToIP(vm) + ":" + port)
 	if err != nil {
-		fmt.Println("Error connecting to scheduler:", err)
-		return ""
+		return err
 	}
 	defer client.Close()
 	var reply string
-	err = client.Call("SchedulerReq.GetTaskLog", args, &reply)
+	err = client.Call("WorkerReq.ReceiveAck", args, &reply)
 	if err != nil {
-		fmt.Println("Error during RPC call:", err)
-		return ""
+		return err
 	}
-	return reply
+	return nil
 }
 
-func showTopology() {
-	for i := 0; i < RAINSTORM_LAYERS; i++ {
-		fmt.Printf("LAYER %d: ", i)
-		for j := 0; j < len(topologyArray[i]); j++ {
-			fmt.Printf("%d: %s |", topologyArray[i][j].VM, topologyArray[i][j].port)
-		}
-		fmt.Printf("\n")
+func restoreState(stateFile string, port string) {
+	err := processStateFile(stateFile, port)
+	if err != nil {
+		rainstormLog.Printf("Error restoring state: %v\n", err)
+		return
+	}
+
+	rainstormLog.Printf("RESTORED STATE:\n")
+	for key := range(portToOpData[port].StateMap) {
+		rainstormLog.Printf("%s: %s\n", key, portToOpData[port].StateMap[key])
 	}
 }
 
-func convertFileInfoStructListToTuples(hydfsSrcFile string, input FileChunkInfo, numSources int) []Rainstorm_tuple_t {
-	var tuples []Rainstorm_tuple_t
-	for i := 0; i < numSources; i++ {
-		rainstormTuple := Rainstorm_tuple_t{
-			Key:   hydfsSrcFile + ":" + strconv.Itoa(input.StartLines[i]) + ":" + strconv.Itoa(input.StartChars[i]) + ":" + strconv.Itoa(input.LinesPerSource[i]),
-			Value: "1",
-		}
-		tuples = append(tuples, rainstormTuple)
+func processStateFile(stateFile string, port string) error {
+	tempFileName := genRandomFileName()
+	rainstormLog.Printf("getting statefile %s\n", stateFile)
+	err := backgroundCommand(fmt.Sprintf("get %s %s", stateFile, tempFileName))
+	if err != nil {
+		rainstormLog.Printf("Error fetching source file: %v\n", err)
 	}
-	return tuples
+	defer os.Remove("client/" + tempFileName)
+
+	sf, err := os.OpenFile("client/" + tempFileName, os.O_RDONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer sf.Close()
+	for {
+		line, err := readLineFromFile(sf)
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+			return err
+		}
+
+		lineParts := strings.Split(line, ":")
+		key := lineParts[0]
+		value := lineParts[1]
+		portToOpData[port].StateMap[key] = value
+	}
 }

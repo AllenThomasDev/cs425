@@ -14,8 +14,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to create ./client directory: %v", err)
 	}
+	
+	file1, err := os.OpenFile("rainstorm.log", os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatalf("Failed to open logfile1: %v", err)
+	}
+	defer file1.Close()
+	rainstormLog = log.New(file1, "RS: ", log.Lmicroseconds)
 	deleteFilesOnServer()
 	err = os.MkdirAll("./server", os.ModePerm)
+	deleteLocalLogs()
+	err = os.MkdirAll("./client/local_logs", os.ModePerm)
 	if err != nil {
 		log.Fatalf("Failed to create ./server directory: %v", err)
 	}

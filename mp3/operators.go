@@ -7,16 +7,21 @@ import (
 	"sync"
 )
 
-type OperatorFunc func(rt Rainstorm_tuple_t) interface{}
+type OperatorFunc func(data interface{}) interface{}
+
+type StatelessArgs struct {
+	rt Rainstorm_tuple_t
+}
+
+type StatefulArgs struct {
+	rt Rainstorm_tuple_t
+	port string
+}
+
 type Operator struct {
 	Name     string
 	Operator OperatorFunc
 	Stateful bool
-}
-
-type OperatorPort struct {
-	OperatorName string
-	Port         string
 }
 
 // input needs both tuple and address/UID to ack so output knows who to ACK
@@ -32,55 +37,47 @@ type OutputInfo struct {
 	UID string
 }
 
-type TupleAndAckInfo struct {
-	Tup Rainstorm_tuple_t
-	AckInfo Ack_info_t
-}
-
 type Ack_info_t struct {
 	UID string
-	SenderNum int
-	SenderPort string
+	SenderOp	string
+	SenderHash	int
 }
 
-type OperatorChannels struct {
+type OperatorData struct {
 	Input		chan InputInfo
 	Output		chan OutputInfo
-	RecvdAck	chan Ack_info_t
-	SendAck		chan bool
+	RecvdAck	chan string // channel of Acked UIDs we've received
+	SendAck		chan bool // after we receive the next Ack, should we send out an Ack?
+	StateMap	map[string]string // so we don't have to go to statefile every time
+	LogFile		string
+	StateFile	string
+	Op			string
+	Hash		int
+	UIDBuf		*[]string // buffer of UIDs we're currently processing (either in input channel or outputting)
+	UIDBufLock  *sync.Mutex
 }
 
 var operators = make(map[string]Operator)
-var portToChannels = make(map[string]OperatorChannels)
-// maps port current task is running on to next ACK we need to send out
-// var portToNextAck = make(map[string]Ack_info_t)
-var wordCountUpdates = make(chan string, 100) // Buffered channel for updates
-var wordCounts sync.Map
+var portToOpData = make(map[string]OperatorData)
 
-
-func startWordCountWorker() {
-  go func() {
-    for key := range wordCountUpdates {
-	// search for word we want to update in HyDFS logFile
-      value, _ := wordCounts.LoadOrStore(key, 0)
-	// append updated value to HyDFS state file
-      wordCounts.Store(key, value.(int)+1)
-      fmt.Println("Updated wordCounts:", key, value.(int)+1)
-    }
-  }()
+func updateWordCount(key string, port string) {
+	val, found := portToOpData[port].StateMap[key]
+	if found {
+		count, _ := strconv.Atoi(val)
+		rainstormLog.Printf("Updating %s with count %d\n", key, count + 1)
+		portToOpData[port].StateMap[key] = strconv.Itoa(count + 1)
+	} else {
+		rainstormLog.Printf("Updating %s with count %d\n", key, 1)
+		portToOpData[port].StateMap[key] = strconv.Itoa(1)
+	}
 }
-
-func updateWordCount(key string) {
-    wordCountUpdates <- key // Push key to the channel for processing
-}
-
 
 func initOperators() {
-  startWordCountWorker()
 	operators["source"] = Operator{
 		Name: "source",
-		Operator: func(rt Rainstorm_tuple_t) interface{} {
-      fmt.Printf("I am a source\n")
+		Operator: func(data interface{}) interface{} {
+      rainstormLog.Printf("I am a source\n")
+			rt := data.(StatelessArgs).rt
 			fileInfo := rt.Key
 			fileInfoParts := strings.Split(fileInfo, ":")
 			fileName := fileInfoParts[0]
@@ -96,15 +93,16 @@ func initOperators() {
 
 	operators["splitLineOperator"] = Operator{
 		Name: "splitLineOperator",
-		Operator: func(rt Rainstorm_tuple_t) interface{} {
-			fmt.Printf("I am splitting\n")
+		Operator: func(data interface{}) interface{} {
+			rainstormLog.Printf("I am splitting\n")
+			rt := data.(StatelessArgs).rt
 			words := strings.Fields(rt.Value)
 			tupleChannel := make(chan Rainstorm_tuple_t)
 			go func() {
-				for i, word := range words {
+				for _, word := range words {
 					tupleChannel <- Rainstorm_tuple_t{
-            Key:   rt.Key + ":" + strconv.Itoa(i), // unique id, i'th word of unique id line
-						Value: word,
+            			Key: word,
+						Value: "",
 					}
 				}
 
@@ -117,13 +115,14 @@ func initOperators() {
 
 	operators["wordCountOperator"] = Operator{
 		Name: "wordCountOperator",
-		Operator: func(rt Rainstorm_tuple_t) interface{} {
-			fmt.Printf("I am counting words\n")
-      updateWordCount(rt.Value)
+		Operator: func(data interface{}) interface{} {
+			rainstormLog.Printf("I am counting words\n")
+			rt := data.(StatefulArgs).rt
+			port := data.(StatefulArgs).port
+      		updateWordCount(rt.Key, port)
 			return Rainstorm_tuple_t{
-				Key:   rt.Value,
-        //TODO: temporary 0 for testin
-				Value: "0",
+				Key:   rt.Key,
+				Value: portToOpData[port].StateMap[rt.Key],
 			}
 		},
 		Stateful: true,

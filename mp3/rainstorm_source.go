@@ -42,7 +42,7 @@ func generateSourceTuples(hydfsSrcFile string, startLine int, startChar int, num
 		uniqueID := startLine + numLines - remainingLines
 		key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
 		lineTuple := generateTuple(key, line)
-    tupleChannel <- lineTuple
+    	tupleChannel <- lineTuple
 		remainingLines--
 	}
 	close(tupleChannel)

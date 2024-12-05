@@ -72,7 +72,11 @@ var (
 	RAINSTORM_LAYERS	= 3		// source, op1, op2 -> we will always have 3 layers for rainstorm operation
 	RPC_PORT			= "2233"
 	SCHEDULER_PORT		= "2234"
-	CONSOLE_OUT_PORT	= "2235"
+	CONSOLE_OUT_PORT	= "2235" // leader serves worker functions from here
+	MAGIC_STR1			= "SESQUIPEDALIAN$$$$" // surely we won't encounter a tuple with this as the key, right?
+	MAGIC_STR2			= "LENDRICKKAMAR" // surely we won't encounter a tuple with this as the value, right?
+	FILTERED			= "this tuple has been filtered out" // data that gets filtered still needs to be acked, use this to designate filtered data
+	EMPTY				= "EMPTYYYYYYYYYYYY"
 	RAINSTORM_ACK_TIMEOUT = 3 * time.Second
 	introducerIP        = "172.22.94.178"
 	ipList              = []string {

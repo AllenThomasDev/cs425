@@ -524,7 +524,6 @@ var backgroundCommand = func(input string) error {
 
 		hyDFSFilename := args[1]
 		modifiedFilename := slashesToBackticks(hyDFSFilename)
-		fmt.Printf("Trying to append %s to %s\n", fileContent, modifiedFilename)
 		ts := time.Now()
 		for {
 			err := sendAppendToQuorum(AppendArgs{modifiedFilename, fileContent, ts.String(), currentVM}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
@@ -591,6 +590,7 @@ var backgroundCommand = func(input string) error {
 		hyDFSFilename := args[0]
 		localFilename := args[1]
 		if cachedContent, ok := readFileFromCache(hyDFSFilename); ok {
+			fmt.Printf("serving from cache\n")
 			err := writeFile(localFilename, cachedContent, "client")
 			if err != nil {
 				return fmt.Errorf("Error on file receipt: %v\n", err)

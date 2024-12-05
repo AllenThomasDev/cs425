@@ -2,185 +2,237 @@ package main
 
 import (
 	"fmt"
-	"net/rpc"
 	"strconv"
-	"strings"
 	"time"
 )
 
-var (
-	stopChannels =  make(map[string] chan string)
-)
+// check if new data has already been received, keeping it out of input channel if it has
+func screenInput(opData OperatorData, AckInfo Ack_info_t) bool {	
+	opData.UIDBufLock.Lock()
+	defer opData.UIDBufLock.Unlock()
+
+	bufLocal := *opData.UIDBuf
+
+	var i int
+	for i = 0; i < len(bufLocal); i++ {
+		// entries are popped UIDBuf starting at index 0, so if we've encountered an empty slot, our data isn't present in the buffer
+		if (bufLocal[i] == EMPTY) {
+			break
+		}
+
+		// if the data is in the buffer, we will send out an ack at some point in the future, so just drop this data
+		if (bufLocal[i] == AckInfo.UID) {
+			rainstormLog.Printf("Data found in buffer, discarding...\n")
+			return false
+		}
+	}
+
+	processed, err := checkLogFile(AckInfo.UID, opData.LogFile)
+	if err != nil {
+		rainstormLog.Printf("Error checking logfile\n")
+		panic(err)
+	}
+	if processed {
+		// if the data was found in the log, we don't want to send data to the next stage, but we MUST send an ack to the previous stage
+		rainstormLog.Printf("Data found in log file, sending ack to previous stage...\n")
+		// use a new goroutine here since screenInput is called from an RPC the sender of the data is currently waiting for a return from
+		go ackPrevStage(AckInfo)
+		return false
+	} 
+
+	// if the new data wasn't in our buffer or log file, add it to the buffer
+	bufLocal[i] = AckInfo.UID
+
+	for i := 0; i < len(bufLocal); i++ {
+		rainstormLog.Printf("Screen: UID at index %d: %s\n", i, bufLocal[i])
+	}
+
+	*opData.UIDBuf = bufLocal
+
+	return true
+}
 
 // listens to input channel, processes the tuple using opeartor and puts it to output channel
+func processInputChannel(opData OperatorData, port string) {
+	for input := range opData.Input {
 
-func processInputChannel(operatorName string, channels OperatorChannels, port string) {
-	for input := range channels.Input {
-		// TODO: check logfile here
-		output := operators[operatorName].Operator(input.Tup)
-		opsDone := 0
+		var output interface{}
+		if operators[opData.Op].Stateful {
+			output = operators[opData.Op].Operator(StatefulArgs{input.Tup, port})
+		} else {
+			output = operators[opData.Op].Operator(StatelessArgs{input.Tup})
+		}
+		
+		opsDone := 0 // counter for UIDs
 		switch v := output.(type) {
 		case chan Rainstorm_tuple_t:
-			fmt.Printf("I'm processing a channel!\n")
+			rainstormLog.Printf("Processing a channel!\n")
 			emptyChannel := true
-			// keep a one-value buffer here so we know which value is last
-			bufTup := Rainstorm_tuple_t{"I AM UNINITIALIZED", "SOOOOO UNINITIALIZED"}
+			// since we only know processing is finished when a channel has closed, we need to maintain a one-value buffer,
+			// otherwise output processing may not ack after the last value has been sent out and acked
+			bufTup := Rainstorm_tuple_t{MAGIC_STR1, MAGIC_STR2}
+			bufUID := ""
+
 			for tuple := range v {
 				emptyChannel = false
-				if bufTup.Key != "I AM UNINITIALIZED" && bufTup.Value != "SOOOOO UNINITIALIZED" {
-					fmt.Printf("Writing %s:%s to output\n", bufTup.Key, bufTup.Value)
-					channels.Output <- OutputInfo{
+				if bufTup.Key != MAGIC_STR1 && bufTup.Value != MAGIC_STR2 {
+					rainstormLog.Printf("Writing %s:%s to output\n", bufTup.Key, bufTup.Value)
+					opData.Output <- OutputInfo{
 						Tup: bufTup,
-						UID: input.AckInfo.UID + ":" + strconv.Itoa(opsDone),
+						UID: bufUID,
 						AckInfo: input.AckInfo,
 					}
-					channels.SendAck <- false
+					opData.SendAck <- false
 				}
 				bufTup = tuple
+				bufUID = input.AckInfo.UID + ":" + strconv.Itoa(opsDone)
 				opsDone++
 			}
 
 			// channel has closed, send last value and signal that we should send out an ack
 			if emptyChannel == false {
-				fmt.Printf("channel is not empty!\n")
-			} else {
-				fmt.Printf("channel is empty??\n")
-			}
-
-			if emptyChannel == false {
-				fmt.Printf("Writing %s:%s (final tuple) to output\n", bufTup.Key, bufTup.Value)
-				channels.Output <- OutputInfo{
+				rainstormLog.Printf("Writing %s:%s (final tuple) to output\n", bufTup.Key, bufTup.Value)
+				opData.Output <- OutputInfo{
 					Tup: bufTup,
-					UID: input.AckInfo.UID + ":" + strconv.Itoa(opsDone),
+					UID: bufUID,
 					AckInfo: input.AckInfo,
 				}
-				fmt.Printf("Channel closed, now we can ACK!\n")
-				channels.SendAck <- true
+				rainstormLog.Printf("Channel closed, now we can ACK!\n")
+				opData.SendAck <- true
 			} else {
-				// send from here if our channel was full of nothin'
-				err := sendAckFromInput(input.AckInfo)
-				if err != nil {
-					fmt.Printf("Error on empty channel ACK: %v\n", err)
-				}
+				handleEmptyOutput(opData.Op, opData.LogFile, opData.StateFile, input.AckInfo)
 			}
 
 		case Rainstorm_tuple_t:
-			fmt.Printf("I'm processing a single tuple!\n")
-			channels.Output <- OutputInfo{
-				Tup: v,
-				UID: input.AckInfo.UID + ":" + strconv.Itoa(opsDone),
-				AckInfo: input.AckInfo,
-			}
-		  	// send ack after each output has been ACKed
-		  	channels.SendAck <- true
-		case []Rainstorm_tuple_t:
-			fmt.Printf("I'm processing a slice of tuples!\n")
-			for i := 0; i < len(v); i++ {
-				channels.Output <- OutputInfo{
-					Tup: v[i],
+			rainstormLog.Printf("Processing a single tuple!\n")
+			if v.Key == FILTERED && v.Value == FILTERED {
+				handleEmptyOutput(opData.Op, opData.LogFile, opData.StateFile, input.AckInfo)
+			} else {
+				opData.Output <- OutputInfo{
+					Tup: v,
 					UID: input.AckInfo.UID + ":" + strconv.Itoa(opsDone),
 					AckInfo: input.AckInfo,
 				}
-				opsDone++
-				if i == len(v) - 1 {
-					// send ack after last tuple in slice has been ACKed
-					channels.SendAck <- true
-				} else {
-					channels.SendAck <- false
+				// send ack after each output has been ACKed
+				opData.SendAck <- true
+			}
+		case []Rainstorm_tuple_t:
+			rainstormLog.Printf("Processing a slice of tuples!\n")
+			if len(v) == 0 {
+				// empty slice
+				handleEmptyOutput(opData.Op, opData.LogFile, opData.StateFile, input.AckInfo)
+			} else {
+				for i := 0; i < len(v); i++ {
+					opData.Output <- OutputInfo{
+						Tup: v[i],
+						UID: input.AckInfo.UID + ":" + strconv.Itoa(opsDone),
+						AckInfo: input.AckInfo,
+					}
+					
+					if i == len(v) - 1 {
+						// send ack after last tuple in slice has been ACKed
+						opData.SendAck <- true
+					} else {
+						opData.SendAck <- false
+					}
+					
+					opsDone++
 				}
 			}
 		default:
-		  fmt.Printf("Unexpected output type: %T\n", output)
+		  rainstormLog.Printf("Unexpected output type: %T\n", output)
 		}
 	  }
-	close(channels.Output) // Close the output channel when input channel is closed
+	close(opData.Output) // Close the output channel when input channel is closed
 } 
   
 // Function to print the contents of the output channel
-func processOutputChannel(operatorName string, channels OperatorChannels, port string) {
-	for out := range channels.Output {
-		fmt.Printf("ProcessOutput: Trying to process output: %s:%s\n", out.Tup.Key, out.Tup.Value)
+func processOutputChannel(opData OperatorData, port string) {
+	for out := range opData.Output {
+
+		rainstormLog.Printf("ProcessOutput: Trying to process output: %s:%s\n", out.Tup.Key, out.Tup.Value)
 		for {
 			nextStageArgs := GetNextStageArgs{
 				Rt: out.Tup,
-				VM: ipToVM(selfIP),
-				Port: port,
+				CurrOperator: opData.Op,
 			}
 			
 			err := sendToNextStage(nextStageArgs, out.UID)
 			if err != nil {
-				fmt.Printf("Error on next stage send: %v\n", err)
+				rainstormLog.Printf("Error on next stage send: %v\n", err)
 				time.Sleep(RAINSTORM_ACK_TIMEOUT)
 			} else {
-				err = handleAcks(operatorName, channels, out)
+				err = handleAcks(opData, out)
 				if err != nil {
-					fmt.Printf("Error on ACK handling: %v\n", err)
-					time.Sleep(RAINSTORM_ACK_TIMEOUT)
+					rainstormLog.Printf("Error on ACK handling: %v\n", err)
+					// if our error was due to something other than timeout, wait a little bit
+					if err.Error() != "TIMEOUT" {
+						time.Sleep(RAINSTORM_ACK_TIMEOUT)
+					}
 				} else {
 					break
 				}
 			}
-			fmt.Printf("Transmission failed or ack timed out, trying again...\n")
+			rainstormLog.Printf("Transmission failed or ack timed out, trying again...\n")
 		}
-
-		fmt.Printf("Output iteration finished\n")
 	}
 }
 
-func handleAcks(operatorName string, channels OperatorChannels, out OutputInfo) error {
+func handleAcks(opData OperatorData, out OutputInfo) error {
 	select {
-	case ackInfo := <- channels.RecvdAck:
-		logFiles := getTaskLogFromScheduler(&GetTaskLogArgs{ackInfo.SenderNum, ackInfo.SenderPort})
-		logFilesParts := strings.Split(logFiles, ":")
-		logFile := logFilesParts[0]
-		stateFile := logFilesParts[1]
+	case <- opData.RecvdAck:
+		if <- opData.SendAck {
+			// to write the UID that we got sent, we need to take the UID from out.AckInfo (which is from input and therefore the previous stage)
+			err := writeRainstormLogs(opData.Op, opData.LogFile, opData.StateFile, out.AckInfo.UID, Rainstorm_tuple_t{out.Tup.Key, out.Tup.Value})
+			if err != nil {
+				return fmt.Errorf("Error writing logs: %v\n", err)
+			}
 
-		backgroundWrite(ackInfo.UID, logFile)
-		if operators[operatorName].Stateful {
-			backgroundWrite(fmt.Sprintf("%s:%s\n", out.Tup.Key, out.Tup.Value), stateFile)
+			opData.UIDBufLock.Lock()
+			bufLocal := *opData.UIDBuf
+
+			for i := 0; i < len(bufLocal) - 1; i++ {
+				bufLocal[i] = bufLocal[i + 1]
+			}
+			bufLocal[len(bufLocal) - 1] = EMPTY
+
+			for i := 0; i < len(bufLocal); i++ {
+				rainstormLog.Printf("Output: UID at index %d: %s\n", i, bufLocal[i])
+			}
+
+			*opData.UIDBuf = bufLocal
+			opData.UIDBufLock.Unlock()
+			
+			err = ackPrevStage(out.AckInfo)
+			if err != nil {
+				return err
+			}
 		}
-
-		var err error
-
-		fmt.Printf("trying to send ack now...\n")
-		if <- channels.SendAck {
-			fmt.Printf("Sending ACK with ID %s to %d:%s\n", out.AckInfo.UID, out.AckInfo.SenderNum, out.AckInfo.SenderPort)
-			err = callReceiveAck(out.AckInfo)
-		}
-		fmt.Printf("ack channel cleared\n")
-		return err
+		return nil
 	case <-time.After(RAINSTORM_ACK_TIMEOUT):
-		return fmt.Errorf("timeout!")
+		return fmt.Errorf("TIMEOUT")
 	}
 }
 
-func sendAckFromInput(ack Ack_info_t) error {
-	fmt.Printf("Sending ACK with ID %s to %d:%s\n", ack.UID, ack.SenderNum, ack.SenderPort)
-	return callReceiveAck(ack)
-}
+func writeRainstormLogs(operatorName string, logFile string, stateFile string, prevUID string, stateTup Rainstorm_tuple_t) error {
+	backgroundWrite(prevUID + "\n", logFile)
+	if operators[operatorName].Stateful {
+		backgroundWrite(fmt.Sprintf("%s:%s\n", stateTup.Key, stateTup.Value), stateFile)
+	}
 
-func callReceiveAck(ackInfo Ack_info_t) error {
-	client, err := rpc.Dial("tcp", vmToIP(ackInfo.SenderNum) + ":" + ackInfo.SenderPort)
-	if err != nil {
-		return err
-	}
-	defer client.Close()
-	var reply string
-	ackArgs := ReceiveAckArgs{
-		AckInfo: ackInfo,
-	}
-	
-	err = client.Call("WorkerReq.ReceiveAck", ackArgs, &reply)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
-func deferredStop(port string) {
-	fmt.Println("About to die...")
-	time.Sleep(time.Millisecond)
-	// need to send TWO stop requests, one for RPC listener and one for function wrapper
-	stopChannels[port] <- "die."
-	stopChannels[port] <- "die."
+func handleEmptyOutput(operatorName string, logFile string, stateFile string, ackInfo Ack_info_t) {
+	// since we have no data to send, we can't go through the standard output->send data->receive ack process
+	// just send the ack from here instead
+	// TODO: can we have stateful operators that also filter?
+	err := writeRainstormLogs(operatorName, logFile, stateFile, ackInfo.UID, Rainstorm_tuple_t{"",""})
+	if err != nil {
+		rainstormLog.Printf("Error writing logs on empty ACK")
+	}
+	err = ackPrevStage(ackInfo)
+	if err != nil {
+		rainstormLog.Printf("Error on empty channel ACK: %v\n", err)
+	}
 }

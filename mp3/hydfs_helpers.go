@@ -293,3 +293,8 @@ func deleteFilesOnServer() {
   os.RemoveAll("./server")
   fmt.Println("Deleted server directory")
 }
+
+func deleteLocalLogs() {
+	os.RemoveAll("./client/local_logs")
+	fmt.Println("Removed residual RainStorm logs")
+}

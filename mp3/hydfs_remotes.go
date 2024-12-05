@@ -67,11 +67,13 @@ type OpArgs struct {
 	LogFilename string
 }
 
-type TaskArgs struct {
-	TaskType Task_type_t
-	SA SourceArgs
-	OA OpArgs
-  ADDRESS task_addr_t
+type InitializeOperatorArgs struct {
+	OperatorName	string
+	Port			string
+	LogFile			string
+	StateFile		string
+	Hash			int
+	Numtasks		int
 }
 
 func startRPCListenerHyDFS() {
@@ -86,7 +88,7 @@ func startRPCListenerHyDFS() {
 }
 
 func (h *HyDFSReq) Get(args *GetArgs, reply *string) error {
-	fmt.Printf("Received GET message to fetch %s\n", args.HyDFSFilename)
+	// fmt.Printf("Received GET message to fetch %s\n", args.HyDFSFilename)
 	fileContent, err := readFileToMessageBuffer(args.HyDFSFilename, "server")
 	if err != nil {
 		fmt.Printf("Error writing file content: %v\n", err)
@@ -107,7 +109,7 @@ func (h *HyDFSReq) Get(args *GetArgs, reply *string) error {
 	}
 
 	*reply = fileContent
-	fmt.Printf("Sent file content\n")
+	// fmt.Printf("Sent file content\n")
 	return nil
 }
 
@@ -201,41 +203,40 @@ func (h *HyDFSReq) FindFreePort(args struct{}, reply *string) error {
     return nil
 }
 
-func (h *HyDFSReq) InitializeOperatorOnPort(args *OperatorPort, reply *string) error {
+func (h *HyDFSReq) InitializeOperatorOnPort(args *InitializeOperatorArgs, reply *string) error {
   portString := args.Port
-  fmt.Printf("Operator name: %s \n\n", args.OperatorName)
+  rainstormLog.Printf("Operator name: %s \n\n", args.OperatorName)
   // this listener will send the tuples to the input channel for this port
   go startRPCListenerWorker(portString)
-  channels := OperatorChannels{
-    Input:  make(chan InputInfo),
-    Output: make(chan OutputInfo),
-	RecvdAck: make(chan Ack_info_t),
-	SendAck: make(chan bool),
+
+  // initialize program infrastructure
+	var uBuf = make([]string, 0)
+  for i := 0; i < args.Numtasks; i++ {
+	uBuf = append(uBuf, EMPTY)
   }
-  portToChannels[portString] = channels
-  //start a channel to listen to inputs
-  fmt.Printf("created a channel to listen to inputs, \nthe port here is %s\n", args.Port)
-  go processInputChannel(args.OperatorName, channels, args.Port)
-  go processOutputChannel(args.OperatorName, channels, args.Port)
-  return nil
-}
-
-func (h *HyDFSReq) StartTask(args *TaskArgs, reply *string) error {
-	portString := args.ADDRESS.port 
-
-	// Start serving worker functions from passed port
-	go startRPCListenerWorker(portString)
-	// initialize channel for stopping task due to rescheduling
-	stopChannels[portString] = make(chan string)
-	
-	if args.TaskType == OP {
-		fmt.Printf("Executing op %s, stateful = %t, output = %t\n", args.OA.ExecFilename, args.OA.IsStateful, args.OA.IsOutput)
-		go opWrapper(args.OA, portString)
-		return nil
-	} else if args.TaskType == SOURCE {
-		fmt.Printf("Processing %d lines of %s starting at line %d\n", args.SA.LinesToRead, args.SA.SrcFilename, args.SA.StartLine)
-		return nil
-	} else {
-		return fmt.Errorf("Unknown task type")
+  opData := OperatorData{
+    Input:  make(chan InputInfo, args.Numtasks), // we can have at most numTasks senders at a time trying to send us data
+    Output: make(chan OutputInfo),
+	RecvdAck: make(chan string),
+	SendAck: make(chan bool),
+	StateMap: make(map[string]string),
+	LogFile: args.LogFile, // use temp file name so if we already have a local copy of a certain file, get still works
+	StateFile: args.StateFile,
+	Hash: args.Hash,
+	Op: args.OperatorName,
+	UIDBuf: &uBuf,
+	UIDBufLock: &sync.Mutex{},
+  }
+  portToOpData[portString] = opData	
+		
+  // restore state from state file if operator is stateful
+	if operators[args.OperatorName].Stateful {
+		restoreState(args.StateFile, args.Port)
 	}
+
+  // create I/O channels
+  rainstormLog.Printf("created a channel to listen to inputs, \nthe port here is %s\n", args.Port)
+  go processInputChannel(opData, args.Port)
+  go processOutputChannel(opData, args.Port)
+  return nil
 }

@@ -8,20 +8,17 @@ import (
 
 type WorkerReq string
 
-type StopTaskArgs struct {
-	Port string
-}
-
 type ArgsWithSender struct {
 	Rt        	Rainstorm_tuple_t
-	SenderNum	int
-	SenderPort	string
+	SenderOp	string
+	SenderHash	int
 	TargetPort  string
 	UID			string
 }
 
 type ReceiveAckArgs struct {
-	AckInfo	Ack_info_t
+	Port string
+	UID string
 }
 
 func startRPCListenerWorker(port string) {
@@ -31,25 +28,16 @@ func startRPCListenerWorker(port string) {
 	if err != nil {
 		panic(err)
 	}
-  fmt.Printf("Started a server on port: %s", port)
+  fmt.Printf("Started a server on port: %s\n", port)
 	go rpc.Accept(servePort)
-}
-
-func (w *WorkerReq) StopTask(args *StopTaskArgs, reply *string) error {
-	go deferredStop(args.Port)
-	return nil
-}
-
-func (w *WorkerReq) RunExec(reply *string) error {
-	// run executable, send to buffer where we will attempt to send to subsequent stages
-	return nil
 }
 
 func (r *WorkerReq) HandleTuple(args *ArgsWithSender, reply *string) error {
 	// this is data being sent from output stage, have scheduler write it to files
 	if ipToVM(selfIP) == LEADER_ID {
+		fmt.Printf("%s:%s\n", args.Rt.Key, args.Rt.Value)
 		// write data to output
-		err := backgroundCommand(fmt.Sprintf("appendstring %s:%s %s", args.Rt.Key, args.Rt.Value, rainstormArgs.Hydfs_dest_file))
+		err := backgroundCommand(fmt.Sprintf("appendstring %s:%s\n %s", args.Rt.Key, args.Rt.Value, rainstormArgs.Hydfs_dest_file))
 		if err != nil {
 			return err
 		}
@@ -57,18 +45,22 @@ func (r *WorkerReq) HandleTuple(args *ArgsWithSender, reply *string) error {
 		go sendAck(args)
 
 	} else {
-		channels, exists := portToChannels[args.TargetPort]
+		opData, exists := portToOpData[args.TargetPort]
 		if !exists {
-			return fmt.Errorf("no channels found for port %s", args.TargetPort)
-		}
-		
-		senderAck := Ack_info_t{
-			UID: args.UID,
-			SenderNum: args.SenderNum,
-			SenderPort: args.SenderPort,
+			return fmt.Errorf("no data found for port %s", args.TargetPort)
 		}
 
-		channels.Input <- InputInfo{
+		senderAck := Ack_info_t{
+			UID: args.UID,
+			SenderOp: args.SenderOp,
+			SenderHash: args.SenderHash,
+		}
+		
+		if !screenInput(opData, senderAck) {
+			return nil
+		}
+
+		opData.Input <- InputInfo{
 			Tup : args.Rt,
 			AckInfo: senderAck,
 		}
@@ -78,18 +70,19 @@ func (r *WorkerReq) HandleTuple(args *ArgsWithSender, reply *string) error {
 }
 
 func (r *WorkerReq) ReceiveAck(args *ReceiveAckArgs, reply *string) error {
-	portToChannels[args.AckInfo.SenderPort].RecvdAck <- args.AckInfo
-	fmt.Printf("ReceiveACK: Received ACK on port %s with UID %s\n", args.AckInfo.SenderPort, args.AckInfo.UID)
+	portToOpData[args.Port].RecvdAck <- args.UID
+	rainstormLog.Printf("ReceiveACK: Received ACK on port %s with UID %s\n", args.Port, args.UID)
 	return nil
 }
 
-func sendAck (args *ArgsWithSender) {// call ACK on sender
-	err := callReceiveAck( Ack_info_t{
+func sendAck (args *ArgsWithSender) {// immediately ACK sender
+	senderAddr := operatorToVmPorts[args.SenderOp][args.SenderHash]
+	receiverArgs := ReceiveAckArgs{
+		Port: senderAddr.port,
 		UID: args.UID,
-		SenderNum: args.SenderNum,
-		SenderPort: args.SenderPort,
-	});
+	}
+	err := sendAckToServer(senderAddr.VM, senderAddr.port, &receiverArgs)
 	if err != nil {
-		fmt.Printf("error in immediate ack: %v\n", err)
+		rainstormLog.Printf("error in immediate ack: %v\n", err)
 	}
 }
