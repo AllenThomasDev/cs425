@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/rpc"
+	"sync"
 )
 
 type SchedulerReq string
@@ -26,9 +27,27 @@ func startRPCListenerScheduler(schChannel chan bool) {
 	if err != nil {
 		panic(err)
 	}
-	go rpc.Accept(servePort)
+
+	var wg sync.WaitGroup
+
+	go func() {
+		for {
+			conn, err := servePort.Accept()
+			if err != nil {
+				break
+			}
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				rpc.ServeConn(conn)
+			}()
+		}
+	}()
 	
 	<-schChannel
+	wg.Wait()
+	fmt.Printf("Shutting down RainStorm Scheduler\n")
 	servePort.Close()
 	close(schChannel)
 }

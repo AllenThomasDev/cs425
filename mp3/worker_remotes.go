@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/rpc"
-	"time"
+	"sync"
 )
 
 type WorkerReq string
@@ -34,11 +34,27 @@ func startRPCListenerWorker(port string, endChannel chan bool) {
 		panic(err)
 	}
   fmt.Printf("Started a server on port: %s\n", port)
-	go rpc.Accept(servePort)
+
+  var wg sync.WaitGroup
+
+	go func() {
+		for {
+			conn, err := servePort.Accept()
+			if err != nil {
+				break
+			}
+
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				rpc.ServeConn(conn)
+			}()
+		}
+	}()
 	
 	<-endChannel
-
-	fmt.Printf("Ending Rainstorm task\n")
+	wg.Wait()
+	fmt.Printf("Ending Rainstorm task on port %s\n", port)
 	servePort.Close()
 	cleanUpState(port, endChannel)
 }
@@ -107,14 +123,14 @@ func sendAck (args *ArgsWithSender) {// immediately ACK sender
 }
 
 func (r *WorkerReq) KillTask (args *KillTaskArgs, reply *string) error {
-	go deferredStop(args.Port)
+	portToOpData[args.Port].Death <- true
 	return nil
 }
 
-func deferredStop (port string) {
-	time.Sleep(time.Second)
-	portToOpData[port].Death <- true
-}
+// func deferredStop (port string) {
+// 	time.Sleep(time.Second)
+// 	portToOpData[port].Death <- true
+// }
 
 func cleanUpState(port string, endChannel chan bool) {
 	if currentVM != LEADER_ID {
