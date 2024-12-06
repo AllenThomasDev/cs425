@@ -68,8 +68,11 @@ var operators = make(map[string]Operator)
 var portToOpData = make(map[string]OperatorData)
 var OBJECTID_COLUMN = 2
 var SIGNTYPE_COLUMN = 3
+var SIGNPOST_COLUMN = 6
+var CATEGORY_COLUMN = 8
+var signCategories = []string{"Punched Telespar", "Unpunched Telespar", "Streetlight"}
 
-func updateWordCount(key string, port string) {
+func updateState(key string, port string) {
 	val, found := portToOpData[port].StateMap[key]
 	if found {
 		count, _ := strconv.Atoi(val)
@@ -81,10 +84,20 @@ func updateWordCount(key string, port string) {
 	}
 }
 
-func filterTuple(rt Rainstorm_tuple_t, pattern string) Rainstorm_tuple_t {
+func filterLine(rt Rainstorm_tuple_t, pattern string) Rainstorm_tuple_t {
 	if strings.Contains(rt.Value, pattern) {
 		return rt
  	} else {
+		return Rainstorm_tuple_t{FILTERED, FILTERED}
+	}
+}
+
+func filterSignPost(rt Rainstorm_tuple_t, pattern string) Rainstorm_tuple_t {
+	parts := strings.Split(rt.Value, ",")
+	if parts[SIGNPOST_COLUMN] == pattern {
+		// return just the category so we can partition based on categories to keep state clean
+		return Rainstorm_tuple_t{parts[CATEGORY_COLUMN], ""}
+	} else {
 		return Rainstorm_tuple_t{FILTERED, FILTERED}
 	}
 }
@@ -144,7 +157,7 @@ func initOperators() {
 			rainstormLog.Printf("I am counting words\n")
 			rt := data.(StatefulArgs).rt
 			port := data.(StatefulArgs).port
-      		updateWordCount(rt.Key, port)
+      		updateState(rt.Key, port)
 			return Rainstorm_tuple_t{
 				Key:   rt.Key,
 				Value: portToOpData[port].StateMap[rt.Key],
@@ -154,13 +167,13 @@ func initOperators() {
 		Filter: false,
 	}
 
-	operators["filterPatternOperator"] = Operator{
-		Name: "filterPatternOperator",
+	operators["filterLineOperator"] = Operator{
+		Name: "filterLineOperator",
 		Operator: func(data interface{}) interface{} {
 			rt := data.(FilterArgs).rt
 			pattern := data.(FilterArgs).pattern
-			rainstormLog.Printf("Filtering for strings with pattern %s\n", pattern)
-			filteredRT := filterTuple(rt, pattern)
+			rainstormLog.Printf("Filtering for lines with pattern %s\n", pattern)
+			filteredRT := filterLine(rt, pattern)
 			return filteredRT
 		},
 		Stateful: false,
@@ -176,6 +189,29 @@ func initOperators() {
 		},
 		Stateful: false,
 		Filter: false,
+	}
+
+	operators["filterPostOperator"] = Operator{
+		Name: "filterPostOperator",
+		Operator: func(data interface{}) interface{} {
+			rt := data.(FilterArgs).rt
+			patNum, _ := strconv.Atoi(data.(FilterArgs).pattern)
+			pattern := "No matching strings found"
+			// patterns have spaces, so we need to do something goofy
+			if patNum == 0 {
+				pattern = signCategories[0]
+			} else if patNum == 1 {
+				pattern = signCategories[1]
+			} else if patNum == 2 {
+				pattern = signCategories[2]
+			}
+			
+			rainstormLog.Printf("Filtering for sign posts with pattern %s\n", pattern)
+			filteredRT := filterSignPost(rt, pattern)
+			return filteredRT
+		},
+		Stateful: false,
+		Filter: true,
 	}
 
 	fmt.Println("Available Operators are - ")

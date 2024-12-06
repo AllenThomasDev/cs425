@@ -48,6 +48,8 @@ type StartRainstormRemoteArgs struct {
 	Hydfs_src_file string
 	Hydfs_dest_file string
 	Num_tasks int
+	Op1_args string
+	Op2_args string
 }
 
 type SourceArgs struct {
@@ -74,6 +76,7 @@ type InitializeOperatorArgs struct {
 	StateFile		string
 	Hash			int
 	Numtasks		int
+	Args			string
 }
 
 func startRPCListenerHyDFS() {
@@ -188,7 +191,7 @@ func (h *HyDFSReq) Remove(args *RemoveArgs, reply *string) error {
 }
 
 func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *string) error {
-	go rainstormMain(args.Op1_exe,  args.Op2_exe, args.Hydfs_src_file, args.Hydfs_dest_file, args.Num_tasks)
+	go rainstormMain(args.Op1_exe, args.Op2_exe, args.Hydfs_src_file, args.Hydfs_dest_file, args.Num_tasks, args.Op1_args, args.Op2_args)
 	return nil
 }
 
@@ -205,7 +208,8 @@ func (h *HyDFSReq) FindFreePort(args struct{}, reply *string) error {
 
 func (h *HyDFSReq) InitializeOperatorOnPort(args *InitializeOperatorArgs, reply *string) error {
   portString := args.Port
-  rainstormLog.Printf("Operator name: %s \n\n", args.OperatorName)
+  rainstormLog.Printf("Operator name: %s\n", args.OperatorName)
+  rainstormLog.Printf("Operator hash: %d\n", args.Hash)
 
   // initialize program infrastructure
 	var uBuf = make([]string, 0)
@@ -238,7 +242,7 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *InitializeOperatorArgs, reply 
 
   // create I/O channels
   rainstormLog.Printf("created a channel to listen to inputs, \nthe port here is %s\n", args.Port)
-  go processInputChannel(opData, args.Port)
+  go processInputChannel(opData, args.Port, args.Args)
   go processOutputChannel(opData, args.Port)
   return nil
 }

@@ -33,7 +33,7 @@ var (
 	operatorSequence []string
 )
 
-func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_file string, numTasks int) {
+func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_file string, numTasks int, op1_args string, op2_args string) {
 	fmt.Println("Starting Rainstorm ...")
 	if valid := validateOperations([]string{op1, op2}); !valid {
 		return
@@ -47,6 +47,8 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 		hydfs_src_file,
 		hydfs_dest_file,
 		numTasks,
+		op1_args,
+		op2_args,
 	}
 	acksReceived = 0
 	endRainStorm = make(chan bool)
@@ -131,6 +133,17 @@ func callInitializeOperatorOnVM(vm int, port string, op string, hash int) error 
 		Hash:	hash,
 		Numtasks: rainstormArgs.Num_tasks,
 	}
+
+	opNum := findLayerFromOperator(op)
+	if opNum == -1 {
+		return fmt.Errorf("Could not find layer from op name %s\n", op)
+	}
+
+	if opNum == 1 {
+		opArgs.Args = rainstormArgs.Op1_args
+	} else {
+		opArgs.Args = rainstormArgs.Op1_args
+	}
 	
 	var reply string
 	err = client.Call("HyDFSReq.InitializeOperatorOnPort", opArgs, &reply)
@@ -149,7 +162,6 @@ func callInitializeOperatorOnVM(vm int, port string, op string, hash int) error 
 
 func initializeAllOperators() error {
 	for opStr := range operatorSequence {
-		fmt.Printf("CALLED\n")
 		for i := 0; i < len(operatorToVmPorts[operatorSequence[opStr]]); i++ {
 			fmt.Println(i)
 			err := callInitializeOperatorOnVM(operatorToVmPorts[operatorSequence[opStr]][i].VM, operatorToVmPorts[operatorSequence[opStr]][i].port, operatorSequence[opStr], i)
@@ -216,6 +228,15 @@ func rebalanceTasksOnNodeFailure(vm int) {
 		}
 	}
   }
+}
+
+func findLayerFromOperator(operatorName string) int {
+	for i := 0; i < len(operatorSequence); i++ {
+		if operatorSequence[i] == operatorName {
+			return i
+		}
+	}
+	return -1
 }
 
 // func rebalanceTasksOnNodeJoin(newNode int) {
@@ -590,9 +611,9 @@ func cleanupTempFile(fileName string) {
 	os.Remove("client/" + fileName)
 }
 
-func initRainstormOnScheduler(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
+func initRainstormOnScheduler(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int, op1_args string, op2_args string) {
 	if selfIP == introducerIP {
-		rainstormMain(op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks)
+		rainstormMain(op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks, op1_args, op2_args)
 	} else {
 		client, err := rpc.DialHTTP("tcp", introducerIP+":"+RPC_PORT)
 		if err != nil {
@@ -601,7 +622,7 @@ func initRainstormOnScheduler(op1_exe string, op2_exe string, hydfs_src_file str
 		}
 
 		var reply string
-		err = client.Call("HyDFSReq.StartRainstormRemote", StartRainstormRemoteArgs{op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks}, &reply)
+		err = client.Call("HyDFSReq.StartRainstormRemote", StartRainstormRemoteArgs{op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks, op1_args, op2_args}, &reply)
 		if err != nil {
 			fmt.Printf("Failed to initiate Rainstorm: %v\n", err)
 		}

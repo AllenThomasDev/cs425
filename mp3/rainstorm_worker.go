@@ -53,12 +53,16 @@ func screenInput(opData OperatorData, AckInfo Ack_info_t) bool {
 }
 
 // listens to input channel, processes the tuple using opeartor and puts it to output channel
-func processInputChannel(opData OperatorData, port string) {
+func processInputChannel(opData OperatorData, port string, opArgs string) {
 	for input := range opData.Input {
 
 		var output interface{}
 		if operators[opData.Op].Filter {
-			output = operators[opData.Op].Operator(FilterArgs{input.Tup, "Streetname"})
+			if opArgs == "" {
+				fmt.Printf("Error: filter operation must have an argument")
+				return
+			}
+			output = operators[opData.Op].Operator(FilterArgs{input.Tup, opArgs})
 		} else if operators[opData.Op].Stateful {
 			output = operators[opData.Op].Operator(StatefulArgs{input.Tup, port})
 		} else {
