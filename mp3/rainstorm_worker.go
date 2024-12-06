@@ -57,7 +57,9 @@ func processInputChannel(opData OperatorData, port string) {
 	for input := range opData.Input {
 
 		var output interface{}
-		if operators[opData.Op].Stateful {
+		if operators[opData.Op].Filter {
+			output = operators[opData.Op].Operator(FilterArgs{input.Tup, "Streetname"})
+		} else if operators[opData.Op].Stateful {
 			output = operators[opData.Op].Operator(StatefulArgs{input.Tup, port})
 		} else {
 			output = operators[opData.Op].Operator(StatelessArgs{input.Tup})
@@ -100,13 +102,13 @@ func processInputChannel(opData OperatorData, port string) {
 				rainstormLog.Printf("Channel closed, now we can ACK!\n")
 				opData.SendAck <- true
 			} else {
-				handleEmptyOutput(opData.Op, opData.LogFile, opData.StateFile, input.AckInfo)
+				handleEmptyOutput(opData, input.AckInfo)
 			}
 
 		case Rainstorm_tuple_t:
 			rainstormLog.Printf("Processing a single tuple!\n")
 			if v.Key == FILTERED && v.Value == FILTERED {
-				handleEmptyOutput(opData.Op, opData.LogFile, opData.StateFile, input.AckInfo)
+				handleEmptyOutput(opData, input.AckInfo)
 			} else {
 				opData.Output <- OutputInfo{
 					Tup: v,
@@ -120,7 +122,7 @@ func processInputChannel(opData OperatorData, port string) {
 			rainstormLog.Printf("Processing a slice of tuples!\n")
 			if len(v) == 0 {
 				// empty slice
-				handleEmptyOutput(opData.Op, opData.LogFile, opData.StateFile, input.AckInfo)
+				handleEmptyOutput(opData, input.AckInfo)
 			} else {
 				for i := 0; i < len(v); i++ {
 					opData.Output <- OutputInfo{
@@ -193,23 +195,9 @@ func handleAcks(opData OperatorData, out OutputInfo) error {
 				if err != nil {
 					return fmt.Errorf("Error writing logs: %v\n", err)
 				}
-
-				// once we've sent out an ack, we can remove data from our buffer (we now have another record that says we've processed the data)
-				opData.UIDBufLock.Lock()
-				bufLocal := *opData.UIDBuf
-
-				for i := 0; i < len(bufLocal) - 1; i++ {
-					bufLocal[i] = bufLocal[i + 1]
-				}
-				bufLocal[len(bufLocal) - 1] = EMPTY
-
-				for i := 0; i < len(bufLocal); i++ {
-					rainstormLog.Printf("Output: UID at index %d: %s\n", i, bufLocal[i])
-				}
-
-				*opData.UIDBuf = bufLocal
-				opData.UIDBufLock.Unlock()
 				
+				shiftUIDBuf(opData)
+
 				// whether or not this goes through is not super important to us; we've already written it to output
 				ackPrevStage(out.AckInfo)
 			}
@@ -218,6 +206,24 @@ func handleAcks(opData OperatorData, out OutputInfo) error {
 	case <-time.After(RAINSTORM_ACK_TIMEOUT):
 		return fmt.Errorf("TIMEOUT")
 	}
+}
+
+func shiftUIDBuf(opData OperatorData) {
+	// once we've sent out an ack, we can remove data from our buffer (we now have another record that says we've processed the data)
+	opData.UIDBufLock.Lock()
+	bufLocal := *opData.UIDBuf
+
+	for i := 0; i < len(bufLocal) - 1; i++ {
+		bufLocal[i] = bufLocal[i + 1]
+	}
+	bufLocal[len(bufLocal) - 1] = EMPTY
+
+	for i := 0; i < len(bufLocal); i++ {
+		rainstormLog.Printf("After shift: UID at index %d: %s\n", i, bufLocal[i])
+	}
+
+	*opData.UIDBuf = bufLocal
+	opData.UIDBufLock.Unlock()
 }
 
 func writeRainstormLogs(operatorName string, logFile string, stateFile string, prevUID string, stateTup Rainstorm_tuple_t) error {
@@ -229,14 +235,15 @@ func writeRainstormLogs(operatorName string, logFile string, stateFile string, p
 	return nil
 }
 
-func handleEmptyOutput(operatorName string, logFile string, stateFile string, ackInfo Ack_info_t) {
+func handleEmptyOutput(opData OperatorData, ackInfo Ack_info_t) {
 	// since we have no data to send, we can't go through the standard output->send data->receive ack process
 	// just send the ack from here instead
 	// TODO: can we have stateful operators that also filter?
-	err := writeRainstormLogs(operatorName, logFile, stateFile, ackInfo.UID, Rainstorm_tuple_t{"",""})
+	err := writeRainstormLogs(opData.Op, opData.LogFile, opData.StateFile, ackInfo.UID, Rainstorm_tuple_t{"",""})
 	if err != nil {
 		rainstormLog.Printf("Error writing logs on empty ACK")
 	}
+	shiftUIDBuf(opData)
 	err = ackPrevStage(ackInfo)
 	if err != nil {
 		rainstormLog.Printf("Error on empty channel ACK: %v\n", err)

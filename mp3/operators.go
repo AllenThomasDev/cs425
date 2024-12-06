@@ -18,10 +18,16 @@ type StatefulArgs struct {
 	port string
 }
 
+type FilterArgs struct {
+	rt Rainstorm_tuple_t
+	pattern string
+}
+
 type Operator struct {
 	Name     string
 	Operator OperatorFunc
 	Stateful bool
+	Filter	 bool
 }
 
 // input needs both tuple and address/UID to ack so output knows who to ACK
@@ -60,6 +66,8 @@ type OperatorData struct {
 
 var operators = make(map[string]Operator)
 var portToOpData = make(map[string]OperatorData)
+var OBJECTID_COLUMN = 2
+var SIGNTYPE_COLUMN = 3
 
 func updateWordCount(key string, port string) {
 	val, found := portToOpData[port].StateMap[key]
@@ -71,6 +79,20 @@ func updateWordCount(key string, port string) {
 		rainstormLog.Printf("Updating %s with count %d\n", key, 1)
 		portToOpData[port].StateMap[key] = strconv.Itoa(1)
 	}
+}
+
+func filterTuple(rt Rainstorm_tuple_t, pattern string) Rainstorm_tuple_t {
+	if strings.Contains(rt.Value, pattern) {
+		return rt
+ 	} else {
+		return Rainstorm_tuple_t{FILTERED, FILTERED}
+	}
+}
+
+// hardcoded columns for demo
+func cutOutColumns(rt Rainstorm_tuple_t) Rainstorm_tuple_t {
+	parts := strings.Split(rt.Value, ",")
+	return Rainstorm_tuple_t{parts[OBJECTID_COLUMN] + "," + parts[SIGNTYPE_COLUMN], ""}
 }
 
 func initOperators() {
@@ -90,6 +112,7 @@ func initOperators() {
       return tupleChannel
 		},
 		Stateful: false,
+		Filter: false,
 	}
 
 	operators["splitLineOperator"] = Operator{
@@ -112,6 +135,7 @@ func initOperators() {
 			return tupleChannel // Return the channel
 		},
 		Stateful: false,
+		Filter: false,
 	}
 
 	operators["wordCountOperator"] = Operator{
@@ -127,7 +151,33 @@ func initOperators() {
 			}
 		},
 		Stateful: true,
+		Filter: false,
 	}
+
+	operators["filterPatternOperator"] = Operator{
+		Name: "filterPatternOperator",
+		Operator: func(data interface{}) interface{} {
+			rt := data.(FilterArgs).rt
+			pattern := data.(FilterArgs).pattern
+			rainstormLog.Printf("Filtering for strings with pattern %s\n", pattern)
+			filteredRT := filterTuple(rt, pattern)
+			return filteredRT
+		},
+		Stateful: false,
+		Filter: true,
+	}
+
+	operators["getSpecificColumns"] = Operator{
+		Name: "getSpecificColumns",
+		Operator: func(data interface{}) interface{} {
+			rt := data.(StatelessArgs).rt
+			filteredRT := cutOutColumns(rt)
+			return filteredRT
+		},
+		Stateful: false,
+		Filter: false,
+	}
+
 	fmt.Println("Available Operators are - ")
 	for key := range operators {
 		fmt.Println(key)

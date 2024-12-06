@@ -244,6 +244,7 @@ func commandListener() {
 		case "status_sus":
 			statusSuspicion()
 		case "append":
+			rainstormLog.Printf("Regular append called!\n")
 			if len(args) < 2 {
 				fmt.Println("Error: Insufficient arguments. Usage: append localfilename HyDFSfilename")
 				continue
@@ -488,6 +489,7 @@ func commandListener() {
 }
 
 var backgroundCommand = func(input string) error {
+	rainstormLog.Println(input)
 	args := strings.Split(input, " ")
 	if len(args) < 1 {
 		return fmt.Errorf("Error: need at least one command\n")
@@ -506,24 +508,6 @@ var backgroundCommand = func(input string) error {
 		if err != nil {
 			return fmt.Errorf("Error reading file: %v\n", err)
 		}
-		ts := time.Now()
-		for {
-			err := sendAppendToQuorum(AppendArgs{modifiedFilename, fileContent, ts.String(), currentVM}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
-			if err == nil {
-				break
-			}
-			removeFileFromCache(hyDFSFilename)
-		}
-		removeFileFromCache(hyDFSFilename)
-	// swap content of file we want to append with string
-	case "appendstring" :
-		if len(args) < 2 {
-			return fmt.Errorf("Error: Insufficient arguments. Usage: appendstring writeString HyDFSfilename")
-		}
-		fileContent := args[0]
-
-		hyDFSFilename := args[1]
-		modifiedFilename := slashesToBackticks(hyDFSFilename)
 		ts := time.Now()
 		for {
 			err := sendAppendToQuorum(AppendArgs{modifiedFilename, fileContent, ts.String(), currentVM}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
@@ -590,7 +574,6 @@ var backgroundCommand = func(input string) error {
 		hyDFSFilename := args[0]
 		localFilename := args[1]
 		if cachedContent, ok := readFileFromCache(hyDFSFilename); ok {
-			fmt.Printf("serving from cache\n")
 			err := writeFile(localFilename, cachedContent, "client")
 			if err != nil {
 				return fmt.Errorf("Error on file receipt: %v\n", err)
@@ -645,5 +628,19 @@ var backgroundCommand = func(input string) error {
 		return fmt.Errorf("Unknown command")
 	}
 
+	return nil
+}
+
+func appendString(writeStr string, writeFile string) error {
+	modifiedFilename := slashesToBackticks(writeFile)
+	ts := time.Now()
+	for {
+		err := sendAppendToQuorum(AppendArgs{modifiedFilename, writeStr, ts.String(), currentVM}, routingTable[hash(modifiedFilename, MACHINES_IN_NETWORK)])
+		if err == nil {
+			break
+		}
+		removeFileFromCache(writeFile)
+	}
+	removeFileFromCache(writeFile)
 	return nil
 }

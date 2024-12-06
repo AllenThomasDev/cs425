@@ -143,6 +143,7 @@ func writeFile(fileName string, fileContent string, writeTo string) error {
 }
 
 func appendFile(fileName string, fileContent string) (string, error) {
+	rainstormLog.Printf("Trying to append to file %s\n", fileName)
 	exists := checkFileExists("server/" + fileName)
 	if exists {
 		randFileName := genRandomFileName()

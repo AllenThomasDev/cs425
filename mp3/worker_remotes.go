@@ -64,7 +64,7 @@ func (r *WorkerReq) HandleTuple(args *ArgsWithSender, reply *string) error {
 	if currentVM == LEADER_ID {
 		fmt.Printf("%s:%s\n", args.Rt.Key, args.Rt.Value)
 		// write data to output
-		err := backgroundCommand(fmt.Sprintf("appendstring %s:%s\n %s", args.Rt.Key, args.Rt.Value, rainstormArgs.Hydfs_dest_file))
+		err := appendString(fmt.Sprintf("%s:%s\n", args.Rt.Key, args.Rt.Value), rainstormArgs.Hydfs_dest_file)
 		if err != nil {
 			return err
 		}

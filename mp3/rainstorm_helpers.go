@@ -12,7 +12,8 @@ import (
 // using the client copy is NOT fine here since we need a record that persists even if this node fails
 // Log the fact that a record has been processed
 var backgroundWrite = func(writeStr string, writeFile string) {
-	err := backgroundCommand(fmt.Sprintf("appendstring %s %s", writeStr, writeFile))
+	rainstormLog.Printf("Trying to write %s to file %s\n", writeStr, writeFile)
+	err := appendString(writeStr, writeFile)
 	if err != nil {
 		fmt.Printf("Error writing processed line %d: %v\n", writeStr, err)
 		return

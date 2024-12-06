@@ -138,7 +138,7 @@ func (h *HyDFSReq) Create(args *CreateArgs, reply *string) error {
 }
 
 func (h *HyDFSReq) Append(args *AppendArgs, reply *string) error {
-	// fmt.Println("Received APPEND message")
+	rainstormLog.Printf("Received APPEND message from VM %d\n", args.CallerVM)
 	
 	aID := Append_id_t{args.CallerVM, args.Timestamp}
 	_, exists := aIDtoFile[args.HyDFSFilename][aID]
