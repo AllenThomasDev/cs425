@@ -34,7 +34,7 @@ func startRPCListenerWorker(port string) {
 
 func (r *WorkerReq) HandleTuple(args *ArgsWithSender, reply *string) error {
 	// this is data being sent from output stage, have scheduler write it to files
-	if ipToVM(selfIP) == LEADER_ID {
+	if currentVM == LEADER_ID {
 		fmt.Printf("%s:%s\n", args.Rt.Key, args.Rt.Value)
 		// write data to output
 		err := backgroundCommand(fmt.Sprintf("appendstring %s:%s\n %s", args.Rt.Key, args.Rt.Value, rainstormArgs.Hydfs_dest_file))
@@ -70,8 +70,15 @@ func (r *WorkerReq) HandleTuple(args *ArgsWithSender, reply *string) error {
 }
 
 func (r *WorkerReq) ReceiveAck(args *ReceiveAckArgs, reply *string) error {
-	portToOpData[args.Port].RecvdAck <- args.UID
-	rainstormLog.Printf("ReceiveACK: Received ACK on port %s with UID %s\n", args.Port, args.UID)
+	if currentVM == LEADER_ID {
+		acksReceived++
+		if acksReceived >= rainstormArgs.Num_tasks {
+			fmt.Printf("Program has terminated, telling all tasks to stop...\n")
+		}
+	} else {
+		portToOpData[args.Port].RecvdAck <- args.UID
+		rainstormLog.Printf("ReceiveACK: Received ACK on port %s with UID %s\n", args.Port, args.UID)
+	}
 	return nil
 }
 

@@ -15,7 +15,7 @@ func main() {
 		log.Fatalf("Failed to create ./client directory: %v", err)
 	}
 	
-	file1, err := os.OpenFile("rainstorm.log", os.O_CREATE|os.O_WRONLY, 0644)
+	file1, err := os.OpenFile("rainstorm.log", os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatalf("Failed to open logfile1: %v", err)
 	}

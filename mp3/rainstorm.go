@@ -13,8 +13,6 @@ import (
 
 var rainstormLog *log.Logger
 
-// TODO: Have operators check logfile when processing inputs, make program actually conclude, test wordcount on failures
-
 type log_state_t struct {
 	logFile string
 	stateFile string
@@ -29,6 +27,7 @@ var operatorSequence = make([]string, 3)
 var (
 	rainstormArgs   StartRainstormRemoteArgs // save args for rescheduling
 	rainstormActive bool                     // flag to enable rescheduling on joins/leaves
+	acksReceived	int 					// once leader has received num_tasks ACKs, we want to stop rainstorm and erase all state
 )
 
 func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_file string, numTasks int) {
@@ -45,6 +44,7 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 		hydfs_dest_file,
 		numTasks,
 	}
+	acksReceived = 0
 	// TODO: every time that membership list is updated, we need to update a lot of globals
 	createLogFiles(numTasks, operatorSequence)
 	backgroundCommand(fmt.Sprintf("createemptyfile %s", hydfs_dest_file))
@@ -172,19 +172,26 @@ func rebalanceTasksOnNodeFailure(vm int) {
   for i := range(tasksToBeResurrected){
     // remove address from operatorToVmPorts[]
     operatorName := tasksToBeResurrected[i].Name
-	destination := findNodeWithFewestTasks()
-	port, err := callFindFreePort(destination)
-	if err != nil {
-		panic(err) // we're screwed if we can't find a free port on the new machine
+	
+	for {
+		destination := findNodeWithFewestTasks()
+		port, err := callFindFreePort(destination)
+		if err != nil {
+			continue
+		}
+		newTaskAddr := task_addr_t{
+			VM: destination,
+			port: port,
+		}
+	
+		newHash := modifyOperator(operatorName, taskAddrToBeDeleted[i], newTaskAddr)
+		err = callInitializeOperatorOnVM(destination, port, operatorName, newHash)
+		if err == nil {
+			break
+		} else {
+			fmt.Printf("Error on rebalance: %v\n", err)
+		}
 	}
-
-	newTaskAddr := task_addr_t{
-		VM: destination,
-		port: port,
-	}
-
-    newHash := modifyOperator(operatorName, taskAddrToBeDeleted[i], newTaskAddr)
-	callInitializeOperatorOnVM(destination, port, operatorName, newHash)
   }
 }
 
@@ -287,6 +294,18 @@ func distributeTasks(numTasks int) {
 	}
 }
 
+func getNextOperator(operatorName string) string {
+	for i, name := range operatorSequence {
+		if name == operatorName {
+			if i == len(operatorSequence)-1 {
+				return "completed"
+			}
+			return operatorSequence[i+1]
+		}
+	}
+	return "not found"
+}
+
 func findOperatorFromTaskAddr(taskAddr task_addr_t) string {
 	for operatorName, vmPorts := range operatorToVmPorts {
 		for _, addr := range vmPorts {
@@ -315,6 +334,7 @@ func matchTaskWithHash(taskAddr task_addr_t, opString string) int {
 	return -1
 }
 
+
 func getTaskLog(vm int, port string) (log_state_t, error) {
 	var ls log_state_t
 	
@@ -331,17 +351,6 @@ func getTaskLog(vm int, port string) (log_state_t, error) {
 	return ls, nil
 }
 
-func getNextOperator(operatorName string) string {
-	for i, name := range operatorSequence {
-		if name == operatorName {
-			if i == len(operatorSequence)-1 {
-				return "completed"
-			}
-			return operatorSequence[i+1]
-		}
-	}
-	return "not found"
-}
 
 func startSources(sourceTriggers []Rainstorm_tuple_t) {
 	fmt.Println(operatorToVmPorts)
@@ -381,10 +390,6 @@ func createFileChunks(numSources int, hydfsSourceFile string) (*FileChunkInfo, e
 
 // prepareSourceFile merges and retrieves the source file from HydFS
 func prepareSourceFile(hydfsSourceFile string) (string, error) {
-	// TODO: merging on reschedules breaks program, see doc
-	// if err := backgroundCommand(fmt.Sprintf("merge %s", hydfsSourceFile)); err != nil {
-	// 	return "", err
-	// }
 
 	tempFileName := genRandomFileName()
 	if err := backgroundCommand(fmt.Sprintf("get %s %s", hydfsSourceFile, tempFileName)); err != nil {

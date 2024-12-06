@@ -154,6 +154,7 @@ func processOutputChannel(opData OperatorData, port string) {
 		for {
 			nextStageArgs := GetNextStageArgs{
 				Rt: out.Tup,
+				Port: port,
 				CurrOperator: opData.Op,
 			}
 			
@@ -166,7 +167,7 @@ func processOutputChannel(opData OperatorData, port string) {
 				if err != nil {
 					rainstormLog.Printf("Error on ACK handling: %v\n", err)
 					// if our error was due to something other than timeout, wait a little bit
-					if err.Error() != "TIMEOUT" {
+					if err.Error() != "TIMEOUT" && err.Error() != "OLDACK" {
 						time.Sleep(RAINSTORM_ACK_TIMEOUT)
 					}
 				} else {
@@ -180,35 +181,40 @@ func processOutputChannel(opData OperatorData, port string) {
 
 func handleAcks(opData OperatorData, out OutputInfo) error {
 	select {
-	case <- opData.RecvdAck:
-		if <- opData.SendAck {
-			// to write the UID that we got sent, we need to take the UID from out.AckInfo (which is from input and therefore the previous stage)
-			err := writeRainstormLogs(opData.Op, opData.LogFile, opData.StateFile, out.AckInfo.UID, Rainstorm_tuple_t{out.Tup.Key, out.Tup.Value})
-			if err != nil {
-				return fmt.Errorf("Error writing logs: %v\n", err)
-			}
+	// only want to send out acks after we've received acks
+	case recvdUID := <- opData.RecvdAck:
+		if recvdUID != out.UID {
+			rainstormLog.Printf("Old ack %s received, expected %s dropping\n", recvdUID, out.UID)
+			return fmt.Errorf("OLDACK") // we've just been rescheduled and have gotten an ack for some old data; drop it like it's hot
+		} else {
+			if <- opData.SendAck {
+				// to write the UID that we got sent, we need to take the UID from out.AckInfo (which is from input and therefore the previous stage)
+				err := writeRainstormLogs(opData.Op, opData.LogFile, opData.StateFile, out.AckInfo.UID, Rainstorm_tuple_t{out.Tup.Key, out.Tup.Value})
+				if err != nil {
+					return fmt.Errorf("Error writing logs: %v\n", err)
+				}
 
-			opData.UIDBufLock.Lock()
-			bufLocal := *opData.UIDBuf
+				// once we've sent out an ack, we can remove data from our buffer (we now have another record that says we've processed the data)
+				opData.UIDBufLock.Lock()
+				bufLocal := *opData.UIDBuf
 
-			for i := 0; i < len(bufLocal) - 1; i++ {
-				bufLocal[i] = bufLocal[i + 1]
-			}
-			bufLocal[len(bufLocal) - 1] = EMPTY
+				for i := 0; i < len(bufLocal) - 1; i++ {
+					bufLocal[i] = bufLocal[i + 1]
+				}
+				bufLocal[len(bufLocal) - 1] = EMPTY
 
-			for i := 0; i < len(bufLocal); i++ {
-				rainstormLog.Printf("Output: UID at index %d: %s\n", i, bufLocal[i])
-			}
+				for i := 0; i < len(bufLocal); i++ {
+					rainstormLog.Printf("Output: UID at index %d: %s\n", i, bufLocal[i])
+				}
 
-			*opData.UIDBuf = bufLocal
-			opData.UIDBufLock.Unlock()
-			
-			err = ackPrevStage(out.AckInfo)
-			if err != nil {
-				return err
+				*opData.UIDBuf = bufLocal
+				opData.UIDBufLock.Unlock()
+				
+				// whether or not this goes through is not super important to us; we've already written it to output
+				ackPrevStage(out.AckInfo)
 			}
+			return nil
 		}
-		return nil
 	case <-time.After(RAINSTORM_ACK_TIMEOUT):
 		return fmt.Errorf("TIMEOUT")
 	}
