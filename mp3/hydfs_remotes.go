@@ -206,8 +206,6 @@ func (h *HyDFSReq) FindFreePort(args struct{}, reply *string) error {
 func (h *HyDFSReq) InitializeOperatorOnPort(args *InitializeOperatorArgs, reply *string) error {
   portString := args.Port
   rainstormLog.Printf("Operator name: %s \n\n", args.OperatorName)
-  // this listener will send the tuples to the input channel for this port
-  go startRPCListenerWorker(portString)
 
   // initialize program infrastructure
 	var uBuf = make([]string, 0)
@@ -217,6 +215,7 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *InitializeOperatorArgs, reply 
   opData := OperatorData{
     Input:  make(chan InputInfo, args.Numtasks), // we can have at most numTasks senders at a time trying to send us data
     Output: make(chan OutputInfo),
+	Death: make(chan bool),
 	RecvdAck: make(chan string),
 	SendAck: make(chan bool),
 	StateMap: make(map[string]string),
@@ -228,6 +227,9 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *InitializeOperatorArgs, reply 
 	UIDBufLock: &sync.Mutex{},
   }
   portToOpData[portString] = opData	
+
+  // this listener will send the tuples to the input channel for this port
+  go startRPCListenerWorker(portString, opData.Death)
 		
   // restore state from state file if operator is stateful
 	if operators[args.OperatorName].Stateful {

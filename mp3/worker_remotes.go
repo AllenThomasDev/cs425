@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/rpc"
+	"time"
 )
 
 type WorkerReq string
@@ -21,7 +22,11 @@ type ReceiveAckArgs struct {
 	UID string
 }
 
-func startRPCListenerWorker(port string) {
+type KillTaskArgs struct {
+	Port string
+}
+
+func startRPCListenerWorker(port string, endChannel chan bool) {
 	workerreq := new(WorkerReq)
 	rpc.Register(workerreq)
 	servePort, err := net.Listen("tcp", ":"+port)
@@ -30,6 +35,12 @@ func startRPCListenerWorker(port string) {
 	}
   fmt.Printf("Started a server on port: %s\n", port)
 	go rpc.Accept(servePort)
+	
+	<-endChannel
+
+	fmt.Printf("Ending Rainstorm task\n")
+	servePort.Close()
+	cleanUpState(port, endChannel)
 }
 
 func (r *WorkerReq) HandleTuple(args *ArgsWithSender, reply *string) error {
@@ -74,6 +85,7 @@ func (r *WorkerReq) ReceiveAck(args *ReceiveAckArgs, reply *string) error {
 		acksReceived++
 		if acksReceived >= rainstormArgs.Num_tasks {
 			fmt.Printf("Program has terminated, telling all tasks to stop...\n")
+			endRainStorm <- true
 		}
 	} else {
 		portToOpData[args.Port].RecvdAck <- args.UID
@@ -92,4 +104,24 @@ func sendAck (args *ArgsWithSender) {// immediately ACK sender
 	if err != nil {
 		rainstormLog.Printf("error in immediate ack: %v\n", err)
 	}
+}
+
+func (r *WorkerReq) KillTask (args *KillTaskArgs, reply *string) error {
+	go deferredStop(args.Port)
+	return nil
+}
+
+func deferredStop (port string) {
+	time.Sleep(time.Second)
+	portToOpData[port].Death <- true
+}
+
+func cleanUpState(port string, endChannel chan bool) {
+	if currentVM != LEADER_ID {
+		close(portToOpData[port].Input)
+		close(portToOpData[port].RecvdAck)
+		close(portToOpData[port].SendAck)
+		delete(portToOpData, port)
+	}
+	close(endChannel)
 }

@@ -19,7 +19,7 @@ type GetPrevStageArgs struct {
 	PrevHash int
 }
 
-func startRPCListenerScheduler() (net.Listener, error) {
+func startRPCListenerScheduler(schChannel chan bool) {
 	schedulerreq := new(SchedulerReq)
 	rpc.Register(schedulerreq)
 	servePort, err := net.Listen("tcp", ":" + SCHEDULER_PORT)
@@ -27,7 +27,10 @@ func startRPCListenerScheduler() (net.Listener, error) {
 		panic(err)
 	}
 	go rpc.Accept(servePort)
-	return servePort, nil
+	
+	<-schChannel
+	servePort.Close()
+	close(schChannel)
 }
 
 func stopRPCListener(listener net.Listener) {

@@ -18,16 +18,19 @@ type log_state_t struct {
 	stateFile string
 }
 
-// this is vm:port:operator, needs to be updated when things fail
-var currentActiveOperators = make(map[int]map[string]Operator)
-var operatorToVmPorts = make(map[string][]task_addr_t)
-var availableOperators = make([]string, 2)
-var operatorSequence = make([]string, 3)
-
 var (
 	rainstormArgs   StartRainstormRemoteArgs // save args for rescheduling
 	rainstormActive bool                     // flag to enable rescheduling on joins/leaves
 	acksReceived	int 					// once leader has received num_tasks ACKs, we want to stop rainstorm and erase all state
+	endRainStorm	chan bool
+	endScheduler	chan bool
+	endWorker		chan bool
+
+	// this is vm:port:operator, needs to be updated when things fail
+	currentActiveOperators map[int]map[string]Operator
+	operatorToVmPorts map[string][]task_addr_t
+	availableOperators []string
+	operatorSequence []string
 )
 
 func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_file string, numTasks int) {
@@ -35,6 +38,7 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 	if valid := validateOperations([]string{op1, op2}); !valid {
 		return
 	}
+	operatorSequence = make([]string, 3)
 	operatorSequence = []string{"source", op1, op2}
   rainstormActive = true
 	rainstormArgs = StartRainstormRemoteArgs{
@@ -45,8 +49,17 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 		numTasks,
 	}
 	acksReceived = 0
+	endRainStorm = make(chan bool)
+	endScheduler = make(chan bool)
+	endWorker 	= make(chan bool)
+
+	currentActiveOperators = make(map[int]map[string]Operator)
+	operatorToVmPorts = make(map[string][]task_addr_t)
+	availableOperators = make([]string, 2)
+
 	// TODO: every time that membership list is updated, we need to update a lot of globals
 	createLogFiles(numTasks, operatorSequence)
+	defer removeLogFiles(numTasks, operatorSequence)
 	backgroundCommand(fmt.Sprintf("createemptyfile %s", hydfs_dest_file))
 	// here i am making the assumption that a source does not fail before we send the chunks to it
 	sourceArgs, err := createFileChunks(numTasks, hydfs_src_file)
@@ -55,10 +68,11 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 		return
 	}
 
-	go startRPCListenerScheduler()
-	go startRPCListenerWorker(CONSOLE_OUT_PORT)
+	go startRPCListenerScheduler(endScheduler)
+	go startRPCListenerWorker(CONSOLE_OUT_PORT, endWorker)
 	
 	distributeTasks(numTasks)
+	fmt.Println(operatorToVmPorts)
 	err = initializeAllOperators()
 	if err != nil {
 		fmt.Printf("Error on operator initialization: %v\n", err)
@@ -68,7 +82,15 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 	sourceTriggers := convertFileInfoStructListToTuples(hydfs_src_file, *sourceArgs, numTasks)
 	startSources(sourceTriggers)
 	fmt.Println(currentActiveOperators, sourceTriggers)
-	select {}
+
+	<-endRainStorm
+	for op := range(operatorToVmPorts) {
+		for i := 0; i < len(operatorToVmPorts[op]); i++ {
+			killTask(operatorToVmPorts[op][i])
+		}
+	}
+	endScheduler <- true
+	endWorker <- true
 }
 
 func createLogFiles(numTasks int, operatorSequence []string) {
@@ -80,11 +102,11 @@ func createLogFiles(numTasks int, operatorSequence []string) {
 	}
 }
 
-func removeLogFiles(operatorSequence []string) {
-	for opStr := range operatorSequence {
-		for i := 0; i < len(operatorToVmPorts[operatorSequence[opStr]]); i++ {
-			backgroundCommand(fmt.Sprintf("remove %s_%d.log", opStr, i))
-			backgroundCommand(fmt.Sprintf("remove %s_%d_state.log", opStr, i))
+func removeLogFiles(numTasks int, operatorSequence []string) {
+	for i := 0; i < len(operatorSequence); i++ {
+		for j := 0; j < numTasks; j++ {
+			backgroundCommand(fmt.Sprintf("remove %s_%d.log", operatorSequence[i], j))
+			backgroundCommand(fmt.Sprintf("remove %s_%d_state.log", operatorSequence[i], j))
 		}
 	}
 }
@@ -127,8 +149,9 @@ func callInitializeOperatorOnVM(vm int, port string, op string, hash int) error 
 
 func initializeAllOperators() error {
 	for opStr := range operatorSequence {
+		fmt.Printf("CALLED\n")
 		for i := 0; i < len(operatorToVmPorts[operatorSequence[opStr]]); i++ {
-			
+			fmt.Println(i)
 			err := callInitializeOperatorOnVM(operatorToVmPorts[operatorSequence[opStr]][i].VM, operatorToVmPorts[operatorSequence[opStr]][i].port, operatorSequence[opStr], i)
 			if err != nil {
 				return err
@@ -195,6 +218,67 @@ func rebalanceTasksOnNodeFailure(vm int) {
   }
 }
 
+// func rebalanceTasksOnNodeJoin(newNode int) {
+// 	grinder := getGrinderNode()
+// 	var tasksOnGrinder map[string]Operator
+// 	if grinder != -1 {
+// 		tasksOnGrinder = currentActiveOperators[grinder]	
+// 	}
+	
+// 	// list of operators we need to reallocate
+// 	var tasksToBeRealloced []Operator
+// 	var taskAddrToBeRealloced []task_addr_t
+// 	for key := range tasksOnGrinder {
+// 		taskAddrToBeRealloced = append(taskAddrToBeRealloced, task_addr_t{grinder, key})
+// 		tasksToBeRealloced = append(tasksToBeRealloced, tasksOnGrinder[key])
+// 		if len(tasksToBeRealloced) >= len(tasksOnGrinder)/2 {
+// 			break
+// 		}
+// 	}
+
+// 	for i := 0; i < len(taskAddrToBeRealloced); i++ {
+// 		go killTask(taskAddrToBeRealloced[i])
+// 	}
+
+// 	killedTasks := 0
+// 	for {
+// 		if killedTasks >= len(taskAddrToBeRealloced) {
+// 			break
+// 		}
+// 		<-deadTaskChannel
+// 	}
+
+// 	var taskAddrToBeDeleted []task_addr_t
+// 	delete(currentActiveOperators, vm)
+// 	var tasksToBeResurrected []Operator
+// 	for port, _ := range(tasksOnDeadVM) {
+// 	  tasksToBeResurrected = append(tasksToBeResurrected, tasksOnDeadVM[port])
+// 	  taskAddrToBeDeleted = append(taskAddrToBeDeleted, task_addr_t{vm, port})
+// 	}
+// 	for i := range(tasksToBeResurrected){
+// 	  	operatorName := tasksToBeResurrected[i].Name
+// 	  	for {
+// 		  	destination := findNodeWithFewestTasks()
+// 		  	port, err := callFindFreePort(destination)
+// 		  	if err != nil {
+// 			  	continue
+// 		  	}
+// 		  	newTaskAddr := task_addr_t{
+// 			  	VM: destination,
+// 			  	port: port,
+// 		  	}
+	  
+// 		  	newHash := modifyOperator(operatorName, taskAddrToBeDeleted[i], newTaskAddr)
+// 		  	err = callInitializeOperatorOnVM(destination, port, operatorName, newHash)
+// 		  	if err == nil {
+// 			  	break
+// 		  	} else {
+// 			  	fmt.Printf("Error on rebalance: %v\n", err)
+// 		  	}
+// 	  	}
+// 	}
+// }
+
 func modifyOperator(operatorName string, delAddr task_addr_t, newAddr task_addr_t) int {
 	// Retrieve the slice of task addresses for the given operator
 	taskAddrsForOperators := operatorToVmPorts[operatorName]
@@ -212,6 +296,21 @@ func modifyOperator(operatorName string, delAddr task_addr_t, newAddr task_addr_
 	rainstormLog.Print("things were updated\n")
 	rainstormLog.Print(operatorToVmPorts[operatorName])
 	return i
+}
+
+func killTask (Addr task_addr_t) {
+	// Establish a connection to the RPC server
+	fmt.Printf("Killing task on node %d port %s\n", Addr.VM, Addr.port)
+	client, err := rpc.Dial("tcp", vmToIP(Addr.VM)+":"+Addr.port)
+	if err != nil {
+		rainstormLog.Printf("I WANT TO LIIIIIIIIIVE: %v\n", err)
+	}
+	defer client.Close()
+	var reply string
+	err = client.Call("WorkerReq.KillTask", KillTaskArgs{Addr.port}, &reply)
+	if err != nil {
+		rainstormLog.Println("Error during RPC call:", err)
+	}
 }
 
 
@@ -259,6 +358,25 @@ func findNodeWithFewestTasks() int {
 
 	return shortestKey
 
+}
+
+func getGrinderNode() int {
+	var grinder int
+	maxTasks := -1
+
+	for key, operatorMap := range currentActiveOperators {
+		length := len(operatorMap)
+		if maxTasks == -1 || length > maxTasks {
+			maxTasks = length
+			grinder = key
+		}
+	}
+
+	if maxTasks <= 1 {
+		return -1 // return -1 if all nodes have <= 1 task; no sense swiping a node's only task
+	}
+
+	return grinder
 }
 
 func distributeTasks(numTasks int) {

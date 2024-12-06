@@ -48,6 +48,7 @@ type OperatorData struct {
 	Output		chan OutputInfo
 	RecvdAck	chan string // channel of Acked UIDs we've received
 	SendAck		chan bool // after we receive the next Ack, should we send out an Ack?
+	Death		chan bool
 	StateMap	map[string]string // so we don't have to go to statefile every time
 	LogFile		string
 	StateFile	string
