@@ -33,6 +33,7 @@ func screenInput(opData OperatorData, AckInfo Ack_info_t) bool {
 		panic(err)
 	}
 	if processed {
+		fmt.Printf("Discarding record with UID %s\n", AckInfo.UID)
 		// if the data was found in the log, we don't want to send data to the next stage, but we MUST send an ack to the previous stage
 		rainstormLog.Printf("Data found in log file, sending ack to previous stage...\n")
 		// use a new goroutine here since screenInput is called from an RPC the sender of the data is currently waiting for a return from
@@ -232,6 +233,7 @@ func shiftUIDBuf(opData OperatorData) {
 
 func writeRainstormLogs(operatorName string, logFile string, stateFile string, prevUID string, stateTup Rainstorm_tuple_t) error {
 	backgroundWrite(prevUID + "\n", logFile)
+	writeLocalFile("local_logs/" + logFile, prevUID + "\n")
 	if operators[operatorName].Stateful {
 		backgroundWrite(fmt.Sprintf("%s:%s\n", stateTup.Key, stateTup.Value), stateFile)
 	}

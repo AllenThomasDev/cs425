@@ -487,10 +487,10 @@ func commandListener() {
 			op2_args := ""
 
 			if len(args) > 5 {
-				op1_args = args[5]
+				op1_args = tildesToSpaces(args[5])
 			}
 			if len(args) > 6 {
-				op2_args = args[6]
+				op2_args = tildesToSpaces(args[6])
 			}
 
 			initRainstormOnScheduler(op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks, op1_args, op2_args)

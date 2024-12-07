@@ -104,10 +104,22 @@ func backticksToSlashes(filename string) string {
 	return slStr
 }
 
+func tildesToSpaces(arg string) string {
+	spStr := ""
+	for i := 0; i < len(arg); i++ {
+		if arg[i] == '~' {
+			spStr = spStr + " "
+		} else {
+			spStr = spStr + string(arg[i])
+		}
+	}
+	return spStr
+}
+
 func checkFileExists(localFileName string) bool {
 	_, err := os.Stat(localFileName)
 	if os.IsNotExist(err) {
-		log.Printf("Error: Local file %s does not exist\n", localFileName)
+		// log.Printf("Error: Local file %s does not exist\n", localFileName)
 		return false
 	}
 	return true
@@ -139,6 +151,33 @@ func writeFile(fileName string, fileContent string, writeTo string) error {
 		return fmt.Errorf("error writing to file %s: %v", fileName, err)
 	}
 
+	return nil
+}
+
+func writeLocalFile(fileName string, fileContent string) error {
+	file, err := os.OpenFile("client/" + fileName, os.O_APPEND|os.O_WRONLY, 0644)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("file %s does not exist", fileName)
+		}
+		return fmt.Errorf("error opening file %s: %v", fileName, err)
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(fileContent)
+	if err != nil {
+		return fmt.Errorf("error appending string: %v", fileContent, err)
+	}
+
+	return nil
+}
+
+func removeOldLog(fileName string) error {
+	exists := checkFileExists("client/local_logs/" + fileName)
+	if exists {
+		err := os.Remove("client/local_logs/" + fileName)
+		return err
+	}
 	return nil
 }
 

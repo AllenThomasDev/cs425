@@ -50,11 +50,14 @@ func generateSourceTuples(hydfsSrcFile string, startLine int, startChar int, num
 
 // readLineFromFile reads a single line from the file
 func readLineFromFile(f *os.File) (string, error) {
-	var line string
+	line := ""
 	b := make([]byte, 1)
 	for {
 		_, err := f.Read(b)
 		if err != nil {
+			if err == io.EOF && line != "" {
+				return line, nil
+			}
 			return "", err
 		}
 

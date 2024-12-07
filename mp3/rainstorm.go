@@ -74,7 +74,7 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 	go startRPCListenerWorker(CONSOLE_OUT_PORT, endWorker)
 	
 	distributeTasks(numTasks)
-	fmt.Println(operatorToVmPorts)
+	rainstormLog.Println(operatorToVmPorts)
 	err = initializeAllOperators()
 	if err != nil {
 		fmt.Printf("Error on operator initialization: %v\n", err)
@@ -83,7 +83,7 @@ func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_fil
 	
 	sourceTriggers := convertFileInfoStructListToTuples(hydfs_src_file, *sourceArgs, numTasks)
 	startSources(sourceTriggers)
-	fmt.Println(currentActiveOperators, sourceTriggers)
+	rainstormLog.Println(currentActiveOperators, sourceTriggers)
 
 	<-endRainStorm
 	for op := range(operatorToVmPorts) {
@@ -220,6 +220,7 @@ func rebalanceTasksOnNodeFailure(vm int) {
 		}
 	
 		newHash := modifyOperator(operatorName, taskAddrToBeDeleted[i], newTaskAddr)
+		fmt.Printf("Rescheduling operator %s hash %d\n", operatorName, newHash)
 		err = callInitializeOperatorOnVM(destination, port, operatorName, newHash)
 		if err == nil {
 			break
@@ -557,6 +558,7 @@ func analyzeFile(fileName string) (*fileAnalysis, error) {
 			if err != nil && err != io.EOF {
 				return nil, err
 			}
+			lineCount++
 			break
 		}
 
@@ -575,6 +577,7 @@ func analyzeFile(fileName string) (*fileAnalysis, error) {
 
 // distributeLines calculates how to distribute lines across sources
 func distributeLines(lineCount int, charsAtLine []int, numSources int) (*FileChunkInfo, error) {
+	rainstormLog.Printf("Distributing lines: lineCount = %d, numSources = %d\n", lineCount, numSources)
 	// Calculate lines per source
 	linesPerSource := make([]int, numSources)
 	baseLines := lineCount / numSources

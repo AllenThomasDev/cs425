@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"strconv"
 	"strings"
@@ -70,7 +71,13 @@ var OBJECTID_COLUMN = 2
 var SIGNTYPE_COLUMN = 3
 var SIGNPOST_COLUMN = 6
 var CATEGORY_COLUMN = 8
-var signCategories = []string{"Punched Telespar", "Unpunched Telespar", "Streetlight"}
+
+func splitOnCommas(csvals string) []string {
+	csvReader := csv.NewReader(strings.NewReader(csvals))
+	rowVals, _ := csvReader.Read()
+	rainstormLog.Println(rowVals)
+	return rowVals
+}
 
 func updateState(key string, port string) {
 	val, found := portToOpData[port].StateMap[key]
@@ -93,18 +100,20 @@ func filterLine(rt Rainstorm_tuple_t, pattern string) Rainstorm_tuple_t {
 }
 
 func filterSignPost(rt Rainstorm_tuple_t, pattern string) Rainstorm_tuple_t {
-	parts := strings.Split(rt.Value, ",")
+	parts := splitOnCommas(rt.Value)
 	if parts[SIGNPOST_COLUMN] == pattern {
 		// return just the category so we can partition based on categories to keep state clean
+		rainstormLog.Printf("Passing along %s:%s\n", rt.Key, rt.Value)
 		return Rainstorm_tuple_t{parts[CATEGORY_COLUMN], ""}
 	} else {
+		rainstormLog.Printf("Filtered out %s:%s\n", rt.Key, rt.Value)
 		return Rainstorm_tuple_t{FILTERED, FILTERED}
 	}
 }
 
 // hardcoded columns for demo
 func cutOutColumns(rt Rainstorm_tuple_t) Rainstorm_tuple_t {
-	parts := strings.Split(rt.Value, ",")
+	parts := splitOnCommas(rt.Value)
 	return Rainstorm_tuple_t{parts[OBJECTID_COLUMN] + "," + parts[SIGNTYPE_COLUMN], ""}
 }
 
@@ -195,17 +204,7 @@ func initOperators() {
 		Name: "filterPostOperator",
 		Operator: func(data interface{}) interface{} {
 			rt := data.(FilterArgs).rt
-			patNum, _ := strconv.Atoi(data.(FilterArgs).pattern)
-			pattern := "No matching strings found"
-			// patterns have spaces, so we need to do something goofy
-			if patNum == 0 {
-				pattern = signCategories[0]
-			} else if patNum == 1 {
-				pattern = signCategories[1]
-			} else if patNum == 2 {
-				pattern = signCategories[2]
-			}
-			
+			pattern := data.(FilterArgs).pattern
 			rainstormLog.Printf("Filtering for sign posts with pattern %s\n", pattern)
 			filteredRT := filterSignPost(rt, pattern)
 			return filteredRT

@@ -240,6 +240,17 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *InitializeOperatorArgs, reply 
 		restoreState(args.StateFile, args.Port)
 	}
 
+	// get local copy of logfile so we can avoid refetching the log every operation
+	err := removeOldLog(args.LogFile)
+	if err != nil {
+		return err
+	}
+
+	err = backgroundCommand(fmt.Sprintf("get %s %s", args.LogFile, "local_logs/" + args.LogFile))
+	if err != nil {
+		return err
+	}
+
   // create I/O channels
   rainstormLog.Printf("created a channel to listen to inputs, \nthe port here is %s\n", args.Port)
   go processInputChannel(opData, args.Port, args.Args)

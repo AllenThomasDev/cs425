@@ -26,16 +26,16 @@ var backgroundWrite = func(writeStr string, writeFile string) {
 // using the client copy is fine here since duplicates will only come from logged changes at the time of repartitioning
 func checkLogFile(uniqueID string, logFile string) (bool, error) {
 	// fetch local copy of log file
-	tempLogName := genRandomFileName()
-	rainstormLog.Printf("Trying to get logfile %s with temp name %s\n", logFile, tempLogName)
-	err := backgroundCommand(fmt.Sprintf("get %s %s", logFile, tempLogName))
-	if err != nil {
-		return false, err
-	}
+	// tempLogName := genRandomFileName()
+	// rainstormLog.Printf("Trying to get logfile %s with temp name %s\n", logFile, tempLogName)
+	// err := backgroundCommand(fmt.Sprintf("get %s %s", logFile, tempLogName))
+	// if err != nil {
+	// 	return false, err
+	// }
 
 	rainstormLog.Printf("checking logfile for UID: %s\n", uniqueID)
-	defer os.Remove("client/" + tempLogName)
-	log, err := os.OpenFile("client/" + tempLogName, os.O_RDONLY, 0644)
+	// defer os.Remove("client/" + tempLogName)
+	log, err := os.OpenFile("client/local_logs/" + logFile, os.O_RDONLY, 0644)
 	if err != nil {
 		return false, err
 	}
