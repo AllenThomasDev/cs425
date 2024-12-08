@@ -25,13 +25,6 @@ type FilterArgs struct {
 	pattern string
 }
 
-// type Operator struct {
-// 	Name     string
-// 	Operator OperatorFunc
-// 	Stateful bool
-// 	Filter	 bool
-// }
-
 // input needs both tuple and address/UID to ack so output knows who to ACK
 type InputInfo struct {
 	Tup Rainstorm_tuple_t
@@ -75,7 +68,7 @@ var SIGNPOST_COLUMN = 6
 var CATEGORY_COLUMN = 8
 
 func convertStringToRT(strRT string) Rainstorm_tuple_t {
-	parts := strings.Split(strRT, ":")
+	parts := strings.Split(strRT, "~")
 	if len(parts) == 1 {
 		return Rainstorm_tuple_t{parts[0], ""}
 	}
@@ -83,7 +76,7 @@ func convertStringToRT(strRT string) Rainstorm_tuple_t {
 }
 
 func convertRTToString(rt Rainstorm_tuple_t) string {
-	return fmt.Sprintf("%s:%s", rt.Key, rt.Value)
+	return fmt.Sprintf("%s~%s", rt.Key, rt.Value)
 }
 
 func splitOnCommas(csvals string) []string {
@@ -184,16 +177,11 @@ func statefulOp(rt Rainstorm_tuple_t, ex string, port string) Rainstorm_tuple_t 
 
 func filterOp(rt Rainstorm_tuple_t, ex string, arg string) Rainstorm_tuple_t {
 	rainstormLog.Printf("Executing filter op %s with arg %s\n", ex, arg)
-	// cmd := exec.Command("./" + ex, convertRTToString(rt), arg)
-	// for i := 0; i < len(cmd.Args); i++ {
-	// 	rainstormLog.Printf("Arg: %s\n", cmd.Args[i])
-	// }
 	opOut, err := exec.Command("./" + ex, convertRTToString(rt), arg).Output()
 	if err != nil {
 		rainstormLog.Printf("Error on filterOp: %v\n", err)
 		return Rainstorm_tuple_t{FILTERED, FILTERED}
 	}
 	rainstormLog.Printf("opOut: %s\n", opOut)
-	// return Rainstorm_tuple_t{FILTERED, FILTERED}
 	return convertStringToRT(string(opOut))
 }

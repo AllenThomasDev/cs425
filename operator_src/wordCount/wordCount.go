@@ -13,7 +13,7 @@ type Rainstorm_tuple_t struct {
 }
 
 func convertStringToRT(strRT string) Rainstorm_tuple_t {
-	parts := strings.Split(strRT, ":")
+	parts := strings.Split(strRT, "~")
 	if len(parts) == 1 {
 		return Rainstorm_tuple_t{parts[0], ""}
 	}
@@ -27,5 +27,5 @@ func main() {
 	rt := convertStringToRT(strRT)
 	currVal, _ := strconv.Atoi(rt.Value)
 	rt.Value = strconv.Itoa(currVal + 1);
-	fmt.Print(rt.Key, ":", rt.Value)
+	fmt.Print(rt.Key, "~", rt.Value)
 }

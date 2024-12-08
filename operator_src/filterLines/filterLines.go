@@ -16,7 +16,7 @@ type Rainstorm_tuple_t struct {
 }
 
 func convertStringToRT(strRT string) Rainstorm_tuple_t {
-	parts := strings.Split(strRT, ":")
+	parts := strings.Split(strRT, "~")
 	if len(parts) == 1 {
 		return Rainstorm_tuple_t{parts[0], ""}
 	}
@@ -42,5 +42,5 @@ func main() {
 	pattern := args[2]
 	retRT := filterLine(rt, pattern)
 	
-	fmt.Print(retRT.Key, ":", retRT.Value)
+	fmt.Print(retRT.Key, "~", retRT.Value)
 }
