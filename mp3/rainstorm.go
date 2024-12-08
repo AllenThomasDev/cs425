@@ -265,67 +265,6 @@ func findLayerFromOperator(operatorName string) int {
 	return -1
 }
 
-// func rebalanceTasksOnNodeJoin(newNode int) {
-// 	grinder := getGrinderNode()
-// 	var tasksOnGrinder map[string]Operator
-// 	if grinder != -1 {
-// 		tasksOnGrinder = currentActiveOperators[grinder]	
-// 	}
-	
-// 	// list of operators we need to reallocate
-// 	var tasksToBeRealloced []Operator
-// 	var taskAddrToBeRealloced []task_addr_t
-// 	for key := range tasksOnGrinder {
-// 		taskAddrToBeRealloced = append(taskAddrToBeRealloced, task_addr_t{grinder, key})
-// 		tasksToBeRealloced = append(tasksToBeRealloced, tasksOnGrinder[key])
-// 		if len(tasksToBeRealloced) >= len(tasksOnGrinder)/2 {
-// 			break
-// 		}
-// 	}
-
-// 	for i := 0; i < len(taskAddrToBeRealloced); i++ {
-// 		go killTask(taskAddrToBeRealloced[i])
-// 	}
-
-// 	killedTasks := 0
-// 	for {
-// 		if killedTasks >= len(taskAddrToBeRealloced) {
-// 			break
-// 		}
-// 		<-deadTaskChannel
-// 	}
-
-// 	var taskAddrToBeDeleted []task_addr_t
-// 	delete(currentActiveOperators, vm)
-// 	var tasksToBeResurrected []Operator
-// 	for port, _ := range(tasksOnDeadVM) {
-// 	  tasksToBeResurrected = append(tasksToBeResurrected, tasksOnDeadVM[port])
-// 	  taskAddrToBeDeleted = append(taskAddrToBeDeleted, task_addr_t{vm, port})
-// 	}
-// 	for i := range(tasksToBeResurrected){
-// 	  	operatorName := tasksToBeResurrected[i].Name
-// 	  	for {
-// 		  	destination := findNodeWithFewestTasks()
-// 		  	port, err := callFindFreePort(destination)
-// 		  	if err != nil {
-// 			  	continue
-// 		  	}
-// 		  	newTaskAddr := task_addr_t{
-// 			  	VM: destination,
-// 			  	port: port,
-// 		  	}
-	  
-// 		  	newHash := modifyOperator(operatorName, taskAddrToBeDeleted[i], newTaskAddr)
-// 		  	err = callInitializeOperatorOnVM(destination, port, operatorName, newHash)
-// 		  	if err == nil {
-// 			  	break
-// 		  	} else {
-// 			  	fmt.Printf("Error on rebalance: %v\n", err)
-// 		  	}
-// 	  	}
-// 	}
-// }
-
 func modifyOperator(operatorName string, delAddr task_addr_t, newAddr task_addr_t) int {
 	// Retrieve the slice of task addresses for the given operator
 	taskAddrsForOperators := operatorToVmPorts[operatorName]
