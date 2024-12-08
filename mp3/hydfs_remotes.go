@@ -44,12 +44,14 @@ type RemoveArgs struct {
 
 type StartRainstormRemoteArgs struct {
 	Op1_exe string
+	Op1_type Task_type_t
+	Op1_args string
 	Op2_exe string
+	Op2_type Task_type_t
+	Op2_args string
 	Hydfs_src_file string
 	Hydfs_dest_file string
 	Num_tasks int
-	Op1_args string
-	Op2_args string
 }
 
 type SourceArgs struct {
@@ -71,6 +73,8 @@ type OpArgs struct {
 
 type InitializeOperatorArgs struct {
 	OperatorName	string
+	OpType			Task_type_t
+	ExecName		string
 	Port			string
 	LogFile			string
 	StateFile		string
@@ -191,7 +195,7 @@ func (h *HyDFSReq) Remove(args *RemoveArgs, reply *string) error {
 }
 
 func (h *HyDFSReq) StartRainstormRemote(args *StartRainstormRemoteArgs, reply *string) error {
-	go rainstormMain(args.Op1_exe, args.Op2_exe, args.Hydfs_src_file, args.Hydfs_dest_file, args.Num_tasks, args.Op1_args, args.Op2_args)
+	go rainstormMain(args.Op1_exe, args.Op1_type, args.Op1_args, args.Op2_exe, args.Op2_type, args.Op2_args, args.Hydfs_src_file, args.Hydfs_dest_file, args.Num_tasks)
 	return nil
 }
 
@@ -227,6 +231,8 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *InitializeOperatorArgs, reply 
 	StateFile: args.StateFile,
 	Hash: args.Hash,
 	Op: args.OperatorName,
+	OpType: args.OpType,
+	Exec: args.ExecName,
 	UIDBuf: &uBuf,
 	UIDBufLock: &sync.Mutex{},
   }
@@ -236,7 +242,7 @@ func (h *HyDFSReq) InitializeOperatorOnPort(args *InitializeOperatorArgs, reply 
   go startRPCListenerWorker(portString, opData.Death)
 		
   // restore state from state file if operator is stateful
-	if operators[args.OperatorName].Stateful {
+	if args.OpType == STATEFUL {
 		restoreState(args.StateFile, args.Port)
 	}
 

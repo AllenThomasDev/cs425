@@ -23,8 +23,9 @@ type topology_entry_t struct {
 
 type Task_type_t int
 const (
-	SOURCE Task_type_t = iota
-	OP
+	STATELESS Task_type_t = iota
+	STATEFUL
+	FILTER	
 )
 
 // note this is hashable, so we can use it as a key in a map

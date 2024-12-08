@@ -40,7 +40,7 @@ func generateSourceTuples(hydfsSrcFile string, startLine int, startChar int, num
 			fmt.Printf("Error reading line: %v\n", err)
 		}
 		uniqueID := startLine + numLines - remainingLines
-		key := hydfsSrcFile + ":" + strconv.Itoa(uniqueID)
+		key := hydfsSrcFile + "," + strconv.Itoa(uniqueID)
 		lineTuple := generateTuple(key, line)
     	tupleChannel <- lineTuple
 		remainingLines--

@@ -30,7 +30,7 @@ func main() {
 	}
 	go daemonMain()
 	go commandListener()
-  initOperators()
+//   initOperators()
 	go startRPCListenerHyDFS()
 	// go periodicMerge()
 	sigs := make(chan os.Signal, 1)

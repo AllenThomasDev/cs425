@@ -9,6 +9,7 @@ import (
 	"os"
 	"sort"
 	"strconv"
+	"strings"
 )
 
 var rainstormLog *log.Logger
@@ -27,35 +28,37 @@ var (
 	endWorker		chan bool
 
 	// this is vm:port:operator, needs to be updated when things fail
-	currentActiveOperators map[int]map[string]Operator
+	currentActiveOperators map[int]map[string]int
 	operatorToVmPorts map[string][]task_addr_t
 	availableOperators []string
 	operatorSequence []string
 )
 
-func rainstormMain(op1 string, op2 string, hydfs_src_file string, hydfs_dest_file string, numTasks int, op1_args string, op2_args string) {
+func rainstormMain(op1 string, op1_type Task_type_t, op1_args string, op2 string, op2_type Task_type_t, op2_args string, hydfs_src_file string, hydfs_dest_file string, numTasks int) {
 	fmt.Println("Starting Rainstorm ...")
-	if valid := validateOperations([]string{op1, op2}); !valid {
-		return
-	}
+	// if valid := validateOperations([]string{op1, op2}); !valid {
+	// 	return
+	// }
 	operatorSequence = make([]string, 3)
-	operatorSequence = []string{"source", op1, op2}
+	operatorSequence = []string{"source", "op1", "op2"}
   rainstormActive = true
 	rainstormArgs = StartRainstormRemoteArgs{
 		op1,
+		op1_type,
+		op1_args,
 		op2,
+		op2_type,
+		op2_args,
 		hydfs_src_file,
 		hydfs_dest_file,
 		numTasks,
-		op1_args,
-		op2_args,
 	}
 	acksReceived = 0
 	endRainStorm = make(chan bool)
 	endScheduler = make(chan bool)
 	endWorker 	= make(chan bool)
 
-	currentActiveOperators = make(map[int]map[string]Operator)
+	currentActiveOperators = make(map[int]map[string]int)
 	operatorToVmPorts = make(map[string][]task_addr_t)
 	availableOperators = make([]string, 2)
 
@@ -113,7 +116,7 @@ func removeLogFiles(numTasks int, operatorSequence []string) {
 	}
 }
 
-func callInitializeOperatorOnVM(vm int, port string, op string, hash int) error {
+func callInitializeOperatorOnVM(vm int, port string, op string, t Task_type_t, exec string, hash int) error {
 	client, err := rpc.DialHTTP("tcp", vmToIP(vm)+":"+RPC_PORT)
 	if err != nil {
 		fmt.Printf("breaks here, %s", err.Error())
@@ -127,6 +130,8 @@ func callInitializeOperatorOnVM(vm int, port string, op string, hash int) error 
 	
 	opArgs := InitializeOperatorArgs{
 		OperatorName: op,
+		OpType:		t,
+		ExecName:	exec,
 		Port:         port,
 		LogFile: logs.logFile,
 		StateFile: logs.stateFile,
@@ -153,18 +158,33 @@ func callInitializeOperatorOnVM(vm int, port string, op string, hash int) error 
 	}
 
 	if currentActiveOperators[vm] == nil {
-		currentActiveOperators[vm] = make(map[string]Operator)
+		currentActiveOperators[vm] = make(map[string]int)
 	}
-	currentActiveOperators[vm][port] = operators[op]
-	rainstormLog.Printf("Started %s on VM %d:%s\n", operators[op].Name, vm, port)
+
+	currentActiveOperators[vm][port] = opNum
+	rainstormLog.Printf("Started %s on VM %d:%s\n", op, vm, port)
 	return nil
 }
 
 func initializeAllOperators() error {
 	for opStr := range operatorSequence {
 		for i := 0; i < len(operatorToVmPorts[operatorSequence[opStr]]); i++ {
-			fmt.Println(i)
-			err := callInitializeOperatorOnVM(operatorToVmPorts[operatorSequence[opStr]][i].VM, operatorToVmPorts[operatorSequence[opStr]][i].port, operatorSequence[opStr], i)
+			var t Task_type_t
+			execStr := ""
+			if opStr == 1 {
+				execStr = rainstormArgs.Op1_exe
+				t = rainstormArgs.Op1_type
+			
+			} else if opStr == 2 {
+				execStr = rainstormArgs.Op2_exe
+				t = rainstormArgs.Op2_type
+			}
+			err := callInitializeOperatorOnVM(operatorToVmPorts[operatorSequence[opStr]][i].VM, 
+												operatorToVmPorts[operatorSequence[opStr]][i].port,
+												operatorSequence[opStr],
+												t,
+												execStr,
+												i)
 			if err != nil {
 				return err
 			}
@@ -199,14 +219,14 @@ func rebalanceTasksOnNodeFailure(vm int) {
   tasksOnDeadVM := currentActiveOperators[vm]
   var taskAddrToBeDeleted []task_addr_t
   delete(currentActiveOperators, vm)
-  var tasksToBeResurrected []Operator
+  var tasksToBeResurrected []int
   for port, _ := range(tasksOnDeadVM) {
     tasksToBeResurrected = append(tasksToBeResurrected, tasksOnDeadVM[port])
     taskAddrToBeDeleted = append(taskAddrToBeDeleted, task_addr_t{vm, port})
   }
   for i := range(tasksToBeResurrected){
     // remove address from operatorToVmPorts[]
-    operatorName := tasksToBeResurrected[i].Name
+    operatorName := operatorSequence[tasksToBeResurrected[i]]
 	
 	for {
 		destination := findNodeWithFewestTasks()
@@ -221,7 +241,12 @@ func rebalanceTasksOnNodeFailure(vm int) {
 	
 		newHash := modifyOperator(operatorName, taskAddrToBeDeleted[i], newTaskAddr)
 		fmt.Printf("Rescheduling operator %s hash %d\n", operatorName, newHash)
-		err = callInitializeOperatorOnVM(destination, port, operatorName, newHash)
+		if strings.Contains(operatorName, "1") {
+			err = callInitializeOperatorOnVM(destination, port, operatorName, rainstormArgs.Op1_type, rainstormArgs.Op1_exe, newHash)
+		} else {
+			err = callInitializeOperatorOnVM(destination, port, operatorName, rainstormArgs.Op2_type, rainstormArgs.Op2_exe, newHash)
+		}
+
 		if err == nil {
 			break
 		} else {
@@ -614,9 +639,25 @@ func cleanupTempFile(fileName string) {
 	os.Remove("client/" + fileName)
 }
 
-func initRainstormOnScheduler(op1_exe string, op2_exe string, hydfs_src_file string, hydfs_dest_file string, num_tasks int, op1_args string, op2_args string) {
+func initRainstormOnScheduler(op1_exe string, op1_type string, op1_args string, op2_exe string, op2_type string, op2_args string, hydfs_src_file string, hydfs_dest_file string, num_tasks int) {
+	op1_type_num, err := strconv.Atoi(op1_type)
+	if err != nil || op1_type_num > 2 || op1_type_num < 0 {
+		fmt.Printf("Error: op type must be 0 (stateless), 1 (stateful) or 2 (filter\n)")
+		return
+	}
+	one_type := Task_type_t(op1_type_num)
+	fmt.Printf("one_type: %v\n", one_type)
+
+	op2_type_num, err := strconv.Atoi(op2_type)
+	if err != nil || op1_type_num > 2 || op1_type_num < 0 {
+		fmt.Printf("Error: op type must be 0 (stateless), 1 (stateful) or 2 (filter\n)")
+		return
+	}
+	two_type := Task_type_t(op2_type_num)
+	fmt.Printf("two_type: %v\n", two_type)
+	
 	if selfIP == introducerIP {
-		rainstormMain(op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks, op1_args, op2_args)
+		rainstormMain(op1_exe, one_type, op1_args, op2_exe, two_type, op2_args, hydfs_src_file, hydfs_dest_file, num_tasks)
 	} else {
 		client, err := rpc.DialHTTP("tcp", introducerIP+":"+RPC_PORT)
 		if err != nil {
@@ -625,7 +666,7 @@ func initRainstormOnScheduler(op1_exe string, op2_exe string, hydfs_src_file str
 		}
 
 		var reply string
-		err = client.Call("HyDFSReq.StartRainstormRemote", StartRainstormRemoteArgs{op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks, op1_args, op2_args}, &reply)
+		err = client.Call("HyDFSReq.StartRainstormRemote", StartRainstormRemoteArgs{op1_exe, one_type, op1_args, op2_exe, two_type, op2_args, hydfs_src_file, hydfs_dest_file, num_tasks}, &reply)
 		if err != nil {
 			fmt.Printf("Failed to initiate Rainstorm: %v\n", err)
 		}

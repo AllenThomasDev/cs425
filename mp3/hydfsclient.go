@@ -472,28 +472,22 @@ func commandListener() {
 			conc_appends, _ := strconv.Atoi(args[2])
 			gen_merge_files(filename, append_size, conc_appends)
 		case "RainStorm":
-			if len(args) < 5 {
-				fmt.Println("Error: Insufficient arguments. Usage: <op1_exe> <op2_exe> <hydfs_src_file> <hydfs_dest_filename> <num_tasks> optional: <op1_args> <op2_args>")
+			if len(args) < 9 {
+				fmt.Println("Error: Insufficient arguments. Usage: <op1_exe> <op1_type> <op1_args> <op2_exe> <op2_type> <op2_args> <hydfs_src_file> <hydfs_dest_filename> <num_tasks> optional: <op1_args> <op2_args>")
 				continue
 			}
 			
 			op1_exe := args[0]
-			op2_exe := args[1]
-			hydfs_src_file := args[2]
-			hydfs_dest_file := args[3]
-			num_tasks, _ := strconv.Atoi(args[4])
+			op1_type := args[1]
+			op1_args := tildesToSpaces(args[2])
+			op2_exe := args[3]
+			op2_type := args[4]
+			op2_args := tildesToSpaces(args[5])
+			hydfs_src_file := args[6]
+			hydfs_dest_file := args[7]
+			num_tasks, _ := strconv.Atoi(args[8])
 
-			op1_args := ""
-			op2_args := ""
-
-			if len(args) > 5 {
-				op1_args = tildesToSpaces(args[5])
-			}
-			if len(args) > 6 {
-				op2_args = tildesToSpaces(args[6])
-			}
-
-			initRainstormOnScheduler(op1_exe, op2_exe, hydfs_src_file, hydfs_dest_file, num_tasks, op1_args, op2_args)
+			initRainstormOnScheduler(op1_exe, op1_type, op1_args, op2_exe, op2_type, op2_args, hydfs_src_file, hydfs_dest_file, num_tasks)
 		default:
 			fmt.Println("Unknown command")
 		}

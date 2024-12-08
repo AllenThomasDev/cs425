@@ -57,18 +57,31 @@ func screenInput(opData OperatorData, AckInfo Ack_info_t) bool {
 func processInputChannel(opData OperatorData, port string, opArgs string) {
 	for input := range opData.Input {
 
+		rainstormLog.Printf("input tuple: %s:%s\n", input.Tup.Key, input.Tup.Value)
 		var output interface{}
-		if operators[opData.Op].Filter {
-			if opArgs == "" {
-				fmt.Printf("Error: filter operation must have an argument")
-				return
-			}
-			output = operators[opData.Op].Operator(FilterArgs{input.Tup, opArgs})
-		} else if operators[opData.Op].Stateful {
-			output = operators[opData.Op].Operator(StatefulArgs{input.Tup, port})
+		if opData.Op == "source" {
+			output = sourceOp(input.Tup)
+		} else if opData.OpType == STATELESS {
+			output = statelessOp(input.Tup, opData.Exec)
+		} else if opData.OpType == STATEFUL {
+			output = statefulOp(input.Tup, opData.Exec, port)
+		} else if opData.OpType == FILTER {
+			output = filterOp(input.Tup, opData.Exec, opArgs)
 		} else {
-			output = operators[opData.Op].Operator(StatelessArgs{input.Tup})
+			fmt.Printf("Error: unrecognized op type\n")
+			return
 		}
+		// if operators[opData.Op].Filter {
+		// 	if opArgs == "" {
+		// 		fmt.Printf("Error: filter operation must have an argument")
+		// 		return
+		// 	}
+		// 	output = operators[opData.Op].Operator(FilterArgs{input.Tup, opArgs})
+		// } else if operators[opData.Op].Stateful {
+		// 	output = operators[opData.Op].Operator(StatefulArgs{input.Tup, port})
+		// } else {
+		// 	output = operators[opData.Op].Operator(StatelessArgs{input.Tup})
+		// }
 		
 		opsDone := 0 // counter for UIDs
 		switch v := output.(type) {
@@ -196,7 +209,7 @@ func handleAcks(opData OperatorData, out OutputInfo) error {
 		} else {
 			if <- opData.SendAck {
 				// to write the UID that we got sent, we need to take the UID from out.AckInfo (which is from input and therefore the previous stage)
-				err := writeRainstormLogs(opData.Op, opData.LogFile, opData.StateFile, out.AckInfo.UID, Rainstorm_tuple_t{out.Tup.Key, out.Tup.Value})
+				err := writeRainstormLogs(opData.Op, opData.LogFile, opData.OpType, opData.StateFile, out.AckInfo.UID, Rainstorm_tuple_t{out.Tup.Key, out.Tup.Value})
 				if err != nil {
 					return fmt.Errorf("Error writing logs: %v\n", err)
 				}
@@ -231,10 +244,10 @@ func shiftUIDBuf(opData OperatorData) {
 	opData.UIDBufLock.Unlock()
 }
 
-func writeRainstormLogs(operatorName string, logFile string, stateFile string, prevUID string, stateTup Rainstorm_tuple_t) error {
+func writeRainstormLogs(operatorName string, logFile string, ot Task_type_t, stateFile string, prevUID string, stateTup Rainstorm_tuple_t) error {
 	backgroundWrite(prevUID + "\n", logFile)
 	writeLocalFile("local_logs/" + logFile, prevUID + "\n")
-	if operators[operatorName].Stateful {
+	if ot == STATEFUL {
 		backgroundWrite(fmt.Sprintf("%s:%s\n", stateTup.Key, stateTup.Value), stateFile)
 	}
 
@@ -245,7 +258,7 @@ func handleEmptyOutput(opData OperatorData, ackInfo Ack_info_t) {
 	// since we have no data to send, we can't go through the standard output->send data->receive ack process
 	// just send the ack from here instead
 	// TODO: can we have stateful operators that also filter?
-	err := writeRainstormLogs(opData.Op, opData.LogFile, opData.StateFile, ackInfo.UID, Rainstorm_tuple_t{"",""})
+	err := writeRainstormLogs(opData.Op, opData.LogFile, opData.OpType, opData.StateFile, ackInfo.UID, Rainstorm_tuple_t{"",""})
 	if err != nil {
 		rainstormLog.Printf("Error writing logs on empty ACK")
 	}

@@ -3,12 +3,13 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
+	"os/exec"
 	"strconv"
 	"strings"
 	"sync"
 )
 
-type OperatorFunc func(data interface{}) interface{}
+// type OperatorFunc func(data interface{}) interface{}
 
 type StatelessArgs struct {
 	rt Rainstorm_tuple_t
@@ -24,12 +25,12 @@ type FilterArgs struct {
 	pattern string
 }
 
-type Operator struct {
-	Name     string
-	Operator OperatorFunc
-	Stateful bool
-	Filter	 bool
-}
+// type Operator struct {
+// 	Name     string
+// 	Operator OperatorFunc
+// 	Stateful bool
+// 	Filter	 bool
+// }
 
 // input needs both tuple and address/UID to ack so output knows who to ACK
 type InputInfo struct {
@@ -60,17 +61,30 @@ type OperatorData struct {
 	LogFile		string
 	StateFile	string
 	Op			string
+	Exec		string
+	OpType		Task_type_t
 	Hash		int
 	UIDBuf		*[]string // buffer of UIDs we're currently processing (either in input channel or outputting)
 	UIDBufLock  *sync.Mutex
 }
 
-var operators = make(map[string]Operator)
 var portToOpData = make(map[string]OperatorData)
 var OBJECTID_COLUMN = 2
 var SIGNTYPE_COLUMN = 3
 var SIGNPOST_COLUMN = 6
 var CATEGORY_COLUMN = 8
+
+func convertStringToRT(strRT string) Rainstorm_tuple_t {
+	parts := strings.Split(strRT, ":")
+	if len(parts) == 1 {
+		return Rainstorm_tuple_t{parts[0], ""}
+	}
+	return Rainstorm_tuple_t{parts[0], parts[1]}
+}
+
+func convertRTToString(rt Rainstorm_tuple_t) string {
+	return fmt.Sprintf("%s:%s", rt.Key, rt.Value)
+}
 
 func splitOnCommas(csvals string) []string {
 	csvReader := csv.NewReader(strings.NewReader(csvals))
@@ -99,6 +113,8 @@ func filterLine(rt Rainstorm_tuple_t, pattern string) Rainstorm_tuple_t {
 	}
 }
 
+// []bytes = os.Exec("cutOutColumns op1State").Out()
+
 func filterSignPost(rt Rainstorm_tuple_t, pattern string) Rainstorm_tuple_t {
 	parts := splitOnCommas(rt.Value)
 	if parts[SIGNPOST_COLUMN] == pattern {
@@ -117,114 +133,182 @@ func cutOutColumns(rt Rainstorm_tuple_t) Rainstorm_tuple_t {
 	return Rainstorm_tuple_t{parts[OBJECTID_COLUMN] + "," + parts[SIGNTYPE_COLUMN], ""}
 }
 
-func initOperators() {
-	operators["source"] = Operator{
-		Name: "source",
-		Operator: func(data interface{}) interface{} {
-      rainstormLog.Printf("I am a source\n")
-			rt := data.(StatelessArgs).rt
-			fileInfo := rt.Key
-			fileInfoParts := strings.Split(fileInfo, ":")
-			fileName := fileInfoParts[0]
-      startLine, _ := strconv.Atoi(fileInfoParts[1])
-      startChar, _ := strconv.Atoi(fileInfoParts[2])
-      numLines, _ := strconv.Atoi(fileInfoParts[3])
-      tupleChannel := make(chan Rainstorm_tuple_t)
-      go generateSourceTuples(fileName, startLine, startChar, numLines, tupleChannel)
-      return tupleChannel
-		},
-		Stateful: false,
-		Filter: false,
-	}
-
-	operators["splitLineOperator"] = Operator{
-		Name: "splitLineOperator",
-		Operator: func(data interface{}) interface{} {
-			rainstormLog.Printf("I am splitting\n")
-			rt := data.(StatelessArgs).rt
-			words := strings.Fields(rt.Value)
-			tupleChannel := make(chan Rainstorm_tuple_t)
-			go func() {
-				for _, word := range words {
-					tupleChannel <- Rainstorm_tuple_t{
-            			Key: word,
-						Value: "",
-					}
-				}
-
-				close(tupleChannel) // Close the channel once all tuples are sent
-			}() // <-- Invoke the anonymous function here
-			return tupleChannel // Return the channel
-		},
-		Stateful: false,
-		Filter: false,
-	}
-
-	operators["wordCountOperator"] = Operator{
-		Name: "wordCountOperator",
-		Operator: func(data interface{}) interface{} {
-			rainstormLog.Printf("I am counting words\n")
-			rt := data.(StatefulArgs).rt
-			port := data.(StatefulArgs).port
-      		updateState(rt.Key, port)
-			return Rainstorm_tuple_t{
-				Key:   rt.Key,
-				Value: portToOpData[port].StateMap[rt.Key],
-			}
-		},
-		Stateful: true,
-		Filter: false,
-	}
-
-	operators["filterLineOperator"] = Operator{
-		Name: "filterLineOperator",
-		Operator: func(data interface{}) interface{} {
-			rt := data.(FilterArgs).rt
-			pattern := data.(FilterArgs).pattern
-			rainstormLog.Printf("Filtering for lines with pattern %s\n", pattern)
-			filteredRT := filterLine(rt, pattern)
-			return filteredRT
-		},
-		Stateful: false,
-		Filter: true,
-	}
-
-	operators["getSpecificColumns"] = Operator{
-		Name: "getSpecificColumns",
-		Operator: func(data interface{}) interface{} {
-			rt := data.(StatelessArgs).rt
-			filteredRT := cutOutColumns(rt)
-			return filteredRT
-		},
-		Stateful: false,
-		Filter: false,
-	}
-
-	operators["filterPostOperator"] = Operator{
-		Name: "filterPostOperator",
-		Operator: func(data interface{}) interface{} {
-			rt := data.(FilterArgs).rt
-			pattern := data.(FilterArgs).pattern
-			rainstormLog.Printf("Filtering for sign posts with pattern %s\n", pattern)
-			filteredRT := filterSignPost(rt, pattern)
-			return filteredRT
-		},
-		Stateful: false,
-		Filter: true,
-	}
-
-	fmt.Println("Available Operators are - ")
-	for key := range operators {
-		fmt.Println(key)
-	}
+func sourceOp(rt Rainstorm_tuple_t) chan Rainstorm_tuple_t {
+	rainstormLog.Printf("I am a source\n")
+	fileInfo := rt.Key
+	fileInfoParts := strings.Split(fileInfo, ":")
+	fileName := fileInfoParts[0]
+	startLine, _ := strconv.Atoi(fileInfoParts[1])
+	startChar, _ := strconv.Atoi(fileInfoParts[2])
+	numLines, _ := strconv.Atoi(fileInfoParts[3])
+	tupleChannel := make(chan Rainstorm_tuple_t)
+	go generateSourceTuples(fileName, startLine, startChar, numLines, tupleChannel)
+	return tupleChannel
 }
 
-func validateOperations(operations []string) bool {
-	for _, op := range operations {
-		if _, exists := operators[op]; !exists {
-			fmt.Printf("Error - Operation %s does not exist \nrefer to the legal operations that are registered \n\n", op)
-			return false
-		}
+func statelessOp(rt Rainstorm_tuple_t, ex string) Rainstorm_tuple_t {
+	rainstormLog.Printf("Executing stateless op %s\n", ex)
+	opOut, err := exec.Command("./" + ex, convertRTToString(rt)).Output()
+	if err != nil {
+		fmt.Printf("Error on statelessOp: %v\n", err)
+		rainstormLog.Printf("opOut: %s\n", opOut)
+		return Rainstorm_tuple_t{FILTERED, FILTERED}
 	}
-	return true
+	return convertStringToRT(string(opOut))
 }
+
+func statefulOp(rt Rainstorm_tuple_t, ex string, port string) Rainstorm_tuple_t {
+	rainstormLog.Printf("Executing stateful op %s\n", ex)
+	var stateRT Rainstorm_tuple_t
+	stateRT.Key = rt.Key
+	
+	val, found := portToOpData[port].StateMap[rt.Key]
+	if found {
+		stateRT.Value = val
+	} else {
+		stateRT.Value = strconv.Itoa(0)
+		portToOpData[port].StateMap[rt.Key] = strconv.Itoa(1)
+	}
+	rainstormLog.Printf("Sending %s:%s to op\n", stateRT.Key, stateRT.Value)
+	
+	opOut, err := exec.Command("./" + ex, convertRTToString(stateRT)).Output()
+	if err != nil {
+		fmt.Printf("Error on statefulOp: %v\n", err)
+		rainstormLog.Printf("opOut: %s\n", opOut)
+		return Rainstorm_tuple_t{FILTERED, FILTERED}
+	}
+
+	updatedCount := convertStringToRT(string(opOut))
+	portToOpData[port].StateMap[updatedCount.Key] = updatedCount.Value
+
+	return updatedCount
+}
+
+func filterOp(rt Rainstorm_tuple_t, ex string, arg string) Rainstorm_tuple_t {
+	rainstormLog.Printf("Executing filter op %s with arg %s\n", ex, arg)
+	// cmd := exec.Command("./" + ex, convertRTToString(rt), arg)
+	// for i := 0; i < len(cmd.Args); i++ {
+	// 	rainstormLog.Printf("Arg: %s\n", cmd.Args[i])
+	// }
+	opOut, err := exec.Command("./" + ex, convertRTToString(rt), arg).Output()
+	if err != nil {
+		rainstormLog.Printf("Error on filterOp: %v\n", err)
+		return Rainstorm_tuple_t{FILTERED, FILTERED}
+	}
+	rainstormLog.Printf("opOut: %s\n", opOut)
+	// return Rainstorm_tuple_t{FILTERED, FILTERED}
+	return convertStringToRT(string(opOut))
+}
+
+// func initOperators() {
+// 	operators["source"] = Operator{
+// 		Name: "source",
+// 		Operator: func(data interface{}) interface{} {
+//       rainstormLog.Printf("I am a source\n")
+// 			rt := data.(StatelessArgs).rt
+// 			fileInfo := rt.Key
+// 			fileInfoParts := strings.Split(fileInfo, ":")
+// 			fileName := fileInfoParts[0]
+//       startLine, _ := strconv.Atoi(fileInfoParts[1])
+//       startChar, _ := strconv.Atoi(fileInfoParts[2])
+//       numLines, _ := strconv.Atoi(fileInfoParts[3])
+//       tupleChannel := make(chan Rainstorm_tuple_t)
+//       go generateSourceTuples(fileName, startLine, startChar, numLines, tupleChannel)
+//       return tupleChannel
+// 		},
+// 		Stateful: false,
+// 		Filter: false,
+// 	}
+
+// 	operators["splitLineOperator"] = Operator{
+// 		Name: "splitLineOperator",
+// 		Operator: func(data interface{}) interface{} {
+// 			rainstormLog.Printf("I am splitting\n")
+// 			rt := data.(StatelessArgs).rt
+// 			words := strings.Fields(rt.Value)
+// 			tupleChannel := make(chan Rainstorm_tuple_t)
+// 			go func() {
+// 				for _, word := range words {
+// 					tupleChannel <- Rainstorm_tuple_t{
+//             			Key: word,
+// 						Value: "",
+// 					}
+// 				}
+
+// 				close(tupleChannel) // Close the channel once all tuples are sent
+// 			}() // <-- Invoke the anonymous function here
+// 			return tupleChannel // Return the channel
+// 		},
+// 		Stateful: false,
+// 		Filter: false,
+// 	}
+
+// 	operators["wordCountOperator"] = Operator{
+// 		Name: "wordCountOperator",
+// 		Operator: func(data interface{}) interface{} {
+// 			rainstormLog.Printf("I am counting words\n")
+// 			rt := data.(StatefulArgs).rt
+// 			port := data.(StatefulArgs).port
+//       		updateState(rt.Key, port)
+// 			return Rainstorm_tuple_t{
+// 				Key:   rt.Key,
+// 				Value: portToOpData[port].StateMap[rt.Key],
+// 			}
+// 		},
+// 		Stateful: true,
+// 		Filter: false,
+// 	}
+
+// 	operators["filterLineOperator"] = Operator{
+// 		Name: "filterLineOperator",
+// 		Operator: func(data interface{}) interface{} {
+// 			rt := data.(FilterArgs).rt
+// 			pattern := data.(FilterArgs).pattern
+// 			rainstormLog.Printf("Filtering for lines with pattern %s\n", pattern)
+// 			filteredRT := filterLine(rt, pattern)
+// 			return filteredRT
+// 		},
+// 		Stateful: false,
+// 		Filter: true,
+// 	}
+
+// 	operators["getSpecificColumns"] = Operator{
+// 		Name: "getSpecificColumns",
+// 		Operator: func(data interface{}) interface{} {
+// 			rt := data.(StatelessArgs).rt
+// 			filteredRT := cutOutColumns(rt)
+// 			return filteredRT
+// 		},
+// 		Stateful: false,
+// 		Filter: false,
+// 	}
+
+// 	operators["filterPostOperator"] = Operator{
+// 		Name: "filterPostOperator",
+// 		Operator: func(data interface{}) interface{} {
+// 			rt := data.(FilterArgs).rt
+// 			pattern := data.(FilterArgs).pattern
+// 			rainstormLog.Printf("Filtering for sign posts with pattern %s\n", pattern)
+// 			rainstormLog.Printf("Filtering data %s:%s\n", rt.Key, rt.Value)
+// 			filteredRT := filterSignPost(rt, pattern)
+// 			return filteredRT
+// 		},
+// 		Stateful: false,
+// 		Filter: true,
+// 	}
+
+// 	fmt.Println("Available Operators are - ")
+// 	for key := range operators {
+// 		fmt.Println(key)
+// 	}
+// }
+
+// func validateOperations(operations []string) bool {
+// 	for _, op := range operations {
+// 		if _, exists := operators[op]; !exists {
+// 			fmt.Printf("Error - Operation %s does not exist \nrefer to the legal operations that are registered \n\n", op)
+// 			return false
+// 		}
+// 	}
+// 	return true
+// }
