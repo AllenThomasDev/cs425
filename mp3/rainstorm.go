@@ -62,11 +62,9 @@ func rainstormMain(op1 string, op1_type Task_type_t, op1_args string, op2 string
 	operatorToVmPorts = make(map[string][]task_addr_t)
 	availableOperators = make([]string, 2)
 
-	// TODO: every time that membership list is updated, we need to update a lot of globals
+	removeLogFiles(numTasks, operatorSequence)
 	createLogFiles(numTasks, operatorSequence)
-	defer removeLogFiles(numTasks, operatorSequence)
 	backgroundCommand(fmt.Sprintf("createemptyfile %s", hydfs_dest_file))
-	// here i am making the assumption that a source does not fail before we send the chunks to it
 	sourceArgs, err := createFileChunks(numTasks, hydfs_src_file)
 	if err != nil {
 		fmt.Printf("Error breaking file into chunks: %v\n", err)
@@ -96,6 +94,7 @@ func rainstormMain(op1 string, op1_type Task_type_t, op1_args string, op2 string
 	}
 	endScheduler <- true
 	endWorker <- true
+	rainstormActive = false
 }
 
 func createLogFiles(numTasks int, operatorSequence []string) {
